@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Berita — Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5f5f4;
+            --surface: #ffffff;
+            --border: #e7e5e4;
+            --border-hover: #d6d3d1;
+            --text: #1c1917;
+            --text-muted: #78716c;
+            --primary: #166534;
+            --primary-hover: #14532d;
+            --error: #dc2626;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+
+        .nav-link {
+            padding: 8px 14px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .nav-link.active {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .btn-ghost {
+            padding: 8px 14px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            color: var(--text-muted);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .page-desc {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        label .required {
+            color: var(--error);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            background: var(--surface);
+            transition: all 0.15s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #a8a29e;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%2378716c'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 48px;
+        }
+
+        .hint {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 520px) {
+            .form-row { grid-template-columns: 1fr 1fr; }
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #fafaf9;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 40px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (min-width: 480px) {
+            .btn-group {
+                flex-direction: row;
+            }
+        }
+
+        .btn {
+            padding: 16px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: none;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text-muted);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .btn-back {
+            background: #e7e5e4;
+            color: var(--text);
+            border: 2px solid #d6d3d1;
+        }
+
+        .btn-back:hover {
+            background: #d6d3d1;
+            border-color: #a8a29e;
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 24px;
+            background: #fef2f2;
+            color: var(--error);
+            border: 1px solid #fecaca;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="{{ url_for('public.index') }}" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 3L4 9v12h16V9l-8-6zm6 16h-3v-5h-6v5H6v-9.5l6-4.5 6 4.5V19z"/></svg>
+                </div>
+                Kedungwinangun
+            </a>
+            <a href="{{ url_for('admin.dashboard') }}" class="nav-link">Dashboard</a>
+            <a href="{{ url_for('admin.config') }}" class="nav-link">Konfigurasi</a>
+            <a href="{{ url_for('admin.settings') }}" class="nav-link">Pengaturan</a>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn-ghost">← Kembali</a>
+    </nav>
+
+    <main class="main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="page-header">
+            <h1 class="page-title">Tambah Berita Baru</h1>
+            <p class="page-desc">Isi form di bawah untuk menambahkan berita</p>
+        </div>
+
+        <div class="card">
+            <form method="POST" action="{{ url_for('admin.add_berita_route') }}">
+                <div class="form-group">
+                    <label for="judul">Judul Berita <span class="required">*</span></label>
+                    <input type="text" id="judul" name="judul" placeholder="Ketik judul berita di sini..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="excerpt">Ringkasan Berita</label>
+                    <textarea id="excerpt" name="excerpt" placeholder="Ketik ringkasan singkat berita..."></textarea>
+                    <p class="hint">Ringkasan akan ditampilkan di kartu berita</p>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="kategori">Kategori</label>
+                        <select id="kategori" name="kategori">
+                            <option value="Berita">📰 Berita</option>
+                            <option value="Kegiatan">🌿 Kegiatan</option>
+                            <option value="Kesehatan">🏥 Kesehatan</option>
+                            <option value="Keuangan">💰 Keuangan</option>
+                            <option value="Musyawarah">🗳️ Musyawarah</option>
+                            <option value="Pembangunan">🏗️ Pembangunan</option>
+                            <option value="Pendidikan">📚 Pendidikan</option>
+                            <option value="Lainnya">📌 Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="badge_class">Warna Label</label>
+                        <select id="badge_class" name="badge_class">
+                            <option value="badge-green">🟢 Hijau</option>
+                            <option value="badge-blue">🔵 Biru</option>
+                            <option value="badge-orange">🟠 Orange</option>
+                            <option value="badge-purple">🟣 Ungu</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="kategori_icon">Ikon Kategori</label>
+                    <select id="kategori_icon" name="kategori_icon">
+                        <option value="📰">📰 Berita</option>
+                        <option value="🌿">🌿 Kegiatan</option>
+                        <option value="🏥">🏥 Kesehatan</option>
+                        <option value="💰">💰 Keuangan</option>
+                        <option value="🗳️">🗳️ Musyawarah</option>
+                        <option value="🏗️">🏗️ Pembangunan</option>
+                        <option value="📚">📚 Pendidikan</option>
+                        <option value="📌">📌 Lainnya</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="gambar_url">URL Gambar</label>
+                    <input type="url" id="gambar_url" name="gambar_url" placeholder="https://example.com/gambar.jpg">
+                    <p class="hint">Contoh: paste URL gambar dari Google Images / Unsplash</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="gambar_alt">Deskripsi Gambar</label>
+                    <input type="text" id="gambar_alt" name="gambar_alt" placeholder="Contoh: Foto gotong royong warga">
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="unggulan" name="unggulan">
+                        <label for="unggulan">⭐ Tandai sebagai berita unggulan</label>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+                        💾 Simpan Berita
+                    </button>
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-back">
+                        ← Kembali ke Dashboard
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

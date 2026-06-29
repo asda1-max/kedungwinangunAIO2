@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desa Kedungwinangun</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'desa-dark': '#155C1B',
+                        'desa-mid': '#2A6726',
+                        'desa-light': '#73AA0F',
+                        'desa-muted': '#5B8A4E',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="font-sans m-0 bg-[#f4f7f2] text-gray-800">
+
+    <!-- ══════════════════════════════════════════════════════════
+         WRAPPER — mobile: centred card / desktop: full width
+    ═══════════════════════════════════════════════════════════ -->
+    <div
+        class="w-full max-w-[480px] md:max-w-none mx-auto bg-white md:bg-transparent shadow-[0_0_30px_rgba(0,0,0,0.45)] md:shadow-none min-h-screen overflow-x-hidden">
+
+        <!-- ── NAVBAR ─────────────────────────────────────────── -->
+        <nav
+            class="flex items-center gap-3 px-4 py-3 md:px-[5%] md:py-4 bg-[#0F5B21] text-white text-[11px] md:text-base font-semibold">
+            <img src="images/kebumen.png" alt="Logo Desa" class="w-8 h-10 md:w-10 md:h-[50px] object-contain">
+            <div class="flex gap-2 md:gap-6 ml-auto">
+                <a href="#"
+                    class="nav-a nav-active text-gray-200 no-underline transition-colors duration-300">Beranda</a>
+                <a href="#" class="nav-a text-gray-200 no-underline transition-colors duration-300">Layanan</a>
+                <a href="#" class="nav-a text-gray-200 no-underline transition-colors duration-300">Surat</a>
+                <a href="#" class="nav-a text-gray-200 no-underline transition-colors duration-300">Berita</a>
+                <a href="#" class="nav-a text-gray-200 no-underline transition-colors duration-300">Lainya ⌄</a>
+            </div>
+        </nav>
+
+        <!-- ── HERO SECTION ──────────────────────────────────── -->
+        <div class="hero-zoom relative overflow-hidden flex flex-col justify-center
+                    px-5 py-10 md:px-[5%] md:py-24 md:min-h-[55vh]
+                    bg-cover bg-center text-white"
+            style="background-image: linear-gradient(to bottom, rgba(15,91,33,0.55), rgba(0,0,0,0.82)),
+                    url('https://images.unsplash.com/photo-1433086966358-54859d0ed716?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80');">
+
+            <!-- Logo + Title -->
+            <div class="flex items-start md:items-center gap-3 md:gap-6 mb-5 md:mb-10">
+                <img src="images/kebumen.png" alt="Logo Desa Besar"
+                    class="w-12 h-14 md:w-[100px] md:h-[120px] object-contain">
+                <div>
+                    <h1 class="text-lg md:text-5xl font-bold leading-tight mb-1 md:mb-3">Desa Kedungwinangun</h1>
+                    <p class="text-xs md:text-2xl font-semibold">Selamat datang di website Kami</p>
+                    <p class="text-[10px] md:text-lg text-gray-300 mt-0.5 md:mt-2 max-w-[90%] md:max-w-lg">
+                        Eksplor semua tentang desa Kedungwinangun disini
+                    </p>
+                </div>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div class="flex gap-2.5 md:gap-5">
+                <a href="#"
+                    class="bg-[#73AA0F] hover:bg-[#63930b] text-white text-[11px] md:text-base font-bold
+                                   px-3 py-2 md:px-7 md:py-3.5 rounded-md md:rounded-lg no-underline text-center
+                                   transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
+                    Peta Interaktif
+                </a>
+                <a href="#"
+                    class="bg-[#185814] hover:bg-[#11420f] text-white text-[11px] md:text-base font-bold
+                                   px-3 py-2 md:px-7 md:py-3.5 rounded-md md:rounded-lg no-underline text-center
+                                   transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0">
+                    Layanan Surat
+                </a>
+            </div>
+
+            <!-- Dots -->
+            <div class="flex justify-center gap-1.5 md:gap-2 mt-7 md:mt-14">
+                <div id="dot-0"
+                    class="dot dot-active w-2 h-2 md:w-3 md:h-3 rounded-full bg-white transition-all duration-300">
+                </div>
+                <div id="dot-1" class="dot w-2 h-2 md:w-3 md:h-3 rounded-full bg-white/40 transition-all duration-300">
+                </div>
+                <div id="dot-2" class="dot w-2 h-2 md:w-3 md:h-3 rounded-full bg-white/40 transition-all duration-300">
+                </div>
+            </div>
+        </div>
+
+        <!-- ── CONTENT SECTION ───────────────────────────────── -->
+        <div class="orb-tr orb-bl relative overflow-hidden
+                    px-6 py-8
+                    md:w-[94%] md:max-w-[1600px] md:mx-auto
+                    md:mt-12 md:mb-14 md:px-[4%] md:py-16
+                    md:bg-gradient-to-br md:from-[#f5fdf0] md:via-white md:to-[#f0fdf4]
+                    md:rounded-[28px]
+                    md:shadow-[0_4px_6px_rgba(0,0,0,0.02),0_20px_60px_rgba(21,92,27,0.07),inset_0_1px_0_rgba(255,255,255,0.9)]
+                    md:border md:border-[rgba(21,92,27,0.07)]
+                    xl:w-[96%] xl:max-w-[1800px] xl:mt-16 xl:mb-20 xl:px-[4%] xl:py-20 xl:rounded-[32px]">
+
+            <!-- Deco corner (desktop) -->
+            <span class="deco-corner hidden md:block" aria-hidden="true"></span>
+
+            <!-- Deco dot cluster (desktop) -->
+            <div class="hidden md:flex gap-2 absolute bottom-10 left-[4%] pointer-events-none z-0" aria-hidden="true">
+                <span class="block w-2.5 h-2.5 rounded-full bg-[#73AA0F] opacity-[0.18]"></span>
+                <span class="block w-2.5 h-2.5 rounded-full bg-[#73AA0F] opacity-[0.10]"></span>
+                <span class="block w-2.5 h-2.5 rounded-full bg-[#73AA0F] opacity-[0.06]"></span>
+                <span class="block w-2.5 h-2.5 rounded-full bg-[#73AA0F] opacity-[0.04]"></span>
+            </div>
+
+            <!-- ── TENTANG KAMI ─────────────────────────────── -->
+            <h2 class="title-underline reveal relative inline-flex items-center gap-3
+                        text-[#155C1B] text-2xl md:text-4xl xl:text-[44px]
+                        font-extrabold mb-11 md:mb-14">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                </svg>
+                Tentang Kami
+            </h2>
+
+            <!-- Two-column grid (stacked on mobile) -->
+            <div class="flex flex-col md:grid md:grid-cols-2 gap-9 md:gap-9 xl:gap-14 w-full">
+
+                <!-- Google Maps col -->
+                <div class="map-ring reveal flex flex-col min-w-0 h-full">
+                    <!-- Badge -->
+                    <div class="flex items-center gap-1.5 bg-[#155C1B] text-white text-xs md:text-sm
+                                font-bold px-4 py-2 rounded-t-[19px] tracking-wide">
+                        📍 Lokasi Desa
+                    </div>
+                    <!-- Map -->
+                    <div
+                        class="flex-1 overflow-hidden rounded-b-[18px] min-h-[200px] md:min-h-[440px] xl:min-h-[520px]">
+                        <iframe
+                            src="https://maps.google.com/maps?q=Kedungwinangun,+Klirong,+Kebumen&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                            class="w-full h-full block min-h-[200px] md:min-h-[440px] xl:min-h-[520px]"
+                            style="border:0;" allowfullscreen="" loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                </div>
+
+                <!-- Text Content col -->
+                <div class="glass reveal flex flex-col justify-between min-w-0
+                            border border-white/80 border-l-[6px] border-l-[#155C1B]
+                            rounded-[20px] p-7 md:p-10 xl:p-14
+                            shadow-[0_15px_35px_rgba(21,92,27,0.05),inset_0_0_0_1px_rgba(255,255,255,0.5)]
+                            transition-all duration-500 hover:shadow-[0_20px_45px_rgba(21,92,27,0.1)]">
+
+                    <div>
+                        <h3
+                            class="text-[#155C1B] text-xl md:text-3xl xl:text-[34px] font-bold leading-snug mb-4 md:mb-6">
+                            Susunan Tata Kerja Pemerintahan
+                        </h3>
+
+                        <p class="text-[#2D582A] text-[13px] md:text-[15px] xl:text-[17px]
+                                  font-medium text-justify leading-relaxed md:leading-[1.85] mb-4 md:mb-6">
+                            Struktur pemerintahan desa terdiri dari Kepala Desa sebagai pimpinan tertinggi
+                            penyelenggara pemerintahan dan pengelola keuangan, yang dalam tugasnya dibantu oleh
+                            unsur sekretariat serta unsur pelaksana teknis dan kewilayahan. Unsur sekretariat
+                            dikoordinasikan oleh Sekretaris Desa bersama Kepala Urusan (Kaur) Tata Usaha dan
+                            Umum, Kaur Keuangan, serta Kaur Perencanaan. Sementara itu, unsur pelaksana
+                            dijalankan oleh para Kepala Seksi (Kasi) dan dibantu oleh Kepala Dusun (Kadus).
+                        </p>
+
+                        <p class="text-[#2D582A] text-[13px] md:text-[15px] xl:text-[17px]
+                                  font-medium leading-relaxed mb-4 md:mb-6">
+                            Desa Kedungwinangun terbagi menjadi beberapa wilayah dusun utama, meliputi:
+                        </p>
+
+                        <!-- Dusun Divider -->
+                        <div class="flex items-center gap-2.5 my-4">
+                            <div class="flex-1 h-px bg-[#D7E5CD]"></div>
+                            <span
+                                class="text-[10px] md:text-xs font-bold tracking-widest uppercase text-[#5B8A4E] whitespace-nowrap">
+                                Wilayah Dusun
+                            </span>
+                            <div class="flex-1 h-px bg-[#D7E5CD]"></div>
+                        </div>
+
+                        <!-- Dusun Pills -->
+                        <ul
+                            class="dusun-list grid grid-cols-2 md:grid-cols-3 gap-2.5 md:gap-3 list-none p-0 mb-5 md:mb-6">
+                            <li class="dusun-pill flex items-center gap-2 bg-[#F4FAF0] text-[#155C1B]
+                                       text-[11px] md:text-sm xl:text-[15px] font-semibold
+                                       px-3 py-2 md:px-3.5 md:py-2.5 xl:px-4 xl:py-3
+                                       rounded-[10px] border border-[rgba(21,92,27,0.06)]
+                                       transition-all duration-300 cursor-default" style="--delay:0.05s">
+                                <span>📍</span> Dusun Kedungwaru
+                            </li>
+                            <li class="dusun-pill flex items-center gap-2 bg-[#F4FAF0] text-[#155C1B]
+                                       text-[11px] md:text-sm xl:text-[15px] font-semibold
+                                       px-3 py-2 md:px-3.5 md:py-2.5 xl:px-4 xl:py-3
+                                       rounded-[10px] border border-[rgba(21,92,27,0.06)]
+                                       transition-all duration-300 cursor-default" style="--delay:0.12s">
+                                <span>📍</span> Dusun Perna
+                            </li>
+                            <li class="dusun-pill flex items-center gap-2 bg-[#F4FAF0] text-[#155C1B]
+                                       text-[11px] md:text-sm xl:text-[15px] font-semibold
+                                       px-3 py-2 md:px-3.5 md:py-2.5 xl:px-4 xl:py-3
+                                       rounded-[10px] border border-[rgba(21,92,27,0.06)]
+                                       transition-all duration-300 cursor-default" style="--delay:0.19s">
+                                <span>📍</span> Dusun Sasak
+                            </li>
+                            <li class="dusun-pill flex items-center gap-2 bg-[#F4FAF0] text-[#155C1B]
+                                       text-[11px] md:text-sm xl:text-[15px] font-semibold
+                                       px-3 py-2 md:px-3.5 md:py-2.5 xl:px-4 xl:py-3
+                                       rounded-[10px] border border-[rgba(21,92,27,0.06)]
+                                       transition-all duration-300 cursor-default" style="--delay:0.26s">
+                                <span>📍</span> Dusun Entak
+                            </li>
+                            <li class="dusun-pill flex items-center gap-2 bg-[#F4FAF0] text-[#155C1B]
+                                       text-[11px] md:text-sm xl:text-[15px] font-semibold
+                                       px-3 py-2 md:px-3.5 md:py-2.5 xl:px-4 xl:py-3
+                                       rounded-[10px] border border-[rgba(21,92,27,0.06)]
+                                       transition-all duration-300 cursor-default" style="--delay:0.33s">
+                                <span>📍</span> Dusun Grewing
+                            </li>
+                            <li class="dusun-pill flex items-center gap-2 bg-[#F4FAF0] text-[#155C1B]
+                                       text-[11px] md:text-sm xl:text-[15px] font-semibold
+                                       px-3 py-2 md:px-3.5 md:py-2.5 xl:px-4 xl:py-3
+                                       rounded-[10px] border border-[rgba(21,92,27,0.06)]
+                                       transition-all duration-300 cursor-default" style="--delay:0.40s">
+                                <span>📍</span> Dusun Pedana
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Stat Strip -->
+                    <div class="reveal grid grid-cols-3 gap-3 md:gap-4 mt-4">
+                        <div class="stat-bar relative flex flex-col items-center justify-center overflow-hidden
+                                    bg-white/70 backdrop-blur-md border border-white/80 rounded-2xl
+                                    py-4 px-2 md:py-5
+                                    shadow-[0_8px_20px_rgba(15,91,33,0.04)]
+                                    transition-all duration-400 hover:-translate-y-1
+                                    hover:shadow-[0_12px_28px_rgba(15,91,33,0.1)]">
+                            <span
+                                class="block text-[#155C1B] text-2xl md:text-3xl xl:text-4xl font-bold leading-none">6</span>
+                            <span
+                                class="block text-[#5B8A4E] text-[9px] md:text-[11px] font-semibold mt-1 tracking-wide">Dusun</span>
+                        </div>
+                        <div class="stat-bar relative flex flex-col items-center justify-center overflow-hidden
+                                    bg-white/70 backdrop-blur-md border border-white/80 rounded-2xl
+                                    py-4 px-2 md:py-5
+                                    shadow-[0_8px_20px_rgba(15,91,33,0.04)]
+                                    transition-all duration-400 hover:-translate-y-1
+                                    hover:shadow-[0_12px_28px_rgba(15,91,33,0.1)]">
+                            <span
+                                class="block text-[#155C1B] text-2xl md:text-3xl xl:text-4xl font-bold leading-none">3</span>
+                            <span
+                                class="block text-[#5B8A4E] text-[9px] md:text-[11px] font-semibold mt-1 tracking-wide">Kasi
+                                Pelaksana</span>
+                        </div>
+                        <div class="stat-bar relative flex flex-col items-center justify-center overflow-hidden
+                                    bg-white/70 backdrop-blur-md border border-white/80 rounded-2xl
+                                    py-4 px-2 md:py-5
+                                    shadow-[0_8px_20px_rgba(15,91,33,0.04)]
+                                    transition-all duration-400 hover:-translate-y-1
+                                    hover:shadow-[0_12px_28px_rgba(15,91,33,0.1)]">
+                            <span
+                                class="block text-[#155C1B] text-2xl md:text-3xl xl:text-4xl font-bold leading-none">1</span>
+                            <span
+                                class="block text-[#5B8A4E] text-[9px] md:text-[11px] font-semibold mt-1 tracking-wide">Kepala
+                                Desa</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── BERITA ────────────────────────────────────── -->
+            <h2 class="title-underline reveal relative inline-flex items-center gap-3
+                        text-[#155C1B] text-2xl md:text-4xl xl:text-[44px]
+                        font-extrabold mt-16 md:mt-20 mb-10">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+                    <path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z"/>
+                </svg>
+                Berita Desa
+            </h2>
+
+            <!-- ══ FEATURED CARD (big) ══════════════════════════════════ -->
+            <div class="news-card reveal md:flex mb-6" id="news-featured">
+
+                <!-- Thumbnail -->
+                <div class="news-thumb md:w-[45%] shrink-0" style="height:220px; min-height:220px;">
+                    <span class="featured-ribbon">⭐ Unggulan</span>
+                    <img
+                        src="https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=900&auto=format&fit=crop&q=80"
+                        alt="Gotong Royong Warga Desa Kedungwinangun"
+                        style="height:220px;">
+                </div>
+
+                <!-- Body -->
+                <div class="flex flex-col justify-between p-6 md:p-8 flex-1">
+                    <div>
+                        <!-- Meta row -->
+                        <div class="flex flex-wrap items-center gap-2 mb-3">
+                            <span class="news-badge badge-green">🌿 Kegiatan</span>
+                            <span class="text-xs text-gray-400 font-medium">📅 18 Juni 2026</span>
+                            <span class="text-xs text-gray-300">•</span>
+                            <span class="text-xs text-gray-400 font-medium">👁 1.2k dibaca</span>
+                        </div>
+
+                        <!-- Title -->
+                        <h3 class="text-[#155C1B] text-xl md:text-2xl font-extrabold leading-snug mb-3">
+                            Warga Kompak Gelar Gotong Royong Bersihkan Sungai dan Fasilitas Umum
+                        </h3>
+
+                        <!-- Excerpt -->
+                        <p class="text-gray-500 text-[13px] md:text-sm leading-relaxed mb-5 line-clamp-3">
+                            Ratusan warga Desa Kedungwinangun turun tangan bersama-sama membersihkan
+                            saluran irigasi, jalan desa, dan area fasilitas umum dalam kegiatan gotong
+                            royong rutin yang dipimpin langsung oleh Kepala Desa. Kegiatan ini menjadi
+                            bukti nyata semangat kebersamaan warga dalam menjaga kebersihan dan
+                            keindahan lingkungan desa.
+                        </p>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="flex items-center justify-between flex-wrap gap-3 pt-4 border-t border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full bg-[#155C1B] flex items-center justify-center text-white text-xs font-bold">KD</div>
+                            <span class="text-xs text-gray-500 font-medium">Admin Desa Kedungwinangun</span>
+                        </div>
+                        <a href="#" class="news-readmore" aria-label="Baca selengkapnya: Gotong Royong">
+                            Baca Selengkapnya
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thin divider -->
+            <div class="news-divider"></div>
+
+            <!-- ══ NEWS GRID (3 cards) ══════════════════════════════════ -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 mb-10" id="news-grid">
+
+                <!-- Card 1 -->
+                <article class="news-card reveal flex flex-col" style="transition-delay:.05s">
+                    <div class="news-thumb" style="height:180px;">
+                        <img
+                            src="https://images.unsplash.com/photo-1561414927-6d86591d0c4f?w=600&auto=format&fit=crop&q=80"
+                            alt="Posyandu Balita"
+                            style="height:180px;">
+                    </div>
+                    <div class="flex flex-col flex-1 p-5">
+                        <div class="flex flex-wrap items-center gap-2 mb-2.5">
+                            <span class="news-badge badge-blue">🏥 Kesehatan</span>
+                            <span class="text-[10px] text-gray-400 font-medium">12 Jun 2026</span>
+                        </div>
+                        <h3 class="text-[#155C1B] text-base font-bold leading-snug mb-2 flex-1">
+                            Posyandu Balita Bulan Juni Berjalan Lancar, 120 Anak Terpantau Sehat
+                        </h3>
+                        <p class="text-gray-500 text-xs leading-relaxed mb-4 line-clamp-2">
+                            Kegiatan posyandu rutin bulanan dilaksanakan di Balai Desa dengan
+                            dihadiri oleh kader kesehatan dan petugas puskesmas setempat.
+                        </p>
+                        <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                            <span class="text-[10px] text-gray-400">👁 842 dibaca</span>
+                            <a href="#" class="news-readmore text-xs" aria-label="Baca: Posyandu Balita">
+                                Baca
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 2 -->
+                <article class="news-card reveal flex flex-col" style="transition-delay:.12s">
+                    <div class="news-thumb" style="height:180px;">
+                        <img
+                            src="https://images.unsplash.com/photo-1594035910387-fea47794261f?w=600&auto=format&fit=crop&q=80"
+                            alt="BLT Dana Desa"
+                            style="height:180px;">
+                    </div>
+                    <div class="flex flex-col flex-1 p-5">
+                        <div class="flex flex-wrap items-center gap-2 mb-2.5">
+                            <span class="news-badge badge-orange">💰 Keuangan</span>
+                            <span class="text-[10px] text-gray-400 font-medium">8 Jun 2026</span>
+                        </div>
+                        <h3 class="text-[#155C1B] text-base font-bold leading-snug mb-2 flex-1">
+                            Penyaluran BLT Dana Desa Tahap II Tahun 2026 Telah Dimulai
+                        </h3>
+                        <p class="text-gray-500 text-xs leading-relaxed mb-4 line-clamp-2">
+                            Pemerintah Desa Kedungwinangun menyalurkan Bantuan Langsung Tunai
+                            kepada 78 Keluarga Penerima Manfaat (KPM) terdaftar.
+                        </p>
+                        <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                            <span class="text-[10px] text-gray-400">👁 1.5k dibaca</span>
+                            <a href="#" class="news-readmore text-xs" aria-label="Baca: BLT Dana Desa">
+                                Baca
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 3 -->
+                <article class="news-card reveal flex flex-col" style="transition-delay:.19s">
+                    <div class="news-thumb" style="height:180px;">
+                        <img
+                            src="https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=600&auto=format&fit=crop&q=80"
+                            alt="Musyawarah Desa"
+                            style="height:180px;">
+                    </div>
+                    <div class="flex flex-col flex-1 p-5">
+                        <div class="flex flex-wrap items-center gap-2 mb-2.5">
+                            <span class="news-badge badge-teal">🗳️ Musyawarah</span>
+                            <span class="text-[10px] text-gray-400 font-medium">3 Jun 2026</span>
+                        </div>
+                        <h3 class="text-[#155C1B] text-base font-bold leading-snug mb-2 flex-1">
+                            Musyawarah Desa Tetapkan Prioritas Pembangunan Infrastruktur 2026
+                        </h3>
+                        <p class="text-gray-500 text-xs leading-relaxed mb-4 line-clamp-2">
+                            Rapat musyawarah desa dihadiri oleh tokoh masyarakat, BPD, dan perwakilan
+                            warga dari seluruh dusun untuk menetapkan skala prioritas pembangunan.
+                        </p>
+                        <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                            <span class="text-[10px] text-gray-400">👁 697 dibaca</span>
+                            <a href="#" class="news-readmore text-xs" aria-label="Baca: Musyawarah Desa">
+                                Baca
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+            </div><!-- /news-grid -->
+
+            <!-- Lihat Semua Berita CTA -->
+            <div class="reveal flex justify-center mb-6">
+                <a href="#" class="btn-all-news" id="btn-lihat-semua-berita">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+                        <path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z"/>
+                    </svg>
+                    Lihat Semua Berita
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+
+        </div><!-- /content-section -->
+    </div><!-- /wrapper -->
+
+    <script>
+            // Auto-cycle hero dots
+            (function () {
+                var dots = document.querySelectorAll('.dot');
+                if (dots.length > 1) {
+                    var i = 0;
+                    setInterval(function () {
+                        dots[i].classList.remove('dot-active', 'bg-white');
+                        dots[i].classList.add('bg-white/40');
+                        i = (i + 1) % dots.length;
+                        dots[i].classList.remove('bg-white/40');
+                        dots[i].classList.add('dot-active', 'bg-white');
+                    }, 3000);
+                }
+            })();
+
+        // Scroll reveal
+        (function () {
+            var targets = document.querySelectorAll('.reveal, .dusun-list');
+            if (!('IntersectionObserver' in window)) {
+                targets.forEach(function (el) { el.classList.add('is-visible'); });
+                return;
+            }
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12 });
+            targets.forEach(function (el) { observer.observe(el); });
+        })();
+    </script>
+
+</body>
+
+</html>

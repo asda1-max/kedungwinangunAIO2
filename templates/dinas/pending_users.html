@@ -1,0 +1,69 @@
+{% extends 'dinas/base.html' %}
+
+{% block title %}Pendaftaran Pending - Panel Dinas{% endblock %}
+{% block page_title %}Pendaftaran Penduduk Baru{% endblock %}
+{% block page_subtitle %}Setujui atau tolak pendaftaran warga baru{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="table-container">
+        {% if users %}
+        <table>
+            <thead>
+                <tr>
+                    <th>NIK</th>
+                    <th>Nama Lengkap</th>
+                    <th>Email</th>
+                    <th>Telepon</th>
+                    <th>Alamat</th>
+                    <th>Dokumen</th>
+                    <th>Tanggal</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td><code>{{ user.nik }}</code></td>
+                    <td class="font-semibold">{{ user.nama_lengkap }}</td>
+                    <td class="text-slate-500">{{ user.email or '-' }}</td>
+                    <td>{{ user.no_telepon }}</td>
+                    <td class="max-w-[180px] truncate">{{ user.alamat }}</td>
+                    <td>
+                        {% if user.ktp_path %}
+                        <a href="{{ url_for('static', filename='uploads/' + user.ktp_path) }}" class="doc-link" target="_blank">
+                            📄 KTP
+                        </a>
+                        {% else %}
+                        <span class="text-slate-400">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-slate-500">{{ user.created_at }}</td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <form action="{{ url_for('dinas.approve_user_route', user_id=user.id) }}" method="POST">
+                                <button type="submit" class="btn btn-approve" onclick="return confirm('Setujui pendaftaran {{ user.nama_lengkap }}?')">
+                                    ✓ Setuju
+                                </button>
+                            </form>
+                            <form action="{{ url_for('dinas.reject_user_route', user_id=user.id) }}" method="POST">
+                                <button type="submit" class="btn btn-reject" onclick="return confirm('Tolak pendaftaran {{ user.nama_lengkap }}?')">
+                                    ✗ Tolak
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">✓</div>
+            <h3 class="text-lg font-semibold mb-2">Tidak ada pendaftaran pending</h3>
+            <p class="text-slate-500 dark:text-slate-400">Semua pendaftaran sudah diproses</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

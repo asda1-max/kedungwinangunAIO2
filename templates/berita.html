@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Berita — {{ desa.nama }}</title>
+    <meta name="description" content="Daftar berita terbaru dari {{ desa.nama }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'desa-dark': '#155C1B', 'desa-mid': '#2A6726',
+                        'desa-light': '#73AA0F', 'desa-muted': '#5B8A4E',
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="font-sans m-0 bg-[#f4f7f2] text-gray-800">
+<div class="w-full max-w-[480px] md:max-w-none mx-auto bg-white md:bg-transparent shadow-[0_0_30px_rgba(0,0,0,0.45)] md:shadow-none min-h-screen overflow-x-hidden">
+
+    <!-- NAVBAR -->
+    <nav class="flex items-center gap-3 px-4 py-3 md:px-[5%] md:py-4 bg-[#0F5B21] text-white text-[11px] md:text-base font-semibold">
+        <img src="{{ url_for('static', filename='images/kebumen.png') }}" alt="Logo Desa" class="w-8 h-10 md:w-10 md:h-[50px] object-contain">
+        <div class="flex gap-2 md:gap-6 ml-auto">
+            {% for link in nav_links %}
+            <a href="{{ link.href }}"
+               class="nav-a {% if link.active %}nav-active{% endif %} text-gray-200 no-underline transition-colors duration-300">
+                {{ link.label }}
+            </a>
+            {% endfor %}
+        </div>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <div class="bg-[#0F5B21] px-6 py-10 md:px-[5%] md:py-16 text-white">
+        <p class="text-xs md:text-sm text-green-300 mb-2">
+            <a href="{{ url_for('public.index') }}" class="hover:underline">Beranda</a> / Berita
+        </p>
+        <h1 class="text-2xl md:text-4xl font-extrabold">Berita Desa</h1>
+        <p class="text-sm md:text-base text-green-200 mt-1">Informasi dan kegiatan terbaru dari {{ desa.nama }}</p>
+    </div>
+
+    <!-- BERITA GRID -->
+    <div class="px-6 py-10 md:px-[5%] md:py-14">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% for berita in berita_list %}
+            <article class="news-card reveal flex flex-col" style="transition-delay: {{ loop.index * 0.07 }}s">
+                {% if berita.unggulan %}
+                <div class="news-thumb" style="height:200px;">
+                    <span class="featured-ribbon">⭐ Unggulan</span>
+                    <img src="{{ berita.gambar_url }}" alt="{{ berita.gambar_alt }}" style="height:200px;">
+                </div>
+                {% else %}
+                <div class="news-thumb" style="height:200px;">
+                    <img src="{{ berita.gambar_url }}" alt="{{ berita.gambar_alt }}" style="height:200px;">
+                </div>
+                {% endif %}
+                <div class="flex flex-col flex-1 p-5">
+                    <div class="flex flex-wrap items-center gap-2 mb-2.5">
+                        <span class="news-badge {{ berita.badge_class }}">{{ berita.kategori_icon }} {{ berita.kategori }}</span>
+                        <span class="text-[10px] text-gray-400 font-medium">{{ berita.tanggal }}</span>
+                    </div>
+                    <h2 class="text-[#155C1B] text-base font-bold leading-snug mb-2 flex-1">
+                        {{ berita.judul }}
+                    </h2>
+                    <p class="text-gray-500 text-xs leading-relaxed mb-4 line-clamp-3">
+                        {{ berita.excerpt }}
+                    </p>
+                    <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                        <span class="text-[10px] text-gray-400">👁 {{ berita.views }} dibaca</span>
+                        <a href="{{ url_for('public.detail_berita', berita_id=berita.id) }}"
+                           class="news-readmore text-xs"
+                           aria-label="Baca: {{ berita.judul }}">
+                            Baca
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+<script>
+    (function () {
+        var targets = document.querySelectorAll('.reveal');
+        if (!('IntersectionObserver' in window)) {
+            targets.forEach(function (el) { el.classList.add('is-visible'); });
+            return;
+        }
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+        targets.forEach(function (el) { observer.observe(el); });
+    })();
+</script>
+</body>
+</html>

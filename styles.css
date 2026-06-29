@@ -1,0 +1,328 @@
+/* ── Things Tailwind CDN cannot do natively ─────────────────── */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Scroll-reveal */
+@media (prefers-reduced-motion: no-preference) {
+    .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Dusun list stagger */
+    .dusun-list li {
+        opacity: 0;
+        transform: translateX(-8px);
+        transition: opacity 0.45s ease, transform 0.45s ease;
+        transition-delay: var(--delay, 0s);
+    }
+
+    .dusun-list.is-visible li {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .reveal,
+    .dusun-list li {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Dot pulse animation */
+@keyframes dotPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+}
+
+.dot-active {
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+/* Hero image zoom on load */
+@keyframes heroZoom {
+    from {
+        transform: scale(1.06);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+.hero-zoom {
+    animation: heroZoom 8s ease-out both;
+}
+
+/* Glassmorphism (not in Tailwind CDN by default) */
+.glass {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+/* Gradient underline on section title */
+.title-underline::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 64px;
+    height: 5px;
+    background: linear-gradient(90deg, #73AA0F, #155C1B);
+    border-radius: 9999px;
+}
+
+/* Ambient orbs on content card */
+.orb-tr::before {
+    content: "";
+    position: absolute;
+    top: -80px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(74, 222, 128, 0.13) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(40px);
+}
+
+.orb-bl::after {
+    content: "";
+    position: absolute;
+    bottom: -100px;
+    left: -120px;
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, rgba(21, 92, 27, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(50px);
+}
+
+/* Gradient border ring around map (padding-trick) */
+.map-ring {
+    background: linear-gradient(135deg, #73AA0F 0%, #155C1B 55%, #3D8C40 100%);
+    padding: 3px;
+    border-radius: 22px;
+}
+
+/* Stat card gradient bar on hover */
+.stat-bar::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #73AA0F, #155C1B);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 0 0 14px 14px;
+}
+
+.stat-bar:hover::after {
+    opacity: 1;
+}
+
+/* Deco corner triangle */
+.deco-corner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 180px;
+    height: 180px;
+    background: linear-gradient(225deg, rgba(115, 170, 15, 0.10) 0%, transparent 65%);
+    border-radius: 0 28px 0 100%;
+    pointer-events: none;
+}
+
+/* Dusun pill hover invert */
+.dusun-pill:hover {
+    background: #155C1B;
+    color: #ffffff;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(21, 92, 27, 0.22);
+    border-color: #155C1B;
+}
+
+/* Active nav link */
+.nav-a.nav-active {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.nav-a:hover {
+    color: #ffffff;
+}
+
+/* ── News Cards ──────────────────────────────────────────── */
+
+/* Skeleton shimmer for placeholder effect */
+@keyframes shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position: 600px 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg,
+        #e8f0e2 25%,
+        #d4e6c8 50%,
+        #e8f0e2 75%);
+    background-size: 600px 100%;
+    animation: shimmer 1.6s infinite linear;
+    border-radius: 8px;
+}
+
+/* News card base */
+.news-card {
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(21, 92, 27, 0.07);
+    box-shadow: 0 4px 16px rgba(21, 92, 27, 0.05),
+                0 1px 3px rgba(0,0,0,0.04);
+    transition: transform 0.35s cubic-bezier(.25,.8,.25,1),
+                box-shadow 0.35s cubic-bezier(.25,.8,.25,1);
+    cursor: pointer;
+    position: relative;
+}
+
+.news-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 48px rgba(21, 92, 27, 0.13),
+                0 4px 12px rgba(0,0,0,0.06);
+}
+
+.news-card:hover .news-thumb img {
+    transform: scale(1.07);
+}
+
+/* Thumbnail zoom */
+.news-thumb {
+    overflow: hidden;
+    position: relative;
+}
+
+.news-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s cubic-bezier(.25,.8,.25,1);
+}
+
+/* Gradient overlay on thumb */
+.news-thumb::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(15, 91, 33, 0.45) 100%);
+    pointer-events: none;
+}
+
+/* Category badge */
+.news-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 9999px;
+}
+
+.badge-green  { background: #e8f5e0; color: #155C1B; }
+.badge-blue   { background: #e0eeff; color: #1a4d8a; }
+.badge-orange { background: #fff3e0; color: #b95c00; }
+.badge-teal   { background: #e0f7f4; color: #0d6e5e; }
+
+/* Read-more link arrow animation */
+.news-readmore {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #155C1B;
+    text-decoration: none;
+    transition: gap 0.25s ease;
+}
+
+.news-readmore:hover { gap: 10px; }
+
+.news-readmore svg {
+    transition: transform 0.25s ease;
+}
+
+.news-readmore:hover svg {
+    transform: translateX(3px);
+}
+
+/* Featured card label ribbon */
+.featured-ribbon {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: linear-gradient(90deg, #73AA0F, #155C1B);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 9999px;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(21,92,27,0.35);
+}
+
+/* Divider between featured and grid */
+.news-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(21,92,27,0.12), transparent);
+    margin: 2rem 0;
+}
+
+/* "Lihat Semua" button */
+.btn-all-news {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #155C1B, #2A6726);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    box-shadow: 0 4px 14px rgba(21,92,27,0.28);
+}
+
+.btn-all-news:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(21,92,27,0.38);
+    background: linear-gradient(135deg, #0e4313, #1e4f1a);
+}

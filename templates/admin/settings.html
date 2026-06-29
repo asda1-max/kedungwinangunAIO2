@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan — Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5f5f4;
+            --surface: #ffffff;
+            --border: #e7e5e4;
+            --border-hover: #d6d3d1;
+            --text: #1c1917;
+            --text-muted: #78716c;
+            --primary: #166534;
+            --primary-hover: #14532d;
+            --error: #dc2626;
+            --success: #16a34a;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+
+        .nav-link {
+            padding: 8px 14px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .nav-link.active {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .btn-ghost {
+            padding: 8px 14px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            color: var(--text-muted);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .main {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .page-desc {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: #fafaf9;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .info-box {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 28px;
+            display: flex;
+            gap: 14px;
+            font-size: 15px;
+            color: #92400e;
+        }
+
+        .info-box svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            fill: currentColor;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        label .required {
+            color: var(--error);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            background: var(--surface);
+            transition: all 0.15s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+
+        input::placeholder {
+            color: #a8a29e;
+        }
+
+        .hint {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .current-value {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 12px 14px;
+            background: #fafaf9;
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .current-value strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 32px 0;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 32px;
+            padding-top: 28px;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (min-width: 480px) {
+            .btn-group {
+                flex-direction: row;
+            }
+        }
+
+        .btn {
+            padding: 16px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: none;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text-muted);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .btn-back {
+            background: #e7e5e4;
+            color: var(--text);
+            border: 2px solid #d6d3d1;
+        }
+
+        .btn-back:hover {
+            background: #d6d3d1;
+            border-color: #a8a29e;
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: var(--error);
+            border: 1px solid #fecaca;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .alert svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="{{ url_for('public.index') }}" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 3L4 9v12h16V9l-8-6zm6 16h-3v-5h-6v5H6v-9.5l6-4.5 6 4.5V19z"/></svg>
+                </div>
+                Kedungwinangun
+            </a>
+            <a href="{{ url_for('admin.dashboard') }}" class="nav-link">Dashboard</a>
+            <a href="{{ url_for('admin.config') }}" class="nav-link">Konfigurasi</a>
+            <a href="{{ url_for('admin.settings') }}" class="nav-link active">Pengaturan</a>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn-ghost">← Kembali</a>
+    </nav>
+
+    <main class="main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="page-header">
+            <h1 class="page-title">Pengaturan Akun</h1>
+            <p class="page-desc">Kelola username dan password akun admin Anda</p>
+        </div>
+
+        <div class="card">
+            <div class="section-header">
+                <div class="section-icon">👤</div>
+                <div>
+                    <div class="section-title">Akun Admin</div>
+                    <div class="section-desc">Ubah username dan password untuk keamanan</div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                <span>Untuk menyimpan perubahan, Anda harus memasukkan password saat ini.</span>
+            </div>
+
+            <form method="POST" action="{{ url_for('admin.settings') }}">
+                <div class="form-group">
+                    <label for="new_username">Username Baru</label>
+                    <input type="text" id="new_username" name="new_username" value="{{ admin.username }}" placeholder="Ketik username baru...">
+                    <p class="hint">Kosongkan jika tidak ingin mengubah username</p>
+                    <div class="current-value">
+                        <span>Username saat ini:</span>
+                        <strong>{{ admin.username }}</strong>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="section-header" style="margin-top: 0; padding-top: 0; border-bottom: none;">
+                    <div class="section-icon">🔑</div>
+                    <div>
+                        <div class="section-title">Ubah Password</div>
+                        <div class="section-desc">Minimal 6 karakter untuk keamanan</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="current_password">Password Saat Ini <span class="required">*</span></label>
+                    <input type="password" id="current_password" name="current_password" placeholder="Ketik password saat ini..." required>
+                    <p class="hint">Wajib diisi untuk menyimpan perubahan</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="new_password">Password Baru</label>
+                    <input type="password" id="new_password" name="new_password" placeholder="Ketik password baru (min. 6 karakter)">
+                    <p class="hint">Minimal 6 karakter. Kosongkan jika tidak ingin mengubah</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Konfirmasi Password Baru</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Ulangi password baru...">
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+                        💾 Simpan Perubahan
+                    </button>
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-back">
+                        ← Kembali ke Dashboard
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

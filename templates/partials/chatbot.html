@@ -1,0 +1,594 @@
+<!-- ═══════════════════════════════════════════════════════════
+     CHATBOT WIDGET - OpenRouter AI with Fallbacks
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- Chat Floating Button -->
+<button id="chat-toggle-btn" onclick="toggleChat()"
+    class="fixed bottom-6 left-6 z-[9999] w-14 h-14 rounded-full
+           bg-gradient-to-br from-[#155C1B] to-[#73AA0F] text-white
+           shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300
+           flex items-center justify-center group"
+    title="Chat AI">
+    <!-- Chat Icon (shown when closed) -->
+    <svg id="chat-icon" class="w-7 h-7 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+    </svg>
+    <!-- Close Icon (hidden when closed) -->
+    <svg id="chat-close-icon" class="w-7 h-7 absolute hidden transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+    </svg>
+    <!-- Unread Badge -->
+    <span id="chat-badge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full
+                                  flex items-center justify-center hidden">0</span>
+</button>
+
+<!-- Chat Window -->
+<div id="chat-window"
+     class="fixed bottom-24 left-6 z-[9998] w-[380px] max-w-[calc(100vw-48px)] h-[560px] max-h-[calc(100vh-140px)]
+            bg-white dark:bg-[#1e293b] rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700
+            flex flex-col overflow-hidden transition-all duration-400 ease-in-out
+            origin-bottom-left scale-95 opacity-0 pointer-events-none"
+     style="transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 py-4
+                bg-gradient-to-r from-[#155C1B] to-[#2A6726] text-white">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg">
+                🤖
+            </div>
+            <div>
+                <h3 class="font-bold text-base">AI Assistant</h3>
+                <div class="flex items-center gap-1.5">
+                    <span id="chat-status-dot" class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    <span id="chat-status-text" class="text-xs text-green-100">Online</span>
+                </div>
+            </div>
+        </div>
+        <button onclick="toggleChat()" class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Model Selector & Settings -->
+    <div class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-[#0f172a] border-b border-gray-100 dark:border-gray-700">
+        <select id="chat-model" onchange="onModelChange()"
+                class="flex-1 text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600
+                       bg-white dark:bg-[#1e293b] text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2
+                       focus:ring-[#155C1B]/50 cursor-pointer">
+            <option value="nvidia/nemotron-3-ultra-550b-a55b:free"> The Best Model Ever</option>
+
+        </select>
+        <button onclick="clearChat()" class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600
+                                              hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
+                                              text-gray-500 dark:text-gray-400" title="Clear chat">
+            🗑️ Clear
+        </button>
+    </div>
+
+    <!-- Messages -->
+    <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-3 space-y-3 scrollbar-thin">
+        <!-- Welcome Message -->
+        <div class="flex gap-2.5 animate-fade-in-up">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center text-sm flex-shrink-0 mt-0.5">
+                🤖
+            </div>
+            <div class="bg-gray-100 dark:bg-[#334155] rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+                <p class="text-sm text-gray-800 dark:text-gray-100 leading-relaxed">
+                    Halo! 👋 Saya asisten AI untuk Desa Kedungwinangun.
+                    Silakan bertanya tentang berita, informasi desa, atau layanan lainnya!
+                </p>
+                <div class="mt-3 flex flex-wrap gap-1.5">
+                    <button onclick="sendSuggestion('Informasi berita terbaru')"
+                            class="text-xs px-3 py-1.5 bg-[#155C1B]/10 hover:bg-[#155C1B]/20 text-[#155C1B] dark:text-green-400 rounded-full transition-colors">
+                        📰 Berita terbaru
+                    </button>
+                    <button onclick="sendSuggestion('Jadwal kegiatan desa')"
+                            class="text-xs px-3 py-1.5 bg-[#155C1B]/10 hover:bg-[#155C1B]/20 text-[#155C1B] dark:text-green-400 rounded-full transition-colors">
+                        📅 Kegiatan desa
+                    </button>
+                    <button onclick="sendSuggestion('Layanan surat permohonan')"
+                            class="text-xs px-3 py-1.5 bg-[#155C1B]/10 hover:bg-[#155C1B]/20 text-[#155C1B] dark:text-green-400 rounded-full transition-colors">
+                        📝 Surat permohonan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div id="chat-typing" class="px-4 pb-2 hidden">
+        <div class="flex gap-2.5 animate-fade-in-up">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center text-sm flex-shrink-0">
+                🤖
+            </div>
+            <div class="bg-gray-100 dark:bg-[#334155] rounded-2xl rounded-tl-sm px-4 py-3">
+                <div class="flex gap-1">
+                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0ms"></span>
+                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:150ms"></span>
+                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-gray-700 bg-white dark:bg-[#1e293b]">
+        <div class="flex gap-2 items-end">
+            <textarea id="chat-input" rows="1" placeholder="Ketik pesan..."
+                      onkeydown="handleChatKeydown(event)" oninput="autoResizeTextarea(this)"
+                      class="flex-1 resize-none text-sm px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600
+                             bg-gray-50 dark:bg-[#0f172a] text-gray-800 dark:text-gray-100
+                             focus:outline-none focus:ring-2 focus:ring-[#155C1B]/50 focus:border-[#155C1B]
+                             placeholder-gray-400 dark:placeholder-gray-500 max-h-32 scrollbar-thin"
+                      style="field-sizing: content;"></textarea>
+            <button id="chat-send-btn" onclick="sendMessage()"
+                    class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#155C1B] to-[#2A6726] text-white
+                           hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center justify-center flex-shrink-0
+                           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                <svg id="chat-send-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+                <svg id="chat-loading-icon" class="w-5 h-5 hidden animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            </button>
+        </div>
+        <p class="text-[10px] text-gray-400 mt-1.5 text-center">
+            AI may produce inaccurate info — verify with official sources.
+        </p>
+    </div>
+</div>
+
+<!-- Scrollbar Style -->
+<style>
+    #chat-messages::-webkit-scrollbar { width: 4px; }
+    #chat-messages::-webkit-scrollbar-track { background: transparent; }
+    #chat-messages::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    .dark #chat-messages::-webkit-scrollbar-thumb { background: #475569; }
+    .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    .dark .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; }
+</style>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CHATBOT STATE
+// ═══════════════════════════════════════════════════════════
+const ChatState = {
+    isOpen: false,
+    isLoading: false,
+    unreadCount: 0,
+    messageHistory: [
+        { role: 'system', content: `Kamu adalah asisten AI untuk Website Desa Kedungwinangun, Kebumen, Jawa Tengah, Indonesia.
+
+Konteks Website:
+- Website resmi desa untuk informasi dan layanan publik
+- Menyediakan berita terkini tentang kegiatan desa
+- Layanan surat permohonan online
+- Galeri foto kegiatan desa
+- Kontak dan informasi pemerintahan desa
+
+Pedoman:
+- Jawab dengan ramah dalam Bahasa Indonesia informal (ngobrol)
+- Jika pertanyaan di luar konteks website, jawab sebaik mungkin
+- Cantumkan sumber jika merujuk ke data website
+- Jika tidak tahu, jujur dan sarankan untuk menghubungi pihak terkait
+- Batasi jawaban agar ringkas dan helpful (maksimal 3-4 paragraf)` }
+    ],
+
+    // Fallback models (used by server-side /api/chat endpoint)
+    fallbackModels: [
+        'anthropic/claude-3.5-haiku',
+        'google/gemini-2.0-flash-exp',
+        'meta-llama/llama-3-8b-instruct',
+        'mistralai/mistral-nemo',
+        'qwen/qwen-2-7b-instruct'
+    ],
+};
+
+// ═══════════════════════════════════════════════════════════
+// TOGGLE CHAT
+// ═══════════════════════════════════════════════════════════
+function toggleChat() {
+    ChatState.isOpen = !ChatState.isOpen;
+    const window = document.getElementById('chat-window');
+    const icon = document.getElementById('chat-icon');
+    const closeIcon = document.getElementById('chat-close-icon');
+    const badge = document.getElementById('chat-badge');
+
+    if (ChatState.isOpen) {
+        window.classList.remove('scale-95', 'opacity-0', 'pointer-events-none');
+        window.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
+        icon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+        badge.classList.add('hidden');
+        ChatState.unreadCount = 0;
+
+        // Focus input
+        setTimeout(() => document.getElementById('chat-input')?.focus(), 300);
+    } else {
+        window.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
+        window.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto');
+        icon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODEL CHANGE
+// ═══════════════════════════════════════════════════════════
+function onModelChange() {
+    const select = document.getElementById('chat-model');
+    const selectedText = select.options[select.selectedIndex].text;
+    addMessage('assistant', `🔄 Model switched to: **${selectedText}**`);
+    scrollToBottom();
+}
+
+// ═══════════════════════════════════════════════════════════
+// CLEAR CHAT
+// ═══════════════════════════════════════════════════════════
+function clearChat() {
+    const container = document.getElementById('chat-messages');
+    ChatState.messageHistory = ChatState.messageHistory.slice(0, 1); // keep system prompt
+
+    container.innerHTML = `
+        <div class="flex gap-2.5 animate-fade-in-up">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center text-sm flex-shrink-0 mt-0.5">
+                🤖
+            </div>
+            <div class="bg-gray-100 dark:bg-[#334155] rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+                <p class="text-sm text-gray-800 dark:text-gray-100 leading-relaxed">
+                    Chat sudah dibersihkan! 💬 Ada yang bisa saya bantu lagi?
+                </p>
+            </div>
+        </div>
+    `;
+    scrollToBottom();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SEND MESSAGE
+// ═══════════════════════════════════════════════════════════
+async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text || ChatState.isLoading) return;
+
+    input.value = '';
+    input.style.height = 'auto';
+
+    // Add user message
+    addMessage('user', text);
+    ChatState.messageHistory.push({ role: 'user', content: text });
+
+    // Show typing
+    setLoading(true);
+
+    try {
+        const response = await callOpenRouter();
+        addMessage('assistant', response.text);
+        ChatState.messageHistory.push({ role: 'assistant', content: response.text });
+
+        // Update status if fallback was used
+        if (response.fallbackUsed) {
+            updateStatus('fallback', `Model fallback: ${response.modelUsed}`);
+        }
+    } catch (error) {
+        handleError(error);
+    } finally {
+        setLoading(false);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CALL SERVER-SIDE CHATBOT API (/api/chat)
+// API key stays on server — client only talks to our backend
+// ═══════════════════════════════════════════════════════════
+async function callOpenRouter(retries = 0) {
+    const model = document.getElementById('chat-model').value;
+
+    // Get recent messages (keep last 12 to avoid token limits)
+    const messages = ChatState.messageHistory.slice(-12).map(m => ({
+        role: m.role === 'system' ? 'system' : m.role,
+        content: m.content
+    }));
+
+    try {
+        updateStatus('loading', 'Thinking...');
+
+        const response = await Promise.race([
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages, model })
+            }),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('TIMEOUT')), 90000)
+            )
+        ]);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+
+            // Try fallback if server suggests it
+            if ((response.status === 429 || response.status === 503) && retries < ChatState.fallbackModels.length) {
+                const fallbackModel = ChatState.fallbackModels[retries];
+                const select = document.getElementById('chat-model');
+                const idx = Array.from(select.options).findIndex(o => o.value === fallbackModel);
+                if (idx !== -1) select.selectedIndex = idx;
+                return callOpenRouter(retries + 1);
+            }
+
+            throw new Error(errorData.message || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Check if server returned an error response
+        if (data.error) {
+            throw new Error(data.message || data.error);
+        }
+
+        return {
+            text: data.text,
+            fallbackUsed: data.fallback === true,
+            modelUsed: data.model
+        };
+
+    } catch (error) {
+        if (error.message === 'TIMEOUT') {
+            throw new Error('TIMEOUT: Permintaan timeout (>90s). Pastikan koneksi stabil dan coba lagi.');
+        }
+        throw error;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// HANDLE ERRORS
+// ═══════════════════════════════════════════════════════════
+function handleError(error) {
+    let errorMsg = error.message || 'Terjadi kesalahan tidak dikenal';
+    let showSuggestion = true;
+
+    // Friendly error messages
+    if (errorMsg.includes('RATE_LIMITED') || errorMsg.includes('429')) {
+        errorMsg = `⚠️ **Rate Limit Terjadi**\n\nQuota API sementara habis. Coba lagi dalam beberapa menit.\n\n💡 Tips: Gunakan model yang lebih ringan untuk penggunaan intensif.`;
+    } else if (errorMsg.includes('PAYMENT_REQUIRED') || errorMsg.includes('402') || errorMsg.includes('Saldo Habis')) {
+        errorMsg = `💳 **Saldo Habis**\n\nSaldo OpenRouter Anda telah habis. Silakan top-up di [openrouter.ai/credits](https://openrouter.ai/credits)`;
+        showSuggestion = false;
+    } else if (errorMsg.includes('MODEL_UNAVAILABLE') || errorMsg.includes('503') || errorMsg.includes('ALL_MODELS_FAILED')) {
+        errorMsg = `🔧 **Model Tidak Tersedia**\n\nSemua model AI sedang tidak tersedia. Mohon coba lagi nanti.`;
+        showSuggestion = false;
+    } else if (errorMsg.includes('TIMEOUT')) {
+        errorMsg = `⏱️ **Timeout**\n\nPermintaan terlalu lama. Pastikan koneksi internet stabil dan coba lagi.`;
+    } else if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError') || errorMsg.includes('Network request failed')) {
+        errorMsg = `🌐 **Koneksi Terputus**\n\nTidak dapat terhubung ke server. Periksa koneksi internet Anda.`;
+    } else if (errorMsg.includes('API_ERROR')) {
+        errorMsg = `❌ **Error API**\n\nTerjadi kesalahan dari server AI.\n\n\`\`\`\n${errorMsg}\n\`\`\`\n\nCoba lagi dalam beberapa saat.`;
+        showSuggestion = false;
+    } else if (errorMsg.includes('EMPTY_RESPONSE')) {
+        errorMsg = `🤔 **Respons Kosong**\n\nAI tidak memberikan jawaban. Coba pertanyaan yang berbeda.`;
+    } else if (errorMsg.includes('API_KEY_NOT_CONFIGURED') || errorMsg.includes('API key') || errorMsg.includes('belum disetting')) {
+        errorMsg = `⚠️ **API Key Belum Dikaktifkan**\n\nChatbot AI belum bisa digunakan karena API key belum disetting.`;
+
+    if (errorMsg) {
+        addMessage('assistant', errorMsg);
+    }
+
+    if (showSuggestion) {
+        addMessage('assistant',
+            `📌 **Cara Mengaktifkan Chatbot:**\n\n1. Daftar di [openrouter.ai](https://openrouter.ai)\n2. Generate API key di dashboard\n3. Set environment variable:\n\`\`\`bash\nexport OPENROUTER_API_KEY=sk-or-v1-...\n\`\`\`\n4. Restart aplikasi Flask`);
+    }
+    }
+
+    updateStatus('error', 'Error occurred');
+}
+
+// ═══════════════════════════════════════════════════════════
+// ADD MESSAGE TO CHAT
+// ═══════════════════════════════════════════════════════════
+function addMessage(role, content) {
+    const container = document.getElementById('chat-messages');
+    const isDark = document.body.classList.contains('dark') || document.documentElement.classList.contains('dark');
+
+    // Parse markdown-ish content (bold, code, links)
+    const formattedContent = formatMessage(content);
+
+    if (role === 'user') {
+        const div = document.createElement('div');
+        div.className = 'flex gap-2.5 justify-end animate-fade-in-up';
+        div.innerHTML = `
+            <div class="bg-gradient-to-br from-[#155C1B] to-[#2A6726] text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%]">
+                <p class="text-sm leading-relaxed">${escapeHtml(formattedContent)}</p>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-sm flex-shrink-0 mt-0.5">
+                👤
+            </div>
+        `;
+        container.appendChild(div);
+    } else {
+        const div = document.createElement('div');
+        div.className = 'flex gap-2.5 animate-fade-in-up';
+        div.innerHTML = `
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center text-sm flex-shrink-0 mt-0.5">
+                🤖
+            </div>
+            <div class="bg-gray-100 dark:bg-[#334155] rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+                <div class="text-sm text-gray-800 dark:text-gray-100 leading-relaxed prose prose-sm max-w-none">
+                    ${formattedContent}
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    scrollToBottom();
+
+    // Increment unread if chat is closed
+    if (!ChatState.isOpen && role === 'assistant') {
+        ChatState.unreadCount++;
+        const badge = document.getElementById('chat-badge');
+        badge.textContent = ChatState.unreadCount;
+        badge.classList.remove('hidden');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// FORMAT MESSAGE (Simple Markdown)
+// ═══════════════════════════════════════════════════════════
+function formatMessage(content) {
+    if (!content) return '';
+
+    return content
+        // Escape HTML first
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        // Bold: **text**
+        .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+        // Italic: *text*
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        // Code blocks: ```code```
+        .replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-800 text-green-400 rounded-lg px-3 py-2 text-xs overflow-x-auto my-2"><code>$1</code></pre>')
+        // Inline code: `code`
+        .replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-700 rounded px-1.5 py-0.5 text-xs font-mono">$1</code>')
+        // Links: [text](url)
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" class="text-[#155C1B] underline hover:text-[#73AA0F]">$1</a>')
+        // Line breaks
+        .replace(/\n/g, '<br>')
+        // Lists
+        .replace(/- (.+)/g, '<span class="block pl-2">• $1</span>');
+}
+
+// ═══════════════════════════════════════════════════════════
+// ESCAPE HTML
+// ═══════════════════════════════════════════════════════════
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ═══════════════════════════════════════════════════════════
+// SET LOADING STATE
+// ═══════════════════════════════════════════════════════════
+function setLoading(loading) {
+    ChatState.isLoading = loading;
+    const btn = document.getElementById('chat-send-btn');
+    const sendIcon = document.getElementById('chat-send-icon');
+    const loadIcon = document.getElementById('chat-loading-icon');
+    const typing = document.getElementById('chat-typing');
+    const input = document.getElementById('chat-input');
+
+    if (loading) {
+        btn.disabled = true;
+        sendIcon.classList.add('hidden');
+        loadIcon.classList.remove('hidden');
+        typing.classList.remove('hidden');
+        input.disabled = true;
+        scrollToBottom();
+    } else {
+        btn.disabled = false;
+        sendIcon.classList.remove('hidden');
+        loadIcon.classList.add('hidden');
+        typing.classList.add('hidden');
+        input.disabled = false;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// UPDATE STATUS INDICATOR
+// ═══════════════════════════════════════════════════════════
+function updateStatus(status, text) {
+    const dot = document.getElementById('chat-status-dot');
+    const label = document.getElementById('chat-status-text');
+
+    if (!dot || !label) return;
+
+    dot.className = 'w-2 h-2 rounded-full';
+
+    switch(status) {
+        case 'online':
+            dot.classList.add('bg-green-400', 'animate-pulse');
+            label.textContent = 'Online';
+            label.className = 'text-xs text-green-100';
+            break;
+        case 'loading':
+            dot.classList.add('bg-yellow-400');
+            label.textContent = 'Thinking...';
+            label.className = 'text-xs text-yellow-100';
+            break;
+        case 'error':
+            dot.classList.add('bg-red-400');
+            label.textContent = 'Error';
+            label.className = 'text-xs text-red-100';
+            break;
+        case 'fallback':
+            dot.classList.add('bg-orange-400');
+            label.textContent = text;
+            label.className = 'text-xs text-orange-100';
+            break;
+        default:
+            dot.classList.add('bg-green-400', 'animate-pulse');
+            label.textContent = 'Online';
+            label.className = 'text-xs text-green-100';
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SEND SUGGESTION
+// ═══════════════════════════════════════════════════════════
+function sendSuggestion(text) {
+    document.getElementById('chat-input').value = text;
+    sendMessage();
+}
+
+// ═══════════════════════════════════════════════════════════
+// HANDLE KEYBOARD
+// ═══════════════════════════════════════════════════════════
+function handleChatKeydown(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUTO RESIZE TEXTAREA
+// ═══════════════════════════════════════════════════════════
+function autoResizeTextarea(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 128) + 'px';
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCROLL TO BOTTOM
+// ═══════════════════════════════════════════════════════════
+function scrollToBottom() {
+    const container = document.getElementById('chat-messages');
+    if (container) {
+        setTimeout(() => {
+            container.scrollTop = container.scrollHeight;
+        }, 50);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CLOSE CHAT ON OUTSIDE CLICK (mobile)
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('click', function(e) {
+    const window = document.getElementById('chat-window');
+    const btn = document.getElementById('chat-toggle-btn');
+    if (ChatState.isOpen &&
+        !window.contains(e.target) &&
+        !btn.contains(e.target)) {
+        // Don't auto-close, user controls it
+    }
+});
+</script>

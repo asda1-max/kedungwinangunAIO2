@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajukan Surat - Desa Kedungwinangun</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #f5f5f4;
+            --surface: #ffffff;
+            --border: #e7e5e4;
+            --text: #1c1917;
+            --text-muted: #78716c;
+            --primary: #166534;
+            --primary-hover: #14532d;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        .navbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; text-decoration: none; color: var(--text); }
+        .nav-brand .icon { width: 32px; height: 32px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .nav-brand .icon svg { width: 18px; height: 18px; fill: white; }
+        .btn-ghost { padding: 8px 14px; background: transparent; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--text-muted); text-decoration: none; }
+        .btn-ghost:hover { border-color: var(--text-muted); }
+        .main { max-width: 700px; margin: 0 auto; padding: 32px 24px; }
+        .page-header { margin-bottom: 28px; }
+        .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: var(--text-muted); font-size: 14px; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; }
+        .form-group { margin-bottom: 22px; }
+        label { display: block; font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+        label .required { color: #dc2626; }
+        label .hint { font-weight: 400; color: var(--text-muted); font-size: 13px; }
+        input, textarea, select {
+            width: 100%;
+            padding: 13px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.15s ease;
+        }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(22,101,52,0.1); }
+        textarea { min-height: 100px; resize: vertical; }
+        .surat-grid { display: grid; gap: 14px; margin-bottom: 24px; }
+        .surat-option {
+            padding: 16px 18px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .surat-option:hover { border-color: var(--primary); background: #f0fdf4; }
+        .surat-option input { display: none; }
+        .surat-option.selected { border-color: var(--primary); background: #dcfce7; }
+        .surat-option .title { font-weight: 600; font-size: 15px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+        .surat-option .desc { font-size: 13px; color: var(--text-muted); }
+        .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+        @media (min-width: 480px) { .btn-group { flex-direction: row; } }
+        .btn { padding: 14px 24px; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { background: var(--bg); color: var(--text-muted); border: 2px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--text-muted); }
+        .dynamic-form { display: none; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); }
+        .dynamic-form.active { display: block; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('public.index') }}" class="nav-brand">
+            <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 3L4 9v12h16V9l-8-6zm6 16h-3v-5h-6v5H6v-9.5l6-4.5 6 4.5V19z"/></svg></div>
+            Kedungwinangun
+        </a>
+        <a href="{{ url_for('user.dashboard') }}" class="btn-ghost">← Kembali</a>
+    </nav>
+
+    <main class="main">
+        <div class="page-header">
+            <h1>Ajukan Permohonan Surat</h1>
+            <p>Pilih jenis surat yang dibutuhkan dan isi formnya</p>
+        </div>
+
+        <div class="card">
+            <form method="POST" id="suratForm">
+                <div class="form-group">
+                    <label>Jenis Surat <span class="required">*</span></label>
+                    <div class="surat-grid">
+                        {% for surat in jenis_surat %}
+                        <label class="surat-option" data-id="{{ surat.id }}" data-kode="{{ surat.kode }}">
+                            <input type="radio" name="jenis_surat_id" value="{{ surat.id }}" required>
+                            <div class="title">{{ surat.nama }}</div>
+                            <div class="desc">{{ surat.deskripsi }}</div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Dynamic form fields will be inserted here -->
+                <div class="dynamic-form" id="dynamicForm"></div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Ajukan Permohonan</button>
+                    <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary">Batal</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const suratOptions = document.querySelectorAll('.surat-option');
+        const dynamicForm = document.getElementById('dynamicForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Form templates based on surat type
+        const formTemplates = {
+            'SKU': `
+                <h3 style="font-size: 16px; margin-bottom: 16px;">📝 Data Usaha</h3>
+                <div class="form-group"><label>Nama Usaha</label><input type="text" name="nama_usaha" required></div>
+                <div class="form-group"><label>Jenis Usaha</label><input type="text" name="jenis_usaha" placeholder="Contoh: Toko Kelontong" required></div>
+                <div class="form-group"><label>Alamat Usaha</label><textarea name="alamat_usaha" required></textarea></div>
+                <div class="form-group"><label>No. SIUP/NIB (jika ada)</label><input type="text" name="no_siup"></div>
+            `,
+            'SKTM': `
+                <h3 style="font-size: 16px; margin-bottom: 16px;">📝 Data Keluarga</h3>
+                <div class="form-group"><label>Jumlah Tanggungan</label><input type="number" name="jumlah_tanggungan" required></div>
+                <div class="form-group"><label>Pendapatan Per Bulan</label><input type="text" name="pendapatan" placeholder="Contoh: Rp 500.000" required></div>
+                <div class="form-group"><label>Keperluan</label><textarea name="keperluan" placeholder="Contoh: Untuk biaya sekolah anak" required></textarea></div>
+            `,
+            'SKCK': `
+                <h3 style="font-size: 16px; margin-bottom: 16px;">📝 Data SKCK</h3>
+                <div class="form-group"><label>Keperluan</label><input type="text" name="keperluan" placeholder="Contoh: Melamar pekerjaan di PT X" required></div>
+            `,
+            'DOMISILI': `
+                <h3 style="font-size: 16px; margin-bottom: 16px;">📝 Data Domisili</h3>
+                <div class="form-group"><label>Lama Tinggal (Tahun)</label><input type="text" name="lama_tinggal" required></div>
+                <div class="form-group"><label>Keperluan</label><textarea name="keperluan" required></textarea></div>
+            `,
+            'BELUM_NIKAH': `
+                <h3 style="font-size: 16px; margin-bottom: 16px;">📝 Data</h3>
+                <div class="form-group"><label>Tempat Lahir</label><input type="text" name="tempat_lahir" required></div>
+                <div class="form-group"><label>Tanggal Lahir</label><input type="date" name="tanggal_lahir" required></div>
+                <div class="form-group"><label>Keperluan</label><textarea name="keperluan" placeholder="Contoh: Untuk pengurusan passport" required></textarea></div>
+            `,
+            'LAHIR': `
+                <h3 style="font-size: 16px; margin-bottom: 16px;">📝 Data Kelahiran</h3>
+                <div class="form-group"><label>Nama Bayi</label><input type="text" name="nama_bayi" required></div>
+                <div class="form-group"><label>Jenis Kelamin</label><select name="jenis_kelamin" required><option value="">Pilih</option><option>Laki-laki</option><option>Perempuan</option></select></div>
+                <div class="form-group"><label>Tanggal Lahir</label><input type="datetime-local" name="tanggal_lahir" required></div>
+                <div class="form-group"><label>Tempat Lahir</label><input type="text" name="tempat_lahir" required></div>
+                <div class="form-group"><label>Nama Ayah</label><input type="text" name="nama_ayah" required></div>
+                <div class="form-group"><label>Nama Ibu</label><input type="text" name="nama_ibu" required></div>
+            `,
+            'MATI': `
+                <h3 style="font-size: 16px; margin-bottom: 16px;">📝 Data Kematian</h3>
+                <div class="form-group"><label>Nama Almarhum/Almarhumah</label><input type="text" name="nama_almarhum" required></div>
+                <div class="form-group"><label>NIK Almarhum</label><input type="text" name="nik_almarhum" maxlength="16" required></div>
+                <div class="form-group"><label>Tanggal Meninggal</label><input type="date" name="tanggal_meninggal" required></div>
+                <div class="form-group"><label>Penyebab</label><input type="text" name="penyebab" required></div>
+                <div class="form-group"><label>Tempat Meninggal</label><input type="text" name="tempat_meninggal" required></div>
+            `
+        };
+
+        suratOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove selected from all
+                suratOptions.forEach(o => o.classList.remove('selected'));
+                // Add selected to clicked
+                this.classList.add('selected');
+                // Select the radio
+                this.querySelector('input').checked = true;
+
+                // Show dynamic form
+                const kode = this.dataset.kode;
+                if (formTemplates[kode]) {
+                    dynamicForm.innerHTML = formTemplates[kode];
+                    dynamicForm.classList.add('active');
+                } else {
+                    dynamicForm.innerHTML = '<div class="form-group"><label>Keterangan</label><textarea name="keterangan" placeholder="Jelaskan keperluan Anda..."></textarea></div>';
+                    dynamicForm.classList.add('active');
+                }
+
+                // Enable submit
+                submitBtn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
