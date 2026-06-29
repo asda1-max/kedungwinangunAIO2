@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galeri — {{ desa.nama }}</title>
+    <title>Galeri — {{ site_name or desa.nama }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'desa-dark': '#155C1B',
-                        'desa-mid': '#2A6726',
-                        'desa-light': '#73AA0F',
-                        'desa-muted': '#5B8A4E',
+                        'desa-dark': '#155C1B', 'desa-mid': '#2A6726',
+                        'desa-light': '#73AA0F', 'desa-muted': '#5B8A4E',
                     },
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                 }
@@ -23,163 +22,91 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f4f7f2; }
+    </style>
 </head>
-<body class="font-sans m-0 bg-[#f4f7f2] text-gray-800">
-    <div class="w-full max-w-[480px] md:max-w-none mx-auto bg-white md:bg-transparent shadow-[0_0_30px_rgba(0,0,0,0.45)] md:shadow-none min-h-screen overflow-x-hidden">
+<body>
+    <!-- NAVBAR (using shared partial) -->
+    {% include 'partials/navbar.html' %}
 
-        <!-- NAVBAR -->
-        <nav class="flex items-center gap-3 px-4 py-3 md:px-[5%] md:py-4 bg-[#0F5B21] text-white text-[11px] md:text-base font-semibold">
-            <img src="{{ url_for('static', filename='images/kebumen.png') }}" alt="Logo Desa" class="w-8 h-10 md:w-10 md:h-[50px] object-contain">
-            <div class="flex gap-2 md:gap-6 ml-auto">
-                {% for link in nav_links %}
-                <a href="{{ link.href }}" class="nav-a {% if link.active %}nav-active{% endif %} text-gray-200 no-underline transition-colors duration-300">
-                    {{ link.label }}
-                </a>
-                {% endfor %}
-            </div>
-        </nav>
-
-        <!-- HERO -->
-        <div class="relative overflow-hidden flex flex-col justify-center px-5 py-16 md:px-[5%] md:py-24 md:min-h-[40vh] bg-cover bg-center text-white"
-            style="background-image: linear-gradient(to bottom, rgba(15,91,33,0.7), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80');">
-            <div class="relative z-10">
-                <span class="inline-block bg-[#73AA0F] text-white text-[10px] md:text-sm font-bold px-3 py-1 rounded-full mb-4">📷 Galeri</span>
-                <h1 class="text-2xl md:text-5xl font-extrabold leading-tight mb-3">Galeri {{ desa.nama }}</h1>
-                <p class="text-sm md:text-xl text-gray-200 max-w-lg">Kumpulan foto kegiatan dan potensi desa yang telah terdokumentasi.</p>
-            </div>
+    <!-- HERO -->
+    <div class="relative overflow-hidden flex flex-col justify-center px-5 py-16 md:px-[5%] md:py-24 md:min-h-[40vh] bg-cover bg-center text-white"
+        style="background-image: linear-gradient(to bottom, rgba(15,91,33,0.7), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80');">
+        <div class="relative z-10">
+            <span class="inline-block bg-[#73AA0F] text-white text-[10px] md:text-sm font-bold px-3 py-1 rounded-full mb-4">📷 Galeri</span>
+            <h1 class="text-2xl md:text-5xl font-extrabold leading-tight mb-3">Galeri {{ site_name or 'Desa' }}</h1>
+            <p class="text-sm md:text-xl text-gray-200 max-w-lg">Kumpulan foto kegiatan dan potensi desa yang telah terdokumentasi.</p>
         </div>
+    </div>
 
-        <!-- CONTENT -->
-        <div class="orb-tr orb-bl relative overflow-hidden px-6 py-10 md:w-[94%] md:max-w-[1400px] md:mx-auto md:mt-10 md:mb-14 md:px-[4%] md:py-14 md:bg-gradient-to-br md:from-[#f5fdf0] md:via-white md:to-[#f0fdf4] md:rounded-[28px] md:shadow-[0_4px_6px_rgba(0,0,0,0.02),0_20px_60px_rgba(21,92,27,0.07)] md:border md:border-[rgba(21,92,27,0.07)]">
+    <!-- CONTENT -->
+    <div class="px-6 py-10 md:px-[5%] md:py-14">
+        <h2 class="text-[#155C1B] text-2xl md:text-3xl font-extrabold mb-8 flex items-center gap-3">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            Galeri Foto
+            <span class="text-lg md:text-2xl font-normal text-gray-400">({{ foto_list|length }})</span>
+        </h2>
 
-            <!-- Decorative -->
-            <span class="deco-corner hidden md:block" aria-hidden="true"></span>
-
-            <!-- Breadcrumb -->
-            <div class="flex items-center gap-2 text-xs text-gray-400 mb-8">
-                <a href="{{ url_for('public.index') }}" class="hover:text-[#155C1B] transition-colors">Beranda</a>
-                <span>/</span>
-                <span class="text-[#155C1B] font-medium">Galeri</span>
+        {% if foto_list %}
+        <!-- Masonry-style Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {% for foto in foto_list %}
+            <div class="reveal group relative overflow-hidden rounded-xl cursor-pointer aspect-square"
+                 style="transition-delay: {{ loop.index * 0.03 }}s"
+                 onclick="openLightbox('{{ foto.gambar_url }}', '{{ foto.judul }}')">
+                <img src="{{ foto.gambar_url }}"
+                     alt="{{ foto.gambar_alt or foto.judul }}"
+                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div class="absolute bottom-3 left-3 right-3">
+                        <p class="text-white text-sm font-semibold leading-tight">{{ foto.judul }}</p>
+                        <span class="inline-block mt-1 text-white/80 text-xs bg-white/20 px-2 py-0.5 rounded-full">{{ foto.kategori }}</span>
+                    </div>
+                    <div class="absolute top-3 right-3">
+                        <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15m0 0a9 9 0 1 0-18 0 9 9 0 0 0 18 0ZM9 9l6 6M15 9l-6 6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <h2 class="title-underline relative inline-flex items-center gap-3 text-[#155C1B] text-2xl md:text-4xl font-extrabold mb-10">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-24 h-24 rounded-full bg-[#f0fdf4] flex items-center justify-center mb-6">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#155C1B" stroke-width="1.5">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                     <circle cx="8.5" cy="8.5" r="1.5"/>
                     <polyline points="21 15 16 10 5 21"/>
                 </svg>
-                Galeri Foto
-                <span class="text-lg md:text-2xl font-normal text-gray-400">({{ foto_list|length }})</span>
-            </h2>
-
-            {% if foto_list %}
-            <!-- Masonry-style Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {% for foto in foto_list %}
-                <div class="reveal group relative overflow-hidden rounded-xl cursor-pointer aspect-square"
-                     style="transition-delay: {{ loop.index * 0.03 }}s"
-                     onclick="openLightbox('{{ foto.gambar_url }}', '{{ foto.judul }}')">
-                    <img src="{{ foto.gambar_url }}"
-                         alt="{{ foto.gambar_alt or foto.judul }}"
-                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div class="absolute bottom-3 left-3 right-3">
-                            <p class="text-white text-sm font-semibold leading-tight">{{ foto.judul }}</p>
-                            <span class="inline-block mt-1 text-white/80 text-xs bg-white/20 px-2 py-0.5 rounded-full">{{ foto.kategori }}</span>
-                        </div>
-                        <div class="absolute top-3 right-3">
-                            <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15m0 0a9 9 0 1 0-18 0 9 9 0 0 0 18 0ZM9 9l6 6M15 9l-6 6"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
             </div>
-            {% else %}
-            <!-- Empty State -->
-            <div class="flex flex-col items-center justify-center py-20 text-center">
-                <div class="w-24 h-24 rounded-full bg-[#f0fdf4] flex items-center justify-center mb-6">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#155C1B" stroke-width="1.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                </div>
-                <h3 class="text-[#155C1B] text-xl font-bold mb-3">Galeri Belum Tersedia</h3>
-                <p class="text-gray-500 text-sm max-w-md">
-                    Foto galeri akan segera ditambahkan. Pantau terus untuk melihat dokumentasi kegiatan dan potensi desa kami.
-                </p>
-            </div>
-            {% endif %}
-
-            <!-- Back Button -->
-            <div class="mt-12 pt-8 border-t border-gray-100">
-                <a href="{{ url_for('public.index') }}" class="news-readmore">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transform: rotate(180deg)">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
-                    Kembali ke Beranda
-                </a>
-            </div>
+            <h3 class="text-[#155C1B] text-xl font-bold mb-3">Galeri Belum Tersedia</h3>
+            <p class="text-gray-500 text-sm max-w-md">
+                Foto galeri akan segera ditambahkan. Pantau terus untuk melihat dokumentasi kegiatan dan potensi desa kami.
+            </p>
         </div>
+        {% endif %}
+    </div>
 
-        <!-- Lightbox Modal -->
-        <div id="lightbox" class="fixed inset-0 bg-black/95 z-[200] hidden items-center justify-center p-4" onclick="closeLightbox()">
-            <button class="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 transition-colors z-10" onclick="event.stopPropagation(); closeLightbox();">×</button>
-            <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[85vh] object-contain rounded-lg" onclick="event.stopPropagation()">
-            <div class="absolute bottom-6 left-0 right-0 text-center">
-                <p id="lightbox-caption" class="text-white text-lg font-semibold"></p>
-            </div>
+    <!-- FOOTER (using shared partial) -->
+    {% include 'partials/footer.html' %}
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 bg-black/95 z-[200] hidden items-center justify-center p-4" onclick="closeLightbox()">
+        <button class="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 transition-colors z-10" onclick="event.stopPropagation(); closeLightbox();">×</button>
+        <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[85vh] object-contain rounded-lg" onclick="event.stopPropagation()">
+        <div class="absolute bottom-6 left-0 right-0 text-center">
+            <p id="lightbox-caption" class="text-white text-lg font-semibold"></p>
         </div>
-
-        <!-- FOOTER -->
-        <footer class="bg-[#0F5B21] text-white">
-            <div class="max-w-[1600px] mx-auto px-6 py-12 md:px-[5%]">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16 mb-10">
-                    <!-- Brand -->
-                    <div>
-                        <div class="flex items-center gap-3 mb-5">
-                            <img src="{{ url_for('static', filename='images/kebumen.png') }}" alt="Logo" class="w-10 h-12 md:w-12 md:h-14">
-                            <div>
-                                <h3 class="font-bold text-lg md:text-xl">{{ desa.nama }}</h3>
-                                <p class="text-green-300 text-xs md:text-sm">{{ desa.tagline }}</p>
-                            </div>
-                        </div>
-                        <p class="text-green-200 text-sm leading-relaxed">{{ desa.deskripsi }}</p>
-                    </div>
-
-                    <!-- Quick Links -->
-                    <div>
-                        <h4 class="font-bold mb-5 text-green-300 uppercase text-xs tracking-wider">Navigasi</h4>
-                        <ul class="space-y-3">
-                            <li><a href="{{ url_for('public.index') }}" class="text-green-100 hover:text-white transition-colors text-sm flex items-center gap-2"><span class="text-green-400">›</span> Beranda</a></li>
-                            <li><a href="{{ url_for('public.layanan') }}" class="text-green-100 hover:text-white transition-colors text-sm flex items-center gap-2"><span class="text-green-400">›</span> Layanan Surat</a></li>
-                            <li><a href="{{ url_for('public.berita') }}" class="text-green-100 hover:text-white transition-colors text-sm flex items-center gap-2"><span class="text-green-400">›</span> Berita</a></li>
-                            <li><a href="{{ url_for('public.galeri') }}" class="text-green-100 hover:text-white transition-colors text-sm flex items-center gap-2"><span class="text-green-400">›</span> Galeri</a></li>
-                            <li><a href="{{ url_for('public.kontak') }}" class="text-green-100 hover:text-white transition-colors text-sm flex items-center gap-2"><span class="text-green-400">›</span> Kontak</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Contact Info -->
-                    <div>
-                        <h4 class="font-bold mb-5 text-green-300 uppercase text-xs tracking-wider">Kontak</h4>
-                        <p class="text-green-100 text-sm">Hubungi kami untuk informasi lebih lanjut.</p>
-                        <a href="{{ url_for('public.kontak') }}" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-semibold transition-colors">
-                            Lihat Kontak Lengkap
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Copyright -->
-                <div class="pt-6 border-t border-green-800 text-center">
-                    <p class="text-green-300 text-xs">© {{ tahun }} {{ desa.nama }}. Hak Cipta Dilindungi.</p>
-                </div>
-            </div>
-        </footer>
     </div>
 
     <script>

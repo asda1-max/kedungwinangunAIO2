@@ -104,6 +104,9 @@ def berita():
         berita_list=berita_list,
         show_views=show_views,
         show_tanggal=show_tanggal,
+        site_name=desa_info['nama'],
+        site_tagline=desa_info['tagline'],
+        site_description=desa_info['deskripsi'],
     )
 
 
@@ -124,6 +127,9 @@ def detail_berita(berita_id):
         artikel=artikel,
         show_views=show_views,
         show_tanggal=show_tanggal,
+        site_name=desa_info['nama'],
+        site_tagline=desa_info['tagline'],
+        site_description=desa_info['deskripsi'],
     )
 
 
@@ -163,6 +169,9 @@ def layanan():
         desa=desa_info,
         nav_links=[{**n, "active": n["label"] == "Layanan"} for n in NAV_LINKS],
         jenis_surat=jenis_surat,
+        site_name=desa_info['nama'],
+        site_tagline=desa_info['tagline'],
+        site_description=desa_info['deskripsi'],
     )
 
 

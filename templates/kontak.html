@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kontak Kami — {{ desa.nama }}</title>
+    <title>Kontak Kami — {{ site_name or desa.nama }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'desa-dark': '#155C1B',
-                        'desa-mid': '#2A6726',
-                        'desa-light': '#73AA0F',
-                        'desa-muted': '#5B8A4E',
+                        'desa-dark': '#155C1B', 'desa-mid': '#2A6726',
+                        'desa-light': '#73AA0F', 'desa-muted': '#5B8A4E',
                     },
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                 }
@@ -23,229 +22,115 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f4f7f2; }
+    </style>
 </head>
-<body class="font-sans m-0 bg-[#f4f7f2] text-gray-800">
-    <div class="w-full max-w-[480px] md:max-w-none mx-auto bg-white md:bg-transparent shadow-[0_0_30px_rgba(0,0,0,0.45)] md:shadow-none min-h-screen overflow-x-hidden">
+<body>
+    <!-- NAVBAR (using shared partial) -->
+    {% include 'partials/navbar.html' %}
 
-        <!-- NAVBAR -->
-        <nav class="flex items-center gap-3 px-4 py-3 md:px-[5%] md:py-4 bg-[#0F5B21] text-white text-[11px] md:text-base font-semibold">
-            <img src="{{ url_for('static', filename='images/kebumen.png') }}" alt="Logo Desa" class="w-8 h-10 md:w-10 md:h-[50px] object-contain">
-            <div class="flex gap-2 md:gap-6 ml-auto">
-                {% for link in nav_links %}
-                <a href="{{ link.href }}" class="nav-a {% if link.active %}nav-active{% endif %} text-gray-200 no-underline transition-colors duration-300">
-                    {{ link.label }}
-                </a>
-                {% endfor %}
-            </div>
-        </nav>
-
-        <!-- HERO -->
-        <div class="relative overflow-hidden flex flex-col justify-center px-5 py-16 md:px-[5%] md:py-24 md:min-h-[40vh] bg-cover bg-center text-white"
-            style="background-image: linear-gradient(to bottom, rgba(15,91,33,0.7), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80');">
-            <div class="relative z-10">
-                <span class="inline-block bg-[#73AA0F] text-white text-[10px] md:text-sm font-bold px-3 py-1 rounded-full mb-4">📍 Hubungi Kami</span>
-                <h1 class="text-2xl md:text-5xl font-extrabold leading-tight mb-3">Informasi Kontak</h1>
-                <p class="text-sm md:text-xl text-gray-200 max-w-lg">Jangan ragu untuk menghubungi kami jika ada pertanyaan atau butuh bantuan.</p>
-            </div>
+    <!-- HERO -->
+    <div class="relative overflow-hidden flex flex-col justify-center px-5 py-16 md:px-[5%] md:py-24 md:min-h-[40vh] bg-cover bg-center text-white"
+        style="background-image: linear-gradient(to bottom, rgba(15,91,33,0.7), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80');">
+        <div class="relative z-10">
+            <span class="inline-block bg-[#73AA0F] text-white text-[10px] md:text-sm font-bold px-3 py-1 rounded-full mb-4">📍 Hubungi Kami</span>
+            <h1 class="text-2xl md:text-5xl font-extrabold leading-tight mb-3">Informasi Kontak</h1>
+            <p class="text-sm md:text-xl text-gray-200 max-w-lg">Jangan ragu untuk menghubungi kami jika ada pertanyaan atau butuh bantuan.</p>
         </div>
-
-        <!-- CONTENT -->
-        <div class="orb-tr orb-bl relative overflow-hidden px-6 py-10 md:w-[94%] md:max-w-[1200px] md:mx-auto md:mt-10 md:mb-14 md:px-[4%] md:py-14 md:bg-gradient-to-br md:from-[#f5fdf0] md:via-white md:to-[#f0fdf4] md:rounded-[28px] md:shadow-[0_4px_6px_rgba(0,0,0,0.02),0_20px_60px_rgba(21,92,27,0.07)] md:border md:border-[rgba(21,92,27,0.07)]">
-
-            <!-- Decorative -->
-            <span class="deco-corner hidden md:block" aria-hidden="true"></span>
-
-            <!-- Breadcrumb -->
-            <div class="flex items-center gap-2 text-xs text-gray-400 mb-8">
-                <a href="{{ url_for('public.index') }}" class="hover:text-[#155C1B] transition-colors">Beranda</a>
-                <span>/</span>
-                <span class="text-[#155C1B] font-medium">Kontak</span>
-            </div>
-
-            <h2 class="title-underline relative inline-flex items-center gap-3 text-[#155C1B] text-2xl md:text-4xl font-extrabold mb-10">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"/>
-                </svg>
-                Hubungi Kami
-            </h2>
-
-            <!-- Contact Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-
-                <!-- WhatsApp -->
-                <a href="{% if kontak.whatsapp %}https://wa.me/{{ kontak.whatsapp }}{% else %}#{% endif %}" class="group relative flex items-start gap-4 p-6 bg-gradient-to-br from-white to-[#f0fdf4] rounded-2xl border border-[rgba(21,92,27,0.08)] shadow-[0_4px_15px_rgba(21,92,27,0.05)] hover:shadow-[0_8px_25px_rgba(21,92,27,0.12)] hover:border-[rgba(21,92,27,0.15)] transition-all duration-300 hover:-translate-y-1">
-                    <div class="w-14 h-14 rounded-xl bg-[#25D366]/10 flex items-center justify-center shrink-0 group-hover:bg-[#25D366] transition-colors duration-300">
-                        <svg class="w-7 h-7 text-[#25D366] group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-[#155C1B] font-bold text-lg mb-1">WhatsApp</h3>
-                        <p class="text-gray-600 text-sm">Chat langsung dengan kami</p>
-                        <p class="text-[#25D366] font-semibold mt-2">{% if kontak.whatsapp %}+{{ kontak.whatsapp }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
-                    </div>
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-[#155C1B] transition-colors self-center" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </a>
-
-                <!-- Telepon -->
-                <a href="{% if kontak.telepon %}tel:{{ kontak.telepon }}{% else %}#{% endif %}" class="group relative flex items-start gap-4 p-6 bg-gradient-to-br from-white to-[#f0fdf4] rounded-2xl border border-[rgba(21,92,27,0.08)] shadow-[0_4px_15px_rgba(21,92,27,0.05)] hover:shadow-[0_8px_25px_rgba(21,92,27,0.12)] hover:border-[rgba(21,92,27,0.15)] transition-all duration-300 hover:-translate-y-1">
-                    <div class="w-14 h-14 rounded-xl bg-[#155C1B]/10 flex items-center justify-center shrink-0 group-hover:bg-[#155C1B] transition-colors duration-300">
-                        <svg class="w-7 h-7 text-[#155C1B] group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-[#155C1B] font-bold text-lg mb-1">Telepon</h3>
-                        <p class="text-gray-600 text-sm">Hubungi via telepon langsung</p>
-                        <p class="text-[#155C1B] font-semibold mt-2">{% if kontak.telepon %}{{ kontak.telepon }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
-                    </div>
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-[#155C1B] transition-colors self-center" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </a>
-
-                <!-- Email -->
-                <a href="{% if kontak.email %}mailto:{{ kontak.email }}{% else %}#{% endif %}" class="group relative flex items-start gap-4 p-6 bg-gradient-to-br from-white to-[#f0fdf4] rounded-2xl border border-[rgba(21,92,27,0.08)] shadow-[0_4px_15px_rgba(21,92,27,0.05)] hover:shadow-[0_8px_25px_rgba(21,92,27,0.12)] hover:border-[rgba(21,92,27,0.15)] transition-all duration-300 hover:-translate-y-1">
-                    <div class="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-blue-500 transition-colors duration-300">
-                        <svg class="w-7 h-7 text-blue-500 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                            <polyline points="22,6 12,13 2,6"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-[#155C1B] font-bold text-lg mb-1">Email</h3>
-                        <p class="text-gray-600 text-sm">Kirim email kepada kami</p>
-                        <p class="text-blue-600 font-semibold mt-2 break-all">{% if kontak.email %}{{ kontak.email }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
-                    </div>
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-[#155C1B] transition-colors self-center" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </a>
-
-                <!-- Alamat -->
-                <div class="flex items-start gap-4 p-6 bg-gradient-to-br from-white to-[#f0fdf4] rounded-2xl border border-[rgba(21,92,27,0.08)] shadow-[0_4px_15px_rgba(21,92,27,0.05)]">
-                    <div class="w-14 h-14 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
-                        <svg class="w-7 h-7 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                            <circle cx="12" cy="10" r="3"/>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-[#155C1B] font-bold text-lg mb-1">Alamat</h3>
-                        <p class="text-gray-600 text-sm">Kantor Desa Kedungwinangun</p>
-                        <p class="text-gray-700 font-medium mt-2">{% if kontak.alamat %}{{ kontak.alamat }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Social Media Section -->
-            <h3 class="text-[#155C1B] text-xl font-bold mb-6 flex items-center gap-2">
-                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-                </svg>
-                Sosial Media
-            </h3>
-            <div class="flex flex-wrap gap-4 mb-10">
-                {% if kontak.facebook %}
-                <a href="https://facebook.com/{{ kontak.facebook }}" target="_blank" class="flex items-center gap-3 px-5 py-3 bg-[#1877F2] text-white rounded-xl font-semibold hover:bg-[#166fe5] transition-colors">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    Facebook
-                </a>
-                {% endif %}
-                {% if kontak.instagram %}
-                <a href="https://instagram.com/{{ kontak.instagram }}" target="_blank" class="flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white rounded-xl font-semibold hover:opacity-90 transition-opacity">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                    Instagram
-                </a>
-                {% endif %}
-                {% if kontak.twitter %}
-                <a href="https://twitter.com/{{ kontak.twitter }}" target="_blank" class="flex items-center gap-3 px-5 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    Twitter/X
-                </a>
-                {% endif %}
-                {% if not kontak.facebook and not kontak.instagram and not kontak.twitter %}
-                <div class="w-full text-center py-6 bg-gray-50 rounded-xl">
-                    <p class="text-gray-500">Sosial media belum tersedia</p>
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Map Section -->
-            <h3 class="text-[#155C1B] text-xl font-bold mb-6 flex items-center gap-2">
-                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                </svg>
-                Lokasi Kantor
-            </h3>
-            <div class="rounded-2xl overflow-hidden h-[300px] md:h-[400px] border border-[rgba(21,92,27,0.1)]">
-                <iframe src="{{ desa.maps_embed_url }}" class="w-full h-full" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-            </div>
-
-            <!-- Back Button -->
-            <div class="mt-10 pt-8 border-t border-gray-100">
-                <a href="{{ url_for('public.index') }}" class="news-readmore">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transform: rotate(180deg)">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
-                    Kembali ke Beranda
-                </a>
-            </div>
-        </div>
-
-        <!-- FOOTER -->
-        <footer class="bg-[#0F5B21] text-white">
-            <div class="max-w-[1600px] mx-auto px-6 py-12 md:px-[5%]">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
-                    <!-- Brand -->
-                    <div>
-                        <div class="flex items-center gap-3 mb-4">
-                            <img src="{{ url_for('static', filename='images/kebumen.png') }}" alt="Logo" class="w-10 h-12">
-                            <div>
-                                <h3 class="font-bold text-lg">{{ desa.nama }}</h3>
-                                <p class="text-green-300 text-xs">{{ desa.tagline }}</p>
-                            </div>
-                        </div>
-                        <p class="text-green-200 text-sm leading-relaxed">{{ desa.deskripsi }}</p>
-                    </div>
-                    <!-- Quick Links -->
-                    <div>
-                        <h4 class="font-bold mb-4 text-green-300 uppercase text-xs tracking-wider">Navigasi</h4>
-                        <ul class="space-y-2">
-                            <li><a href="{{ url_for('public.index') }}" class="text-green-100 hover:text-white transition-colors text-sm">Beranda</a></li>
-                            <li><a href="{{ url_for('public.layanan') }}" class="text-green-100 hover:text-white transition-colors text-sm">Layanan Surat</a></li>
-                            <li><a href="{{ url_for('public.berita') }}" class="text-green-100 hover:text-white transition-colors text-sm">Berita</a></li>
-                            <li><a href="{{ url_for('public.kontak') }}" class="text-green-100 hover:text-white transition-colors text-sm">Kontak</a></li>
-                        </ul>
-                    </div>
-                    <!-- Contact -->
-                    <div>
-                        <h4 class="font-bold mb-4 text-green-300 uppercase text-xs tracking-wider">Kontak</h4>
-                        <ul class="space-y-3 text-sm text-green-100">
-                            {% if kontak.alamat %}
-                            <li class="flex items-start gap-2">
-                                <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                {{ kontak.alamat }}
-                            </li>
-                            {% endif %}
-                            {% if kontak.telepon %}
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                {{ kontak.telepon }}
-                            </li>
-                            {% endif %}
-                            {% if kontak.whatsapp %}
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                                +{{ kontak.whatsapp }}
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                </div>
-                <!-- Copyright -->
-                <div class="mt-10 pt-6 border-t border-green-800 text-center text-green-300 text-xs">
-                    <p>© {{ tahun }} {{ desa.nama }}. Hak Cipta Dilindungi.</p>
-                </div>
-            </div>
-        </footer>
     </div>
+
+    <!-- CONTENT -->
+    <div class="px-6 py-10 md:px-[5%] md:py-14">
+        <h2 class="text-[#155C1B] text-2xl md:text-3xl font-extrabold mb-8 flex items-center gap-3">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            Hubungi Kami
+        </h2>
+
+        <!-- Contact Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+            <!-- WhatsApp -->
+            <a href="{% if kontak.whatsapp %}https://wa.me/{{ kontak.whatsapp }}{% else %}#{% endif %}"
+               class="group relative flex items-start gap-4 p-6 bg-white rounded-2xl border border-[rgba(21,92,27,0.08)] shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <div class="w-14 h-14 rounded-xl bg-[#25D366]/10 flex items-center justify-center shrink-0 group-hover:bg-[#25D366] transition-colors duration-300">
+                    <svg class="w-7 h-7 text-[#25D366] group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-[#155C1B] font-bold text-lg mb-1">WhatsApp</h3>
+                    <p class="text-gray-600 text-sm">Chat langsung dengan kami</p>
+                    <p class="text-[#25D366] font-semibold mt-2">{% if kontak.whatsapp %}+{{ kontak.whatsapp }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
+                </div>
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-[#155C1B] transition-colors self-center" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+
+            <!-- Telepon -->
+            <a href="{% if kontak.telepon %}tel:{{ kontak.telepon }}{% else %}#{% endif %}"
+               class="group relative flex items-start gap-4 p-6 bg-white rounded-2xl border border-[rgba(21,92,27,0.08)] shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <div class="w-14 h-14 rounded-xl bg-[#155C1B]/10 flex items-center justify-center shrink-0 group-hover:bg-[#155C1B] transition-colors duration-300">
+                    <svg class="w-7 h-7 text-[#155C1B] group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-[#155C1B] font-bold text-lg mb-1">Telepon</h3>
+                    <p class="text-gray-600 text-sm">Hubungi via telepon langsung</p>
+                    <p class="text-[#155C1B] font-semibold mt-2">{% if kontak.telepon %}{{ kontak.telepon }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
+                </div>
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-[#155C1B] transition-colors self-center" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+
+            <!-- Email -->
+            <a href="{% if kontak.email %}mailto:{{ kontak.email }}{% else %}#{% endif %}"
+               class="group relative flex items-start gap-4 p-6 bg-white rounded-2xl border border-[rgba(21,92,27,0.08)] shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <div class="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-blue-500 transition-colors duration-300">
+                    <svg class="w-7 h-7 text-blue-500 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-[#155C1B] font-bold text-lg mb-1">Email</h3>
+                    <p class="text-gray-600 text-sm">Kirim email kepada kami</p>
+                    <p class="text-blue-600 font-semibold mt-2 break-all">{% if kontak.email %}{{ kontak.email }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
+                </div>
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-[#155C1B] transition-colors self-center" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+
+            <!-- Alamat -->
+            <div class="flex items-start gap-4 p-6 bg-white rounded-2xl border border-[rgba(21,92,27,0.08)] shadow-sm">
+                <div class="w-14 h-14 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+                    <svg class="w-7 h-7 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-[#155C1B] font-bold text-lg mb-1">Alamat</h3>
+                    <p class="text-gray-600 text-sm">Kantor Desa</p>
+                    <p class="text-gray-700 font-medium mt-2">{% if kontak.alamat %}{{ kontak.alamat }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Section -->
+        <h3 class="text-[#155C1B] text-xl font-bold mb-6 flex items-center gap-2">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+            </svg>
+            Lokasi Kantor
+        </h3>
+        <div class="rounded-2xl overflow-hidden h-[300px] md:h-[400px] border border-[rgba(21,92,27,0.1)]">
+            <iframe src="{{ desa.maps_embed_url }}" class="w-full h-full" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </div>
+
+    <!-- FOOTER (using shared partial) -->
+    {% include 'partials/footer.html' %}
 </body>
 </html>
