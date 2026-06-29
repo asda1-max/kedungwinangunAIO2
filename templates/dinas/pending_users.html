@@ -25,30 +25,43 @@
                 {% for user in users %}
                 <tr>
                     <td><code>{{ user.nik }}</code></td>
-                    <td class="font-semibold">{{ user.nama_lengkap }}</td>
+                    <td class="font-semibold dark:text-slate-100">{{ user.nama_lengkap }}</td>
                     <td class="text-slate-500">{{ user.email or '-' }}</td>
                     <td>{{ user.no_telepon }}</td>
                     <td class="max-w-[180px] truncate">{{ user.alamat }}</td>
                     <td>
-                        {% if user.ktp_path %}
-                        <a href="{{ url_for('static', filename='uploads/' + user.ktp_path) }}" class="doc-link" target="_blank">
-                            📄 KTP
-                        </a>
-                        {% else %}
-                        <span class="text-slate-400">-</span>
-                        {% endif %}
+                        <div class="flex items-center gap-2">
+                            {% if user.ktp_path %}
+                            <button type="button" class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                                onclick="openPreview('/uploads/{{ user.ktp_path }}', 'KTP - {{ user.nama_lengkap }}')">
+                                🪪 KTP
+                            </button>
+                            {% else %}
+                            <span class="text-slate-400 text-xs">-</span>
+                            {% endif %}
+
+                            {% if user.kk_path %}
+                            <button type="button" class="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors"
+                                onclick="openPreview('/uploads/{{ user.kk_path }}', 'KK - {{ user.nama_lengkap }}')">
+                                📋 KK
+                            </button>
+                            {% endif %}
+                        </div>
                     </td>
                     <td class="text-slate-500">{{ user.created_at }}</td>
                     <td>
                         <div class="flex items-center gap-2">
+                            <a href="{{ url_for('dinas.user_detail', user_id=user.id) }}" class="btn btn-view text-xs py-2 px-3" title="Lihat Detail">
+                                👁
+                            </a>
                             <form action="{{ url_for('dinas.approve_user_route', user_id=user.id) }}" method="POST">
-                                <button type="submit" class="btn btn-approve" onclick="return confirm('Setujui pendaftaran {{ user.nama_lengkap }}?')">
-                                    ✓ Setuju
+                                <button type="submit" class="btn btn-approve text-xs py-2 px-3" onclick="return confirm('Setujui pendaftaran {{ user.nama_lengkap }}?')">
+                                    ✓
                                 </button>
                             </form>
                             <form action="{{ url_for('dinas.reject_user_route', user_id=user.id) }}" method="POST">
-                                <button type="submit" class="btn btn-reject" onclick="return confirm('Tolak pendaftaran {{ user.nama_lengkap }}?')">
-                                    ✗ Tolak
+                                <button type="submit" class="btn btn-reject text-xs py-2 px-3" onclick="return confirm('Tolak pendaftaran {{ user.nama_lengkap }}?')">
+                                    ✗
                                 </button>
                             </form>
                         </div>
@@ -66,4 +79,83 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Image Preview Modal (shared across pages) -->
+<div id="previewModal" class="fixed inset-0 z-[200] hidden" aria-modal="true" role="dialog">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closePreview()"></div>
+    <div class="relative flex flex-col items-center justify-center h-full p-6">
+        <div class="absolute top-0 left-0 right-0 flex items-center justify-between p-6">
+            <h3 id="previewTitle" class="text-white text-lg font-bold"></h3>
+            <button onclick="closePreview()" class="text-white/70 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <img id="previewImage" src="" alt="Preview"
+             class="max-h-[85vh] max-w-full object-contain rounded-xl shadow-2xl">
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3">
+            <button onclick="zoomOut()" class="bg-white/10 hover:bg-white/20 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors backdrop-blur-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                </svg>
+            </button>
+            <span id="zoomLevel" class="text-white/70 text-sm font-medium bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm">100%</span>
+            <button onclick="zoomIn()" class="bg-white/10 hover:bg-white/20 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors backdrop-blur-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+            </button>
+            <button onclick="resetZoom()" class="bg-white/10 hover:bg-white/20 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors backdrop-blur-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let currentZoom = 1;
+
+    function openPreview(src, title) {
+        const modal = document.getElementById('previewModal');
+        const img = document.getElementById('previewImage');
+        const titleEl = document.getElementById('previewTitle');
+
+        img.src = src;
+        img.style.transform = 'scale(1)';
+        currentZoom = 1;
+        document.getElementById('zoomLevel').textContent = '100%';
+        titleEl.textContent = title;
+
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePreview() {
+        document.getElementById('previewModal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    function zoomIn()  { if (currentZoom < 3)  { currentZoom += 0.25; applyZoom(); } }
+    function zoomOut() { if (currentZoom > 0.5) { currentZoom -= 0.25; applyZoom(); } }
+    function resetZoom() { currentZoom = 1; applyZoom(); }
+
+    function applyZoom() {
+        document.getElementById('previewImage').style.transform = `scale(${currentZoom})`;
+        document.getElementById('zoomLevel').textContent = Math.round(currentZoom * 100) + '%';
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (!document.getElementById('previewModal').classList.contains('hidden')) {
+            if (e.key === 'Escape') closePreview();
+            if (e.key === '+' || e.key === '=') zoomIn();
+            if (e.key === '-') zoomOut();
+            if (e.key === '0') resetZoom();
+        }
+    });
+</script>
 {% endblock %}

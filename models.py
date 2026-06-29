@@ -262,6 +262,15 @@ def get_all_warga():
     conn.close()
     return users
 
+def get_all_warga_approved():
+    """Ambil semua warga yang sudah disetujui"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE role = ? AND status = ? ORDER BY created_at DESC", ('penduduk', 'approved'))
+    users = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return users
+
 def approve_user(user_id, processed_by):
     """Setujui pendaftaran user"""
     conn = get_db_connection()

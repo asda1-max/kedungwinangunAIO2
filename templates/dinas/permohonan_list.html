@@ -26,20 +26,31 @@
                 <tr>
                     <td class="text-slate-400 font-medium">#{{ loop.index }}</td>
                     <td><code>{{ permit.nik }}</code></td>
-                    <td class="font-semibold">{{ permit.nama_lengkap }}</td>
+                    <td class="font-semibold dark:text-slate-100">{{ permit.nama_lengkap }}</td>
                     <td>{{ permit.jenis_nama }}</td>
                     <td class="text-slate-500">{{ permit.nomor_surat or '-' }}</td>
                     <td>
-                        <span class="badge badge-{{ permit.status }}">
-                            {% if permit.status == 'pending' %}⏳{% elif permit.status == 'approved' %}✅{% else %}✗{% endif %}
-                            {{ permit.status|title }}
-                        </span>
+                        {% if permit.status == 'approved' %}
+                        <span class="badge badge-approved">✅ Approved</span>
+                        {% elif permit.status == 'rejected' %}
+                        <span class="badge badge-rejected">✗ Rejected</span>
+                        {% else %}
+                        <span class="badge badge-pending">⏳ Pending</span>
+                        {% endif %}
                     </td>
                     <td class="text-slate-500">{{ permit.created_at }}</td>
                     <td>
-                        <a href="{{ url_for('dinas.permohonan_detail', permit_id=permit.id) }}" class="btn btn-view">
-                            👁 Detail
-                        </a>
+                        <div class="flex items-center gap-2">
+                            {% if permit.status == 'approved' and permit.nomor_surat %}
+                            <a href="{{ url_for('dinas.generate_surat_pdf', permit_id=permit.id) }}"
+                               class="btn btn-primary text-xs py-2 px-3" title="Download PDF">
+                                📥 PDF
+                            </a>
+                            {% endif %}
+                            <a href="{{ url_for('dinas.permohonan_detail', permit_id=permit.id) }}" class="btn btn-view">
+                                👁 Detail
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}

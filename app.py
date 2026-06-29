@@ -21,7 +21,7 @@ Run:
     python app.py
 """
 
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, send_from_directory
 from os import environ, makedirs
 from os.path import exists
 import json
@@ -86,6 +86,20 @@ def api_berita():
 def health():
     """Health check endpoint"""
     return {"status": "healthy", "app": "Desa Kedungwinangun"}
+
+
+# ── Upload Files ────────────────────────────────────────────────────────
+
+@app.route("/uploads/<path:filename>")
+def uploaded_file(filename):
+    """Serve uploaded files (KTP, KK, etc.)"""
+    from flask import abort
+    import os
+    upload_folder = app.config.get('UPLOAD_FOLDER', 'uploads')
+    file_path = os.path.join(upload_folder, filename)
+    if not os.path.exists(file_path):
+        abort(404)
+    return send_from_directory(upload_folder, filename)
 
 
 # ── Chatbot API (Server-side OpenRouter) ──────────────────────────────

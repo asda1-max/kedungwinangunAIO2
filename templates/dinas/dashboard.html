@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 {% extends 'dinas/base.html' %}
 
 {% block title %}Dashboard - Panel Dinas{% endblock %}
@@ -38,7 +37,7 @@
                 <span class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center text-xl">📝</span>
                 Pendaftaran Pending
             </h3>
-            <a href="{{ url_for('dinas.pending_users') }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">Lihat semua →</a>
+            <a href="{{ url_for('dinas.pending_users') }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">Lihat semua →</a>
         </div>
         <div class="table-container">
             {% if recent_pending_users %}
@@ -54,14 +53,17 @@
                     {% for user in recent_pending_users %}
                     <tr>
                         <td><code>{{ user.nik }}</code></td>
-                        <td class="font-medium">{{ user.nama_lengkap }}</td>
+                        <td class="font-medium dark:text-slate-100">{{ user.nama_lengkap }}</td>
                         <td>
                             <div class="flex items-center gap-2">
-                                <form action="{{ url_for('dinas.approve_user_route', user_id=user.id) }}" method="POST">
-                                    <button type="submit" class="btn btn-approve text-xs py-2 px-3">✓</button>
+                                <a href="{{ url_for('dinas.user_detail', user_id=user.id) }}" class="btn btn-view text-xs py-2 px-3" title="Lihat Detail">
+                                    👁
+                                </a>
+                                <form action="{{ url_for('dinas.approve_user_route', user_id=user.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-approve text-xs py-2 px-3" title="Setujui">✓</button>
                                 </form>
-                                <form action="{{ url_for('dinas.reject_user_route', user_id=user.id) }}" method="POST">
-                                    <button type="submit" class="btn btn-reject text-xs py-2 px-3" onclick="return confirm('Tolak pendaftaran ini?')">✗</button>
+                                <form action="{{ url_for('dinas.reject_user_route', user_id=user.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-reject text-xs py-2 px-3" title="Tolak" onclick="return confirm('Tolak pendaftaran ini?')">✗</button>
                                 </form>
                             </div>
                         </td>
@@ -86,7 +88,7 @@
                 <span class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-xl">📄</span>
                 Permohonan Surat Pending
             </h3>
-            <a href="{{ url_for('dinas.permohonan_list') }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">Lihat semua →</a>
+            <a href="{{ url_for('dinas.permohonan_list') }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">Lihat semua →</a>
         </div>
         <div class="table-container">
             {% if recent_permits %}
@@ -102,9 +104,9 @@
                 <tbody>
                     {% for permit in recent_permits %}
                     <tr>
-                        <td class="text-slate-400">#{{ permit.id }}</td>
+                        <td class="text-slate-400 dark:text-slate-500">#{{ permit.id }}</td>
                         <td><code>{{ permit.nik }}</code></td>
-                        <td class="font-medium">{{ permit.nama_lengkap }}</td>
+                        <td class="font-medium dark:text-slate-100">{{ permit.nama_lengkap }}</td>
                         <td>
                             <a href="{{ url_for('dinas.permohonan_detail', permit_id=permit.id) }}" class="btn btn-view text-xs py-2 px-3">👁</a>
                         </td>
@@ -123,371 +125,3 @@
     </div>
 </div>
 {% endblock %}
-=======
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Dinas - Desa Kedungwinangun</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#166534',
-                        'primary-dark': '#14532d',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
-
-        /* ── Layout ── */
-        .layout { display: flex; min-height: 100vh; }
-
-        /* ── Sidebar ── */
-        .sidebar {
-            width: 280px;
-            background: linear-gradient(180deg, #166534 0%, #14532d 100%);
-            color: white;
-            padding: 24px;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 100;
-            transition: transform 0.3s ease;
-        }
-        .sidebar-brand { display: flex; align-items: center; gap: 12px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.15); margin-bottom: 32px; }
-        .sidebar-brand-icon { width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        .sidebar-brand-text h1 { font-size: 18px; font-weight: 700; }
-        .sidebar-brand-text span { font-size: 12px; opacity: 0.7; }
-        .nav-section { margin-bottom: 24px; }
-        .nav-section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin-bottom: 12px; padding-left: 12px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 15px; font-weight: 500; transition: all 0.2s ease; margin-bottom: 4px; }
-        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
-        .nav-item.active { background: rgba(255,255,255,0.2); color: white; }
-        .nav-item-icon { width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .nav-item.active .nav-item-icon { background: white; }
-
-        /* ── Main Content ── */
-        .main-content { flex: 1; margin-left: 280px; padding: 32px; }
-
-        /* ── Header ── */
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
-        .header-left h2 { font-size: 28px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-        .header-left p { color: #64748b; font-size: 15px; }
-        .header-right { display: flex; align-items: center; gap: 16px; }
-        .user-menu { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 8px; background: white; border-radius: 100px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #166534, #22c55e); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px; }
-        .user-info { display: none; }
-        @media (min-width: 768px) { .user-info { display: block; } }
-        .user-info h4 { font-size: 14px; font-weight: 600; }
-        .user-info span { font-size: 12px; color: #64748b; }
-        .role-badge { background: #166534; color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit; text-decoration: none; cursor: pointer; transition: all 0.2s ease; border: none; }
-        .btn-primary { background: linear-gradient(135deg, #166534, #22c55e); color: white; box-shadow: 0 4px 14px rgba(22, 101, 52, 0.4); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(22, 101, 52, 0.5); }
-        .btn-outline { background: white; color: #64748b; border: 1px solid #e2e8f0; }
-        .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
-
-        /* ── Stats Grid ── */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 32px; }
-        .stat-card { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f1f5f9; transition: all 0.3s ease; }
-        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        .stat-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
-        .stat-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
-        .stat-icon.green { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
-        .stat-icon.yellow { background: linear-gradient(135deg, #fef3c7, #fde68a); }
-        .stat-icon.blue { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
-        .stat-icon.red { background: linear-gradient(135deg, #fee2e2, #fecaca); }
-        .stat-content h3 { font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 4px; line-height: 1; }
-        .stat-content p { color: #64748b; font-size: 14px; }
-
-        /* ── Card ── */
-        .card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f1f5f9; overflow: hidden; margin-bottom: 24px; }
-        .card-header { padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
-        .card-header h3 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        .card-header a { font-size: 13px; font-weight: 600; color: #166534; text-decoration: none; }
-        .card-header a:hover { text-decoration: underline; }
-
-        /* ── Table ── */
-        .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 16px 20px; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 20px; font-size: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-        tr:hover td { background: #f8fafc; }
-        tr:last-child td { border-bottom: none; }
-
-        /* ── Badges ── */
-        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; font-size: 13px; font-weight: 600; }
-        .badge-pending { background: #fffbeb; color: #92400e; }
-        .badge-approved { background: #dcfce7; color: #166534; }
-        .badge-rejected { background: #fee2e2; color: #dc2626; }
-
-        /* ── Action Buttons ── */
-        .actions { display: flex; align-items: center; gap: 8px; }
-        .btn-action { padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-approve { background: #dcfce7; color: #166534; }
-        .btn-approve:hover { background: #166534; color: white; }
-        .btn-reject { background: #fee2e2; color: #dc2626; }
-        .btn-reject:hover { background: #dc2626; color: white; }
-        .btn-view { background: #dbeafe; color: #1d4ed8; }
-        .btn-view:hover { background: #1d4ed8; color: white; }
-
-        /* ── Empty State ── */
-        .empty { text-align: center; padding: 60px 24px; }
-        .empty-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; }
-        .empty h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #1e293b; }
-        .empty p { color: #64748b; font-size: 14px; }
-
-        /* ── Alert ── */
-        .alert { padding: 16px 20px; border-radius: 12px; font-size: 15px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .alert-success { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #166534; border: 1px solid #86efac; }
-
-        /* ── Mobile Toggle ── */
-        .mobile-toggle { display: none; width: 44px; height: 44px; border-radius: 10px; background: white; border: 1px solid #e2e8f0; align-items: center; justify-content: center; cursor: pointer; }
-        @media (max-width: 1024px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin-left: 0; } .mobile-toggle { display: flex; } }
-
-        /* ── Animation ── */
-        .animate-in { animation: fadeInUp 0.5s ease; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body>
-    <div class="layout">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-brand">
-                <div class="sidebar-brand-icon">🏘️</div>
-                <div class="sidebar-brand-text">
-                    <h1>Kedungwinangun</h1>
-                    <span>Panel Dinas</span>
-                </div>
-            </div>
-
-            <nav class="nav-section">
-                <div class="nav-section-title">Menu Utama</div>
-                <a href="{{ url_for('dinas.dashboard') }}" class="nav-item active">
-                    <div class="nav-item-icon">📊</div>
-                    Dashboard
-                </a>
-                <a href="{{ url_for('dinas.pending_users') }}" class="nav-item">
-                    <div class="nav-item-icon">📝</div>
-                    Pendaftaran
-                </a>
-                <a href="{{ url_for('dinas.permohonan_list') }}" class="nav-item">
-                    <div class="nav-item-icon">📄</div>
-                    Permohonan Surat
-                </a>
-                <a href="{{ url_for('dinas.all_users') }}" class="nav-item">
-                    <div class="nav-item-icon">👥</div>
-                    Data Warga
-                </a>
-            </nav>
-
-            <div style="margin-top: auto; padding-top: 24px;">
-                <a href="{{ url_for('public.index') }}" class="nav-item" target="_blank">
-                    <div class="nav-item-icon">🌐</div>
-                    Lihat Website
-                </a>
-                <a href="{{ url_for('admin.logout') }}" class="nav-item" style="background: rgba(220,38,38,0.2);">
-                    <div class="nav-item-icon">🚪</div>
-                    Keluar
-                </a>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="header">
-                <div class="header-left">
-                    <button class="mobile-toggle" onclick="toggleSidebar()">
-                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                    </button>
-                    <div>
-                        <h2>Selamat Datang, Petugas! 👋</h2>
-                        <p>Kelola pendaftaran dan permohonan surat warga</p>
-                    </div>
-                </div>
-                <div class="header-right">
-                    <div class="user-menu">
-                        <div class="user-avatar">P</div>
-                        <div class="user-info">
-                            <h4>{{ session.get('user_nama', 'Petugas') }}</h4>
-                            <span class="role-badge">Dinas</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                            </svg>
-                            <span>{{ message }}</span>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <!-- Stats -->
-            <div class="stats-grid animate-in">
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon yellow">📝</div>
-                    </div>
-                    <div class="stat-content">
-                        <h3>{{ pending_users_count }}</h3>
-                        <p>Pendaftaran Pending</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon red">⏳</div>
-                    </div>
-                    <div class="stat-content">
-                        <h3>{{ pending_permits_count }}</h3>
-                        <p>Surat Pending</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon green">✅</div>
-                    </div>
-                    <div class="stat-content">
-                        <h3>{{ approved_count }}</h3>
-                        <p>Disetujui</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon blue">👥</div>
-                    </div>
-                    <div class="stat-content">
-                        <h3>{{ total_warga }}</h3>
-                        <p>Total Warga</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pending Users -->
-            <div class="card animate-in" style="animation-delay: 0.1s;">
-                <div class="card-header">
-                    <h3>📝 Pendaftaran Pending</h3>
-                    <a href="{{ url_for('dinas.pending_users') }}">Lihat semua →</a>
-                </div>
-                {% if recent_pending_users %}
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>NIK</th>
-                                <th>Nama</th>
-                                <th>Email</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in recent_pending_users %}
-                            <tr>
-                                <td style="font-weight: 600;">{{ user.nik }}</td>
-                                <td>{{ user.nama_lengkap }}</td>
-                                <td style="color: #64748b;">{{ user.email or '—' }}</td>
-                                <td>
-                                    <div class="actions">
-                                        <form action="{{ url_for('dinas.approve_user_route', user_id=user.id) }}" method="POST" style="display: inline;">
-                                            <button type="submit" class="btn-action btn-approve">✓ Setujui</button>
-                                        </form>
-                                        <form action="{{ url_for('dinas.reject_user_route', user_id=user.id) }}" method="POST" style="display: inline;">
-                                            <button type="submit" class="btn-action btn-reject" onclick="return confirm('Tolak pendaftaran ini?')">✗ Tolak</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="empty">
-                    <div class="empty-icon">✅</div>
-                    <h3>Tidak ada pendaftaran pending</h3>
-                    <p>Semua pendaftaran sudah diproses</p>
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Pending Permits -->
-            <div class="card animate-in" style="animation-delay: 0.2s;">
-                <div class="card-header">
-                    <h3>📄 Permohonan Surat Pending</h3>
-                    <a href="{{ url_for('dinas.permohonan_list') }}">Lihat semua →</a>
-                </div>
-                {% if recent_permits %}
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>NIK</th>
-                                <th>Nama</th>
-                                <th>Jenis Surat</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for permit in recent_permits %}
-                            <tr>
-                                <td style="font-weight: 600; color: #64748b;">#{{ permit.id }}</td>
-                                <td style="font-weight: 600;">{{ permit.nik }}</td>
-                                <td>{{ permit.nama_lengkap }}</td>
-                                <td><span class="badge badge-pending">⏳ {{ permit.jenis_nama }}</span></td>
-                                <td>
-                                    <div class="actions">
-                                        <a href="{{ url_for('dinas.permohonan_detail', permit_id=permit.id) }}" class="btn-action btn-view">👁 Detail</a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="empty">
-                    <div class="empty-icon">📭</div>
-                    <h3>Tidak ada permohonan surat</h3>
-                    <p>Belum ada permohonan surat dari warga</p>
-                </div>
-                {% endif %}
-            </div>
-        </main>
-    </div>
-
-    <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-        }
-        document.addEventListener('click', function(e) {
-            const sidebar = document.getElementById('sidebar');
-            const toggle = document.querySelector('.mobile-toggle');
-            if (window.innerWidth <= 1024 && !sidebar.contains(e.target) && !toggle.contains(e.target) && sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
-            }
-        });
-    </script>
-</body>
-</html>
->>>>>>> 894d528b3684371c363d36a31d31d4b7cf671395
