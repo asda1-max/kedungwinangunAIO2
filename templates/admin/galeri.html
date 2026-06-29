@@ -1,260 +1,71 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galeri - Admin Panel</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#166534',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
+{% extends 'admin/base.html' %}
 
-        .layout { display: flex; min-height: 100vh; }
+{% block title %}Galeri - Admin Panel{% endblock %}
+{% block page_title %}Galeri 📷{% endblock %}
+{% block page_subtitle %}Kelola foto galeri website desa{% endblock %}
 
-        .sidebar {
-            width: 280px;
-            background: linear-gradient(180deg, #166534 0%, #14532d 100%);
-            color: white;
-            padding: 24px;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 100;
-            transition: transform 0.3s ease;
-        }
-        .sidebar-brand { display: flex; align-items: center; gap: 12px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.15); margin-bottom: 32px; }
-        .sidebar-brand-icon { width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        .sidebar-brand-text h1 { font-size: 18px; font-weight: 700; }
-        .sidebar-brand-text span { font-size: 12px; opacity: 0.7; }
-        .nav-section { margin-bottom: 24px; }
-        .nav-section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin-bottom: 12px; padding-left: 12px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 10px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 15px; font-weight: 500; transition: all 0.2s ease; margin-bottom: 4px; }
-        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
-        .nav-item.active { background: rgba(255,255,255,0.2); color: white; }
-        .nav-item-icon { width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .nav-item.active .nav-item-icon { background: white; }
-
-        .main-content { flex: 1; margin-left: 280px; padding: 32px; }
-
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
-        .header-left h2 { font-size: 28px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-        .header-left p { color: #64748b; font-size: 15px; }
-        .header-right { display: flex; align-items: center; gap: 16px; }
-        .user-menu { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 8px; background: white; border-radius: 100px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #166534, #22c55e); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px; }
-        .user-info { display: none; }
-        @media (min-width: 768px) { .user-info { display: block; } }
-        .user-info h4 { font-size: 14px; font-weight: 600; }
-        .user-info span { font-size: 12px; color: #64748b; }
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit; text-decoration: none; cursor: pointer; transition: all 0.2s ease; border: none; }
-        .btn-primary { background: linear-gradient(135deg, #166534, #22c55e); color: white; box-shadow: 0 4px 14px rgba(22, 101, 52, 0.4); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(22, 101, 52, 0.5); }
-
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
-        .gallery-item { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f1f5f9; transition: all 0.3s ease; }
-        .gallery-item:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        .gallery-image { position: relative; aspect-ratio: 16/10; overflow: hidden; }
-        .gallery-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-        .gallery-item:hover .gallery-image img { transform: scale(1.05); }
-        .gallery-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
-        .gallery-item:hover .gallery-overlay { opacity: 1; }
-        .gallery-badge { position: absolute; top: 12px; left: 12px; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; }
-        .gallery-badge.active { background: #dcfce7; color: #166534; }
-        .gallery-badge.inactive { background: #fee2e2; color: #dc2626; }
-        .gallery-content { padding: 20px; }
-        .gallery-content h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #1e293b; }
-        .gallery-content p { font-size: 13px; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
-        .gallery-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        .btn-sm { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
-        .btn-sm-edit { background: #fef3c7; color: #b45309; }
-        .btn-sm-edit:hover { background: #f59e0b; color: white; }
-        .btn-sm-toggle { background: #dbeafe; color: #1d4ed8; }
-        .btn-sm-toggle:hover { background: #2563eb; color: white; }
-        .btn-sm-delete { background: #fee2e2; color: #dc2626; }
-        .btn-sm-delete:hover { background: #dc2626; color: white; }
-
-        .empty { text-align: center; padding: 80px 24px; }
-        .empty-icon { width: 100px; height: 100px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 48px; }
-        .empty h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #1e293b; }
-        .empty p { color: #64748b; font-size: 15px; margin-bottom: 24px; }
-
-        .alert { padding: 16px 20px; border-radius: 12px; font-size: 15px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .alert-success { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #166534; border: 1px solid #86efac; }
-
-        .mobile-toggle { display: none; width: 44px; height: 44px; border-radius: 10px; background: white; border: 1px solid #e2e8f0; align-items: center; justify-content: center; cursor: pointer; }
-        @media (max-width: 1024px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin-left: 0; } .mobile-toggle { display: flex; } }
-
-        .animate-in { animation: fadeInUp 0.5s ease; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body>
-    <div class="layout">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-brand">
-                <div class="sidebar-brand-icon">🏘️</div>
-                <div class="sidebar-brand-text">
-                    <h1>Kedungwinangun</h1>
-                    <span>Admin Panel</span>
-                </div>
-            </div>
-
-            <nav class="nav-section">
-                <div class="nav-section-title">Menu Utama</div>
-                <a href="{{ url_for('admin.dashboard') }}" class="nav-item">
-                    <div class="nav-item-icon">📊</div>
-                    Dashboard
-                </a>
-                <a href="{{ url_for('admin.galeri') }}" class="nav-item active">
-                    <div class="nav-item-icon">🖼️</div>
-                    Galeri
-                </a>
-            </nav>
-
-            <nav class="nav-section">
-                <div class="nav-section-title">Pengaturan</div>
-                <a href="{{ url_for('admin.config') }}" class="nav-item">
-                    <div class="nav-item-icon">⚙️</div>
-                    Konfigurasi
-                </a>
-                <a href="{{ url_for('admin.settings') }}" class="nav-item">
-                    <div class="nav-item-icon">👤</div>
-                    Pengaturan Akun
-                </a>
-            </nav>
-
-            <div style="margin-top: auto; padding-top: 24px;">
-                <a href="{{ url_for('public.index') }}" class="nav-item" target="_blank">
-                    <div class="nav-item-icon">🌐</div>
-                    Lihat Website
-                </a>
-                <a href="{{ url_for('admin.logout') }}" class="nav-item" style="background: rgba(220,38,38,0.2);">
-                    <div class="nav-item-icon">🚪</div>
-                    Keluar
-                </a>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="header">
-                <div class="header-left">
-                    <button class="mobile-toggle" onclick="toggleSidebar()">
-                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                    </button>
-                    <div>
-                        <h2>Galeri 📷</h2>
-                        <p>Kelola foto galeri website desa</p>
-                    </div>
-                </div>
-                <div class="header-right">
-                    <div class="user-menu">
-                        <div class="user-avatar">A</div>
-                        <div class="user-info">
-                            <h4>{{ session.get('user_nama', 'Admin') }}</h4>
-                            <span>Administrator</span>
-                        </div>
-                    </div>
-                    <a href="{{ url_for('admin.add_galeri_route') }}" class="btn btn-primary">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Tambah Foto
-                    </a>
-                </div>
-            </div>
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                            </svg>
-                            <span>{{ message }}</span>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            {% if galeri_list %}
-            <div class="gallery-grid animate-in">
-                {% for foto in galeri_list %}
-                <div class="gallery-item">
-                    <div class="gallery-image">
-                        <img src="{{ foto.gambar_url }}" alt="{{ foto.judul }}">
-                        <div class="gallery-overlay">
-                            <span class="gallery-badge {{ 'active' if foto.aktif == 1 else 'inactive' }}">
-                                {{ '✓ Aktif' if foto.aktif == 1 else '✗ Nonaktif' }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="gallery-content">
-                        <h4>{{ foto.judul }}</h4>
-                        <p>{{ foto.deskripsi or 'Tidak ada deskripsi' }}</p>
-                        <div class="gallery-actions">
-                            <a href="{{ url_for('admin.edit_galeri_route', galeri_id=foto.id) }}" class="btn-sm btn-sm-edit">
-                                ✏️ Edit
-                            </a>
-                            <form action="{{ url_for('admin.toggle_galeri_route', galeri_id=foto.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn-sm btn-sm-toggle">
-                                    {{ '🙈 Sembunyikan' if foto.aktif == 1 else '👁 Tampilkan' }}
-                                </button>
-                            </form>
-                            <form action="{{ url_for('admin.delete_galeri_route', galeri_id=foto.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus foto ini?')">
-                                <button type="submit" class="btn-sm btn-sm-delete">
-                                    🗑️ Hapus
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="empty animate-in">
-                <div class="empty-icon">🖼️</div>
-                <h3>Belum ada foto galeri</h3>
-                <p>Tambahkan foto pertama untuk galeri website desa</p>
-                <a href="{{ url_for('admin.add_galeri_route') }}" class="btn btn-primary">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Tambah Foto
-                </a>
-            </div>
-            {% endif %}
-        </main>
+{% block header_actions %}
+<div class="user-menu">
+    <div class="user-avatar">{{ session.get('user_nama', 'A')[0]|upper }}</div>
+    <div class="user-info">
+        <h4>{{ session.get('user_nama', 'Admin') }}</h4>
+        <span>Administrator</span>
     </div>
+</div>
+<a href="{{ url_for('admin.add_galeri_route') }}" class="btn btn-primary">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    </svg>
+    Tambah Foto
+</a>
+{% endblock %}
 
-    <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-        }
-        document.addEventListener('click', function(e) {
-            const sidebar = document.getElementById('sidebar');
-            const toggle = document.querySelector('.mobile-toggle');
-            if (window.innerWidth <= 1024 && !sidebar.contains(e.target) && !toggle.contains(e.target) && sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
-            }
-        });
-    </script>
-</body>
-</html>
+{% block content %}
+{% if galeri_list %}
+<div class="gallery-grid animate-in">
+    {% for foto in galeri_list %}
+    <div class="gallery-item">
+        <div class="gallery-image">
+            <img src="{{ foto.gambar_url }}" alt="{{ foto.judul }}">
+            <div class="gallery-overlay">
+                <span class="gallery-badge {{ 'active' if foto.aktif == 1 else 'inactive' }}">
+                    {{ '✓ Aktif' if foto.aktif == 1 else '✗ Nonaktif' }}
+                </span>
+            </div>
+        </div>
+        <div class="gallery-content">
+            <h4>{{ foto.judul }}</h4>
+            <p>{{ foto.deskripsi or 'Tidak ada deskripsi' }}</p>
+            <div class="gallery-actions">
+                <a href="{{ url_for('admin.edit_galeri_route', galeri_id=foto.id) }}" class="btn-sm btn-sm-edit">
+                    ✏️ Edit
+                </a>
+                <form action="{{ url_for('admin.toggle_galeri_route', galeri_id=foto.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-sm btn-sm-toggle">
+                        {{ '🙈 Sembunyikan' if foto.aktif == 1 else '👁 Tampilkan' }}
+                    </button>
+                </form>
+                <form action="{{ url_for('admin.delete_galeri_route', galeri_id=foto.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus foto ini?')">
+                    <button type="submit" class="btn-sm btn-sm-delete">
+                        🗑️ Hapus
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty animate-in">
+    <div class="empty-icon">🖼️</div>
+    <h3>Belum ada foto galeri</h3>
+    <p>Tambahkan foto pertama untuk galeri website desa</p>
+    <a href="{{ url_for('admin.add_galeri_route') }}" class="btn btn-primary">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Tambah Foto
+    </a>
+</div>
+{% endif %}
+{% endblock %}

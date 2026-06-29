@@ -1,654 +1,253 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Konfigurasi — Admin Panel</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends 'admin/base.html' %}
 
-        :root {
-            --bg: #f5f5f4;
-            --surface: #ffffff;
-            --border: #e7e5e4;
-            --border-hover: #d6d3d1;
-            --text: #1c1917;
-            --text-muted: #78716c;
-            --primary: #166534;
-            --primary-hover: #14532d;
-            --error: #dc2626;
-        }
+{% block title %}Konfigurasi - Admin Panel{% endblock %}
+{% block page_title %}Konfigurasi Website{% endblock %}
+{% block page_subtitle %}Atur tampilan dan pengaturan website desa{% endblock %}
 
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
+{% block header_actions %}
+<div class="user-menu">
+    <div class="user-avatar">{{ session.get('user_nama', 'A')[0]|upper }}</div>
+    <div class="user-info">
+        <h4>{{ session.get('user_nama', 'Admin') }}</h4>
+        <span>Administrator</span>
+    </div>
+</div>
+{% endblock %}
 
-        .navbar {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: 0 32px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: var(--text);
-            font-weight: 700;
-            font-size: 15px;
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: var(--primary);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo-icon svg {
-            width: 18px;
-            height: 18px;
-            fill: white;
-        }
-
-        .nav-link {
-            padding: 8px 14px;
-            text-decoration: none;
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 6px;
-            transition: all 0.15s ease;
-        }
-
-        .nav-link:hover {
-            background: var(--bg);
-            color: var(--text);
-        }
-
-        .nav-link.active {
-            background: var(--bg);
-            color: var(--text);
-        }
-
-        .btn-ghost {
-            padding: 8px 14px;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            font-family: inherit;
-            color: var(--text-muted);
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.15s ease;
-        }
-
-        .btn-ghost:hover {
-            border-color: var(--border-hover);
-            color: var(--text);
-        }
-
-        .main {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 32px 24px;
-        }
-
-        .page-header {
-            margin-bottom: 32px;
-        }
-
-        .page-title {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px;
-        }
-
-        .page-desc {
-            color: var(--text-muted);
-            font-size: 16px;
-        }
-
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            margin-bottom: 24px;
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            background: #fafaf9;
-        }
-
-        .card-header .icon {
-            font-size: 22px;
-        }
-
-        .card-header h2 {
-            font-size: 17px;
-            font-weight: 600;
-        }
-
-        .card-header p {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        .card-body {
-            padding: 24px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-
-        label {
-            display: block;
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        label .hint {
-            font-weight: 400;
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-
-        input[type="text"],
-        input[type="url"],
-        input[type="number"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px 14px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 15px;
-            font-family: inherit;
-            background: var(--surface);
-            transition: all 0.15s ease;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
-        }
-
-        input::placeholder, textarea::placeholder {
-            color: #a8a29e;
-        }
-
-        textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
-        select {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%2378716c'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 40px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
-        @media (min-width: 600px) {
-            .form-row { grid-template-columns: 1fr 1fr; }
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 14px 16px;
-            background: #fafaf9;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            accent-color: var(--primary);
-            margin-top: 2px;
-        }
-
-        .checkbox-group label {
-            margin: 0;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 15px;
-        }
-
-        .checkbox-group .desc {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 400;
-            margin-top: 2px;
-        }
-
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-
-        @media (min-width: 600px) {
-            .checkbox-grid { grid-template-columns: 1fr 1fr; }
-        }
-
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border);
-        }
-
-        @media (min-width: 480px) {
-            .btn-group {
-                flex-direction: row;
-            }
-        }
-
-        .btn {
-            padding: 14px 24px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            border: none;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-        }
-
-        .btn-secondary {
-            background: var(--bg);
-            color: var(--text-muted);
-            border: 2px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--border-hover);
-            color: var(--text);
-        }
-
-        .btn-back {
-            background: #e7e5e4;
-            color: var(--text);
-            border: 2px solid #d6d3d1;
-        }
-
-        .btn-back:hover {
-            background: #d6d3d1;
-        }
-
-        .btn svg {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
-
-        .alert {
-            padding: 16px 20px;
-            border-radius: 10px;
-            font-size: 15px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .alert-success {
-            background: #dcfce7;
-            color: #166534;
-            border: 1px solid #bbf7d0;
-        }
-
-        .alert svg {
-            width: 20px;
-            height: 20px;
-            flex-shrink: 0;
-        }
-
-        .current-value {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 6px;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="{{ url_for('public.index') }}" class="logo">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 24 24"><path d="M12 3L4 9v12h16V9l-8-6zm6 16h-3v-5h-6v5H6v-9.5l6-4.5 6 4.5V19z"/></svg>
-                </div>
-                Kedungwinangun
-            </a>
-            <a href="{{ url_for('admin.dashboard') }}" class="nav-link">Dashboard</a>
-            <a href="{{ url_for('admin.config') }}" class="nav-link active">Konfigurasi</a>
-            <a href="{{ url_for('admin.settings') }}" class="nav-link">Pengaturan</a>
+{% block content %}
+<form method="POST">
+    <!-- Info Website -->
+    <div class="card-section animate-in">
+        <div class="card-section-header">
+            <span class="icon">🌐</span>
+            <div>
+                <h2>Informasi Website</h2>
+                <p>Nama dan tagline yang muncul di website</p>
+            </div>
         </div>
-        <a href="{{ url_for('admin.dashboard') }}" class="btn-ghost">← Kembali</a>
-    </nav>
-
-    <main class="main">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                        <span>{{ message }}</span>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <div class="page-header">
-            <h1 class="page-title">Konfigurasi Website</h1>
-            <p class="page-desc">Atur tampilan dan pengaturan website desa</p>
+        <div class="card-section-body">
+            <div class="form-group">
+                <label for="website_nama">Nama Website</label>
+                <input type="text" id="website_nama" name="website_nama" value="{{ config.website_nama }}" placeholder="Contoh: Desa Kedungwinangun">
+            </div>
+            <div class="form-group">
+                <label for="website_tagline">Tagline</label>
+                <input type="text" id="website_tagline" name="website_tagline" value="{{ config.website_tagline }}" placeholder="Contoh: Selamat datang di website Kami">
+            </div>
+            <div class="form-group">
+                <label for="website_deskripsi">Deskripsi Singkat</label>
+                <textarea id="website_deskripsi" name="website_deskripsi" placeholder="Deskripsi singkat tentang website">{{ config.website_deskripsi }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="website_meta_description">Meta Description (SEO)</label>
+                <textarea id="website_meta_description" name="website_meta_description" placeholder="Deskripsi untuk SEO (max 160 karakter)" style="min-height: 60px;">{{ config.website_meta_description }}</textarea>
+                <p class="hint" style="font-size: 13px; color: #64748b; margin-top: 8px;">Akan muncul di hasil pencarian Google</p>
+            </div>
         </div>
+    </div>
 
-        <form method="POST">
-            <!-- Info Website -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="icon">🌐</span>
-                    <div>
-                        <h2>Informasi Website</h2>
-                        <p>Nama dan tagline yang muncul di website</p>
-                    </div>
+    <!-- Berita Settings -->
+    <div class="card-section animate-in" style="animation-delay: 0.1s;">
+        <div class="card-section-header">
+            <span class="icon">📰</span>
+            <div>
+                <h2>Pengaturan Berita</h2>
+                <p>Atur tampilan dan jumlah berita yang ditampilkan</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="berita_tampil_di_beranda">Jumlah Berita di Beranda</label>
+                    <select id="berita_tampil_di_beranda" name="berita_tampil_di_beranda">
+                        <option value="3" {% if config.berita_tampil_di_beranda == '3' %}selected{% endif %}>3 berita</option>
+                        <option value="6" {% if config.berita_tampil_di_beranda == '6' %}selected{% endif %}>6 berita</option>
+                        <option value="9" {% if config.berita_tampil_di_beranda == '9' %}selected{% endif %}>9 berita</option>
+                        <option value="12" {% if config.berita_tampil_di_beranda == '12' %}selected{% endif %}>12 berita</option>
+                    </select>
+                    <p class="hint" style="font-size: 13px; color: #64748b; margin-top: 8px;">Berita biasa (non-unggulan)</p>
                 </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label for="website_nama">Nama Website</label>
-                        <input type="text" id="website_nama" name="website_nama" value="{{ config.website_nama }}" placeholder="Contoh: Desa Kedungwinangun">
+                <div class="form-group">
+                    <label for="berita_unggulan_tampil">Jumlah Berita Unggulan</label>
+                    <select id="berita_unggulan_tampil" name="berita_unggulan_tampil">
+                        <option value="1" {% if config.berita_unggulan_tampil == '1' %}selected{% endif %}>1 berita</option>
+                        <option value="2" {% if config.berita_unggulan_tampil == '2' %}selected{% endif %}>2 berita</option>
+                        <option value="3" {% if config.berita_unggulan_tampil == '3' %}selected{% endif %}>3 berita</option>
+                        <option value="4" {% if config.berita_unggulan_tampil == '4' %}selected{% endif %}>4 berita</option>
+                        <option value="5" {% if config.berita_unggulan_tampil == '5' %}selected{% endif %}>5 berita</option>
+                    </select>
+                    <p class="hint" style="font-size: 13px; color: #64748b; margin-top: 8px;">Maks berita yang ditandai Unggulan</p>
+                </div>
+                <div class="form-group">
+                    <label for="berita_carousel_stacks">Jumlah Card Carousel</label>
+                    <select id="berita_carousel_stacks" name="berita_carousel_stacks">
+                        <option value="1" {% if config.berita_carousel_stacks == '1' %}selected{% endif %}>1 card</option>
+                        <option value="2" {% if config.berita_carousel_stacks == '2' %}selected{% endif %}>2 cards</option>
+                        <option value="3" {% if config.berita_carousel_stacks == '3' %}selected{% endif %}>3 cards</option>
+                    </select>
+                    <p class="hint" style="font-size: 13px; color: #64748b; margin-top: 8px;">Jumlah card berita yang tampil per slide</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="berita_tampil_di_halaman">Jumlah Berita per Halaman</label>
+                <select id="berita_tampil_di_halaman" name="berita_tampil_di_halaman">
+                    <option value="6" {% if config.berita_tampil_di_halaman == '6' %}selected{% endif %}>6 berita</option>
+                    <option value="12" {% if config.berita_tampil_di_halaman == '12' %}selected{% endif %}>12 berita</option>
+                    <option value="18" {% if config.berita_tampil_di_halaman == '18' %}selected{% endif %}>18 berita</option>
+                    <option value="24" {% if config.berita_tampil_di_halaman == '24' %}selected{% endif %}>24 berita</option>
+                </select>
+                <p class="hint" style="font-size: 13px; color: #64748b; margin-top: 8px;">Di halaman /berita</p>
+            </div>
+            <div class="form-group">
+                <label>Tampilan Berita</label>
+                <div class="checkbox-grid" style="margin-top: 12px;">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="berita_tampilkan_views" name="berita_tampilkan_views" {% if config.berita_tampilkan_views == '1' %}checked{% endif %}>
+                        <label for="berita_tampilkan_views">
+                            Tampilkan Jumlah Dilihat
+                            <p style="font-size: 13px; color: #64748b; font-weight: 400; margin-top: 2px;">Contoh: "1.2k dibaca"</p>
+                        </label>
                     </div>
-                    <div class="form-group">
-                        <label for="website_tagline">Tagline</label>
-                        <input type="text" id="website_tagline" name="website_tagline" value="{{ config.website_tagline }}" placeholder="Contoh: Selamat datang di website Kami">
-                    </div>
-                    <div class="form-group">
-                        <label for="website_deskripsi">Deskripsi Singkat</label>
-                        <textarea id="website_deskripsi" name="website_deskripsi" placeholder="Deskripsi singkat tentang website">{{ config.website_deskripsi }}</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="website_meta_description">Meta Description (SEO)</label>
-                        <textarea id="website_meta_description" name="website_meta_description" placeholder="Deskripsi untuk SEO (max 160 karakter)" style="min-height: 60px;">{{ config.website_meta_description }}</textarea>
-                        <div class="current-value">Akan muncul di hasil pencarian Google</div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="berita_tampilkan_tanggal" name="berita_tampilkan_tanggal" {% if config.berita_tampilkan_tanggal == '1' %}checked{% endif %}>
+                        <label for="berita_tampilkan_tanggal">
+                            Tampilkan Tanggal
+                            <p style="font-size: 13px; color: #64748b; font-weight: 400; margin-top: 2px;">Contoh: "18 Juni 2026"</p>
+                        </label>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Berita Settings -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="icon">📰</span>
-                    <div>
-                        <h2>Pengaturan Berita</h2>
-                        <p>Atur tampilan dan jumlah berita yang ditampilkan</p>
-                    </div>
+    <!-- Homepage Sections -->
+    <div class="card-section animate-in" style="animation-delay: 0.2s;">
+        <div class="card-section-header">
+            <span class="icon">🏠</span>
+            <div>
+                <h2>Tampilan Beranda</h2>
+                <p>Pilih bagian mana yang ingin ditampilkan di halaman utama</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            <div class="checkbox-grid">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="tampilkan_hero" name="tampilkan_hero" {% if config.tampilkan_hero == '1' %}checked{% endif %}>
+                    <label for="tampilkan_hero">
+                        Tampilkan Hero Section
+                        <p style="font-size: 13px; color: #64748b; font-weight: 400; margin-top: 2px;">Gambar besar di atas dengan judul desa</p>
+                    </label>
                 </div>
-                <div class="card-body">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="berita_tampil_di_beranda">Jumlah Berita di Beranda</label>
-                            <select id="berita_tampil_di_beranda" name="berita_tampil_di_beranda">
-                                <option value="3" {% if config.berita_tampil_di_beranda == '3' %}selected{% endif %}>3 berita</option>
-                                <option value="6" {% if config.berita_tampil_di_beranda == '6' %}selected{% endif %}>6 berita</option>
-                                <option value="9" {% if config.berita_tampil_di_beranda == '9' %}selected{% endif %}>9 berita</option>
-                                <option value="12" {% if config.berita_tampil_di_beranda == '12' %}selected{% endif %}>12 berita</option>
-                            </select>
-                            <div class="current-value">Berita biasa (non-unggulan)</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="berita_unggulan_tampil">Jumlah Berita Unggulan</label>
-                            <select id="berita_unggulan_tampil" name="berita_unggulan_tampil">
-                                <option value="1" {% if config.berita_unggulan_tampil == '1' %}selected{% endif %}>1 berita</option>
-                                <option value="2" {% if config.berita_unggulan_tampil == '2' %}selected{% endif %}>2 berita</option>
-                                <option value="3" {% if config.berita_unggulan_tampil == '3' %}selected{% endif %}>3 berita</option>
-                                <option value="4" {% if config.berita_unggulan_tampil == '4' %}selected{% endif %}>4 berita</option>
-                                <option value="5" {% if config.berita_unggulan_tampil == '5' %}selected{% endif %}>5 berita</option>
-                            </select>
-                            <div class="current-value">Maks berita yang ditandai Unggulan</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="berita_carousel_stacks">Jumlah Card Carousel</label>
-                            <select id="berita_carousel_stacks" name="berita_carousel_stacks">
-                                <option value="1" {% if config.berita_carousel_stacks == '1' %}selected{% endif %}>1 card</option>
-                                <option value="2" {% if config.berita_carousel_stacks == '2' %}selected{% endif %}>2 cards</option>
-                                <option value="3" {% if config.berita_carousel_stacks == '3' %}selected{% endif %}>3 cards</option>
-                            </select>
-                            <div class="current-value">Jumlah card berita yang tampil per slide</div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="berita_tampil_di_halaman">Jumlah Berita per Halaman</label>
-                        <select id="berita_tampil_di_halaman" name="berita_tampil_di_halaman">
-                            <option value="6" {% if config.berita_tampil_di_halaman == '6' %}selected{% endif %}>6 berita</option>
-                            <option value="12" {% if config.berita_tampil_di_halaman == '12' %}selected{% endif %}>12 berita</option>
-                            <option value="18" {% if config.berita_tampil_di_halaman == '18' %}selected{% endif %}>18 berita</option>
-                            <option value="24" {% if config.berita_tampil_di_halaman == '24' %}selected{% endif %}>24 berita</option>
-                        </select>
-                        <div class="current-value">Di halaman /berita</div>
-                    </div>
-                    <div class="form-group">
-                        <label>Tampilan Berita</label>
-                        <div class="checkbox-grid" style="margin-top: 12px;">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="berita_tampilkan_views" name="berita_tampilkan_views" {% if config.berita_tampilkan_views == '1' %}checked{% endif %}>
-                                <label for="berita_tampilkan_views">
-                                    Tampilkan Jumlah Dilihat
-                                    <div class="desc">Contoh: "1.2k dibaca"</div>
-                                </label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="berita_tampilkan_tanggal" name="berita_tampilkan_tanggal" {% if config.berita_tampilkan_tanggal == '1' %}checked{% endif %}>
-                                <label for="berita_tampilkan_tanggal">
-                                    Tampilkan Tanggal
-                                    <div class="desc">Contoh: "18 Juni 2026"</div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="tampilkan_statistik" name="tampilkan_statistik" {% if config.tampilkan_statistik == '1' %}checked{% endif %}>
+                    <label for="tampilkan_statistik">
+                        Tampilkan Statistik
+                        <p style="font-size: 13px; color: #64748b; font-weight: 400; margin-top: 2px;">Jumlah dusun, kasi, kepala desa</p>
+                    </label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="tampilkan_daftar_dusun" name="tampilkan_daftar_dusun" {% if config.tampilkan_daftar_dusun == '1' %}checked{% endif %}>
+                    <label for="tampilkan_daftar_dusun">
+                        Tampilkan Daftarusun
+                        <p style="font-size: 13px; color: #64748b; font-weight: 400; margin-top: 2px;">Daftar 6 dusun di desa</p>
+                    </label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="tampilkan_maps" name="tampilkan_maps" {% if config.tampilkan_maps == '1' %}checked{% endif %}>
+                    <label for="tampilkan_maps">
+                        Tampilkan Peta Lokasi
+                        <p style="font-size: 13px; color: #64748b; font-weight: 400; margin-top: 2px;">Google Maps di bagian bawah</p>
+                    </label>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Homepage Sections -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="icon">🏠</span>
-                    <div>
-                        <h2>Tampilan Beranda</h2>
-                        <p>Pilih bagian mana yang ingin ditampilkan di halaman utama</p>
-                    </div>
+    <!-- Kontak -->
+    <div class="card-section animate-in" style="animation-delay: 0.3s;">
+        <div class="card-section-header">
+            <span class="icon">📞</span>
+            <div>
+                <h2>Kontak &amp; Informasi</h2>
+                <p>Nomor yang bisa dihubungi warga</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="kontak_whatsapp">WhatsApp</label>
+                    <input type="text" id="kontak_whatsapp" name="kontak_whatsapp" value="{{ config.kontak_whatsapp }}" placeholder="Contoh: 081234567890">
                 </div>
-                <div class="card-body">
-                    <div class="checkbox-grid">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="tampilkan_hero" name="tampilkan_hero" {% if config.tampilkan_hero == '1' %}checked{% endif %}>
-                            <label for="tampilkan_hero">
-                                Tampilkan Hero Section
-                                <div class="desc">Gambar besar di atas dengan judul desa</div>
-                            </label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="tampilkan_statistik" name="tampilkan_statistik" {% if config.tampilkan_statistik == '1' %}checked{% endif %}>
-                            <label for="tampilkan_statistik">
-                                Tampilkan Statistik
-                                <div class="desc">Jumlah dusun, kasi, kepala desa</div>
-                            </label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="tampilkan_daftar_dusun" name="tampilkan_daftar_dusun" {% if config.tampilkan_daftar_dusun == '1' %}checked{% endif %}>
-                            <label for="tampilkan_daftar_dusun">
-                                Tampilkan Daftarusun
-                                <div class="desc">Daftar 6 dusun di desa</div>
-                            </label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="tampilkan_maps" name="tampilkan_maps" {% if config.tampilkan_maps == '1' %}checked{% endif %}>
-                            <label for="tampilkan_maps">
-                                Tampilkan Peta Lokasi
-                                <div class="desc">Google Maps di bagian bawah</div>
-                            </label>
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label for="kontak_telepon">Telepon</label>
+                    <input type="text" id="kontak_telepon" name="kontak_telepon" value="{{ config.kontak_telepon }}" placeholder="Contoh: (0287) 123456">
                 </div>
             </div>
+            <div class="form-group">
+                <label for="kontak_email">Email</label>
+                <input type="text" id="kontak_email" name="kontak_email" value="{{ config.kontak_email }}" placeholder="Contoh: desakdwg@gmail.com">
+            </div>
+            <div class="form-group">
+                <label for="alamat_desa">Alamat</label>
+                <textarea id="alamat_desa" name="alamat_desa" placeholder="Alamat lengkap kantor desa">{{ config.alamat_desa }}</textarea>
+            </div>
+        </div>
+    </div>
 
-            <!-- Kontak -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="icon">📞</span>
-                    <div>
-                        <h2>Kontak & Informasi</h2>
-                        <p>Nomor yang bisa dihubungi warga</p>
-                    </div>
+    <!-- Sosial Media -->
+    <div class="card-section animate-in" style="animation-delay: 0.4s;">
+        <div class="card-section-header">
+            <span class="icon">📱</span>
+            <div>
+                <h2>Sosial Media</h2>
+                <p>Tautan ke akun resmi desa (kosongkan jika tidak ada)</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="sosial_facebook">Facebook</label>
+                    <input type="text" id="sosial_facebook" name="sosial_facebook" value="{{ config.sosial_facebook }}" placeholder="Nama halaman atau link Facebook">
                 </div>
-                <div class="card-body">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="kontak_whatsapp">WhatsApp</label>
-                            <input type="text" id="kontak_whatsapp" name="kontak_whatsapp" value="{{ config.kontak_whatsapp }}" placeholder="Contoh: 081234567890">
-                        </div>
-                        <div class="form-group">
-                            <label for="kontak_telepon">Telepon</label>
-                            <input type="text" id="kontak_telepon" name="kontak_telepon" value="{{ config.kontak_telepon }}" placeholder="Contoh: (0287) 123456">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="kontak_email">Email</label>
-                        <input type="text" id="kontak_email" name="kontak_email" value="{{ config.kontak_email }}" placeholder="Contoh: desakdwg@gmail.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="alamat_desa">Alamat</label>
-                        <textarea id="alamat_desa" name="alamat_desa" placeholder="Alamat lengkap kantor desa">{{ config.alamat_desa }}</textarea>
-                    </div>
+                <div class="form-group">
+                    <label for="sosial_instagram">Instagram</label>
+                    <input type="text" id="sosial_instagram" name="sosial_instagram" value="{{ config.sosial_instagram }}" placeholder="Username Instagram (tanpa @)">
                 </div>
             </div>
-
-            <!-- Sosial Media -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="icon">📱</span>
-                    <div>
-                        <h2>Sosial Media</h2>
-                        <p>Tautan ke akun resmi desa (kosongkan jika tidak ada)</p>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="sosial_facebook">Facebook</label>
-                            <input type="text" id="sosial_facebook" name="sosial_facebook" value="{{ config.sosial_facebook }}" placeholder="Nama halaman atau link Facebook">
-                        </div>
-                        <div class="form-group">
-                            <label for="sosial_instagram">Instagram</label>
-                            <input type="text" id="sosial_instagram" name="sosial_instagram" value="{{ config.sosial_instagram }}" placeholder="Username Instagram (tanpa @)">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="sosial_twitter">Twitter/X</label>
-                        <input type="text" id="sosial_twitter" name="sosial_twitter" value="{{ config.sosial_twitter }}" placeholder="Username Twitter (tanpa @)">
-                    </div>
-                </div>
+            <div class="form-group">
+                <label for="sosial_twitter">Twitter/X</label>
+                <input type="text" id="sosial_twitter" name="sosial_twitter" value="{{ config.sosial_twitter }}" placeholder="Username Twitter (tanpa @)">
             </div>
+        </div>
+    </div>
 
-            <!-- Footer -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="icon">📋</span>
-                    <div>
-                        <h2>Footer / Copyright</h2>
-                        <p>Teks di bagian paling bawah website</p>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label for="footer_copyright">Teks Copyright</label>
-                        <input type="text" id="footer_copyright" name="footer_copyright" value="{{ config.footer_copyright }}" placeholder="Contoh: © 2026 Desa Kedungwinangun">
-                    </div>
-                </div>
+    <!-- Footer -->
+    <div class="card-section animate-in" style="animation-delay: 0.5s;">
+        <div class="card-section-header">
+            <span class="icon">📋</span>
+            <div>
+                <h2>Footer / Copyright</h2>
+                <p>Teks di bagian paling bawah website</p>
             </div>
+        </div>
+        <div class="card-section-body">
+            <div class="form-group">
+                <label for="footer_copyright">Teks Copyright</label>
+                <input type="text" id="footer_copyright" name="footer_copyright" value="{{ config.footer_copyright }}" placeholder="Contoh: © 2026 Desa Kedungwinangun">
+            </div>
+        </div>
+    </div>
 
-            <div class="btn-group">
-                <button type="submit" class="btn btn-primary">
-                    <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
-                    💾 Simpan Pengaturan
-                </button>
-                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-back">
-                    ← Kembali ke Dashboard
-                </a>
-            </div>
-        </form>
-    </main>
-</body>
-</html>
+    <div class="btn-group">
+        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #166534, #22c55e); color: white; box-shadow: 0 4px 14px rgba(22, 101, 52, 0.4);">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4z"/>
+            </svg>
+            💾 Simpan Pengaturan
+        </button>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline" style="background: #e7e5e4; color: #1e293b; border: 2px solid #d6d3d1;">
+            ← Kembali ke Dashboard
+        </a>
+    </div>
+</form>
+{% endblock %}
