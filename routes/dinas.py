@@ -30,12 +30,8 @@ def dinas_required(f):
     """Decorator untuk proteksi route (hanya dinas & admin)"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        if 'user_logged_in' not in session:
-            return redirect(url_for('user.login'))
-        user = get_user_by_id(session.get('user_id'))
-        if not user or user['role'] not in ['admin', 'dinas']:
-            flash('Anda tidak memiliki akses ke halaman ini!', 'error')
-            return redirect(url_for('user.dashboard'))
+        if not (session.get('user_logged_in') and session.get('user_role') in ['admin', 'dinas']):
+            return redirect(url_for('public.login'))
         return f(*args, **kwargs)
     return decorated
 

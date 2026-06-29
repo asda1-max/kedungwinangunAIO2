@@ -30,12 +30,12 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 # ── Decorators ─────────────────────────────────────────────────────────
 
 def login_required(f):
-    """Decorator untuk proteksi route"""
+    """Decorator untuk proteksi route admin"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        if 'admin_logged_in' not in session:
-            return redirect(url_for('admin.login'))
-        return f(*args, **kwargs)
+        if session.get('user_logged_in') and session.get('user_role') == 'admin':
+            return f(*args, **kwargs)
+        return redirect(url_for('public.login'))
     return decorated
 
 
@@ -43,27 +43,8 @@ def login_required(f):
 
 @admin_bp.route("/login", methods=['GET', 'POST'])
 def login():
-    """Halaman login admin"""
-    if session.get('admin_logged_in'):
-        return redirect(url_for('admin.dashboard'))
-
-    if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
-
-        # Check against admin001 user with admin role
-        user = get_user_by_nik(username)
-        if user and user['role'] == 'admin' and check_password_hash(user['password_hash'], password):
-            session['admin_logged_in'] = True
-            session['user_id'] = user['id']
-            session['user_nama'] = user['nama_lengkap']
-            session['user_nik'] = user['nik']
-            session['user_role'] = user['role']
-            return redirect(url_for('admin.dashboard'))
-        else:
-            flash('Username atau password salah!', 'error')
-
-    return render_template("admin/login.html")
+    """Redirect to unified login"""
+    return redirect(url_for('public.login'))
 
 
 @admin_bp.route("/logout")

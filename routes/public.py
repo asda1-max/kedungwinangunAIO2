@@ -4,12 +4,16 @@ Berisi route-route yang dapat diakses publik (tanpa login)
 """
 
 from flask import Blueprint, render_template, redirect, url_for, request, session, flash, json
+from functools import wraps
+from werkzeug.security import check_password_hash
 from models import (
     get_desa_info,
     get_all_berita,
     get_berita_by_id,
     get_config,
     get_all_galeri,
+    get_user_by_nik,
+    verify_user,
 )
 from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
 
@@ -22,6 +26,76 @@ def get_desa_info_with_maps():
     info['maps_embed_url'] = MAPS_EMBED_URL
     info['dusun'] = DUSUN_DATA
     return info
+
+
+# ── Unified Login Route ──────────────────────────────────────────────────
+
+@public_bp.route("/login", methods=['GET', 'POST'])
+def login():
+    """Unified login page for Admin, Dinas, and Warga"""
+    from datetime import datetime
+
+    # Redirect if already logged in
+    if session.get('user_logged_in'):
+        role = session.get('user_role')
+        if role == 'admin':
+            return redirect(url_for('admin.dashboard'))
+        elif role == 'dinas':
+            return redirect(url_for('dinas.dashboard'))
+        else:
+            return redirect(url_for('user.dashboard'))
+
+    if request.method == 'POST':
+        login_type = request.form.get('login_type', 'admin')
+
+        if login_type == 'admin':
+            # Admin/Dinas Login
+            username = request.form.get('username', '').strip()
+            password = request.form.get('password', '')
+
+            user = get_user_by_nik(username)
+            if user and user['role'] in ['admin', 'dinas'] and check_password_hash(user['password_hash'], password):
+                session['user_logged_in'] = True
+                session['user_id'] = user['id']
+                session['user_nama'] = user['nama_lengkap']
+                session['user_nik'] = user['nik']
+                session['user_role'] = user['role']
+
+                flash(f'Selamat datang, {user["nama_lengkap"]}!', 'success')
+
+                if user['role'] == 'admin':
+                    return redirect(url_for('admin.dashboard'))
+                else:
+                    return redirect(url_for('dinas.dashboard'))
+            else:
+                flash('Username atau password salah!', 'error')
+
+        elif login_type == 'warga':
+            # Warga Login
+            nik = request.form.get('nik', '').strip()
+            password = request.form.get('password', '')
+
+            user = verify_user(nik, password)
+            if user:
+                session['user_logged_in'] = True
+                session['user_id'] = user['id']
+                session['user_nama'] = user['nama_lengkap']
+                session['user_nik'] = user['nik']
+                session['user_role'] = user['role']
+
+                flash(f'Selamat datang, {user["nama_lengkap"]}!', 'success')
+                return redirect(url_for('user.dashboard'))
+            else:
+                flash('NIK atau password salah!', 'error')
+
+    # Render login page
+    desa_info = get_desa_info_with_maps()
+    return render_template(
+        "login.html",
+        site_name=desa_info['nama'],
+        site_tagline=desa_info['tagline'],
+        site_description=desa_info['deskripsi'],
+    )
 
 
 @public_bp.route("/")

@@ -33,12 +33,12 @@ def allowed_file(filename):
 # ── Decorators ─────────────────────────────────────────────────────────
 
 def login_required(f):
-    """Decorator untuk proteksi route"""
+    """Decorator untuk proteksi route warga/dinas"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        if 'user_logged_in' not in session:
-            return redirect(url_for('user.login'))
-        return f(*args, **kwargs)
+        if session.get('user_logged_in') and session.get('user_role') in ['warga', 'dinas']:
+            return f(*args, **kwargs)
+        return redirect(url_for('public.login') + '#warga')
     return decorated
 
 
@@ -105,36 +105,8 @@ def register():
 
 @user_bp.route("/login", methods=['GET', 'POST'])
 def login():
-    """Halaman login warga/dinas"""
-    if session.get('user_logged_in'):
-        if session.get('user_role') in ['admin', 'dinas']:
-            return redirect(url_for('dinas.dashboard'))
-        return redirect(url_for('user.dashboard'))
-
-    if request.method == 'POST':
-        nik = request.form.get('nik', '').strip()
-        password = request.form.get('password', '')
-
-        user = verify_user(nik, password)
-
-        if user:
-            session['user_logged_in'] = True
-            session['user_id'] = user['id']
-            session['user_nama'] = user['nama_lengkap']
-            session['user_role'] = user['role']
-            session['user_nik'] = user['nik']
-
-            if user['role'] in ['admin', 'dinas']:
-                return redirect(url_for('dinas.dashboard'))
-            return redirect(url_for('user.dashboard'))
-        else:
-            existing = get_user_by_id(nik)
-            if existing and existing['status'] == 'pending':
-                flash('Akun Anda belum disetujui. Mohon tunggu konfirmasi.', 'warning')
-            else:
-                flash('NIK atau password salah!', 'error')
-
-    return render_template("user/login.html")
+    """Redirect to unified login"""
+    return redirect(url_for('public.login') + '#warga')
 
 
 @user_bp.route("/logout")
