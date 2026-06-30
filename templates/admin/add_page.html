@@ -1,0 +1,95 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Tambah Page - Admin Panel{% endblock %}
+{% block page_title %}📄 Tambah Page Baru{% endblock %}
+{% block page_subtitle %}Buat halaman baru untuk website{% endblock %}
+
+{% block header_actions %}
+{% endblock %}
+
+{% block content %}
+<div class="card animate-in">
+    <div class="card-body">
+        <form method="POST">
+            <div class="form-group">
+                <label for="title">Judul Page <span class="required">*</span></label>
+                <input type="text" id="title" name="title" placeholder="Contoh: Produk Hukum" required>
+                <p class="hint">Judul yang akan ditampilkan di menu</p>
+            </div>
+
+            <div class="form-group">
+                <label for="slug">Slug / URL <span class="required">*</span></label>
+                <div class="input-group">
+                    <span class="input-prefix">/page/</span>
+                    <input type="text" id="slug" name="slug" placeholder="produk-hukum" required>
+                </div>
+                <p class="hint">Slug akan menjadi URL page. Contoh: /page/produk-hukum</p>
+            </div>
+
+            <div class="form-group">
+                <label for="icon">Ikon</label>
+                <select id="icon" name="icon">
+                    <option value="📄">📄 Page</option>
+                    <option value="📋">📋 Dokumen</option>
+                    <option value="⚖️">⚖️ Hukum</option>
+                    <option value="📊">📊 Statistik</option>
+                    <option value="📁">📁 Arsip</option>
+                    <option value="🏛️">🏛️ Pemerintahan</option>
+                    <option value="📜">📜 Surat</option>
+                    <option value="📑">📑 Formulir</option>
+                    <option value="🗺️">🗺️ Peta</option>
+                    <option value="📞">📞 Kontak</option>
+                    <option value="❓">❓ FAQ</option>
+                    <option value="📝">📝 Panduan</option>
+                    <option value="🎯">🎯 Visi Misi</option>
+                    <option value="👥">👥 Organisasi</option>
+                    <option value="📅">📅 Agenda</option>
+                    <option value="🏆">🏆 Prestasi</option>
+                    <option value="🌾">🌾 Pertanian</option>
+                    <option value="🐟">🐟 Peternakan</option>
+                    <option value="🏭">🏭 UMKM</option>
+                    <option value="🛤️">🛤️ Infrastruktur</option>
+                    <option value="💧">💧 Sumber Daya</option>
+                    <option value="🌳">🌳 Lingkungan</option>
+                    <option value="🎓">🎓 Pendidikan</option>
+                    <option value="🏥">🏥 Kesehatan</option>
+                </select>
+                <p class="hint">Pilih ikon yang sesuai dengan page</p>
+            </div>
+
+            <div class="form-group">
+                <label for="content">Konten Page</label>
+                <textarea id="content" name="content" placeholder="Tulis konten page di sini... (supports HTML)" style="min-height: 300px;"></textarea>
+                <p class="hint">Konten bisa menggunakan HTML untuk formatting</p>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4z"/>
+                    </svg>
+                    💾 Simpan Page
+                </button>
+                <a href="{{ url_for('admin.pages') }}" class="btn btn-outline">
+                    ← Kembali
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto-generate slug from title
+document.getElementById('title').addEventListener('input', function() {
+    const slug = this.value
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+    document.getElementById('slug').value = slug;
+});
+</script>
+{% endblock %}

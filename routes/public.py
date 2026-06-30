@@ -14,6 +14,8 @@ from models import (
     get_all_galeri,
     get_user_by_nik,
     verify_user,
+    get_all_pages,
+    get_page_by_slug,
 )
 from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
 
@@ -291,6 +293,41 @@ def galeri():
         desa=desa_info,
         nav_links=[{**n, "active": n["label"] == "Galeri"} for n in NAV_LINKS],
         foto_list=foto_list,
+        tahun=datetime.now().year,
+        site_name=desa_info['nama'],
+        site_tagline=desa_info['tagline'],
+        site_description=desa_info['deskripsi'],
+    )
+
+
+@public_bp.route("/page/<slug>")
+def view_page(slug):
+    """Halaman custom page"""
+    from datetime import datetime
+    desa_info = get_desa_info_with_maps()
+    page = get_page_by_slug(slug)
+
+    if not page:
+        return "Page tidak ditemukan", 404
+
+    # Update nav_links with custom pages
+    custom_pages = get_all_pages()
+    nav_links_with_pages = NAV_LINKS.copy()
+    if custom_pages:
+        # Add Lainnya with custom pages
+        nav_links_with_pages.append({
+            "label": "Lainnya",
+            "href": "#",
+            "active": False,
+            "is_dropdown": True,
+            "children": [{"label": p.title, "href": f"/page/{p.slug}", "icon": p.icon} for p in custom_pages]
+        })
+
+    return render_template(
+        "page.html",
+        desa=desa_info,
+        page=page,
+        nav_links=nav_links_with_pages,
         tahun=datetime.now().year,
         site_name=desa_info['nama'],
         site_tagline=desa_info['tagline'],

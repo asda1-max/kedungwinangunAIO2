@@ -22,6 +22,12 @@ from models import (
     update_galeri,
     delete_galeri,
     toggle_galeri_aktif,
+    get_all_pages,
+    get_page_by_id,
+    add_page,
+    update_page,
+    delete_page,
+    toggle_page_active,
 )
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -313,3 +319,94 @@ def toggle_galeri_route(galeri_id):
     toggle_galeri_aktif(galeri_id)
     flash('Status galeri berhasil diubah!', 'success')
     return redirect(url_for('admin.galeri'))
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── PAGES MANAGEMENT ───────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+@admin_bp.route("/pages")
+@login_required
+def pages():
+    """Halaman list pages"""
+    all_pages = get_all_pages()
+    return render_template("admin/pages.html", pages_list=all_pages)
+
+
+@admin_bp.route("/pages/add", methods=['GET', 'POST'])
+@login_required
+def add_page_route():
+    """Form tambah page"""
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        slug = request.form.get('slug', '').strip().lower().replace(' ', '-')
+        content = request.form.get('content', '').strip()
+        icon = request.form.get('icon', '📄').strip()
+
+        if title and slug:
+            # Check if slug exists
+            existing = get_all_pages()
+            slugs = [p['slug'] for p in existing]
+            if slug in slugs:
+                flash('Slug sudah digunakan! Gunakan slug lain.', 'error')
+                return redirect(url_for('admin.add_page_route'))
+
+            add_page(title, slug, content, icon)
+            flash('Page berhasil dibuat!', 'success')
+            return redirect(url_for('admin.pages'))
+        else:
+            flash('Judul dan slug harus diisi!', 'error')
+
+    return render_template("admin/add_page.html")
+
+
+@admin_bp.route("/pages/edit/<int:page_id>", methods=['GET', 'POST'])
+@login_required
+def edit_page_route(page_id):
+    """Form edit page"""
+    page = get_page_by_id(page_id)
+    if not page:
+        flash('Page tidak ditemukan!', 'error')
+        return redirect(url_for('admin.pages'))
+
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        slug = request.form.get('slug', '').strip().lower().replace(' ', '-')
+        content = request.form.get('content', '').strip()
+        icon = request.form.get('icon', '📄').strip()
+        order_num = int(request.form.get('order_num', 0) or 0)
+        active = 1 if request.form.get('active') else 0
+
+        if title and slug:
+            # Check if slug exists for other pages
+            existing = get_all_pages()
+            slugs = [p['slug'] for p in existing if p['id'] != page_id]
+            if slug in slugs:
+                flash('Slug sudah digunakan! Gunakan slug lain.', 'error')
+                return redirect(url_for('admin.edit_page_route', page_id=page_id))
+
+            update_page(page_id, title, slug, content, icon, order_num, active)
+            flash('Page berhasil diperbarui!', 'success')
+            return redirect(url_for('admin.pages'))
+        else:
+            flash('Judul dan slug harus diisi!', 'error')
+
+    return render_template("admin/edit_page.html", page=page)
+
+
+@admin_bp.route("/pages/delete/<int:page_id>", methods=['POST'])
+@login_required
+def delete_page_route(page_id):
+    """Hapus page"""
+    delete_page(page_id)
+    flash('Page berhasil dihapus!', 'success')
+    return redirect(url_for('admin.pages'))
+
+
+@admin_bp.route("/pages/toggle/<int:page_id>", methods=['POST'])
+@login_required
+def toggle_page_route(page_id):
+    """Toggle status aktif/nonaktif page"""
+    toggle_page_active(page_id)
+    flash('Status page berhasil diubah!', 'success')
+    return redirect(url_for('admin.pages'))

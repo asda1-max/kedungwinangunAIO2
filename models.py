@@ -114,6 +114,19 @@ def init_database():
             aktif INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        -- Pages (Custom Pages)
+        CREATE TABLE IF NOT EXISTS pages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            slug TEXT UNIQUE NOT NULL,
+            content TEXT,
+            icon TEXT DEFAULT '📄',
+            order_num INTEGER DEFAULT 0,
+            active INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
     ''')
 
     # Insert default config
@@ -528,5 +541,89 @@ def toggle_galeri_aktif(galeri_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('UPDATE galeri SET aktif = CASE WHEN aktif = 1 THEN 0 ELSE 1 END WHERE id = ?', (galeri_id,))
+    conn.commit()
+    conn.close()
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── CUSTOM PAGES HELPERS ─────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_all_pages():
+    """Ambil semua page aktif"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM pages WHERE active = 1 ORDER BY order_num ASC, title ASC')
+    pages = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return pages
+
+def get_page_by_slug(slug):
+    """Ambil page berdasarkan slug"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM pages WHERE slug = ? AND active = 1', (slug,))
+    page = cursor.fetchone()
+    conn.close()
+    return dict(page) if page else None
+
+def get_page_by_id(page_id):
+    """Ambil page berdasarkan ID"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM pages WHERE id = ?', (page_id,))
+    page = cursor.fetchone()
+    conn.close()
+    return dict(page) if page else None
+
+def get_all_pages_admin():
+    """Ambil semua page (termasuk nonaktif) untuk admin"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM pages ORDER BY order_num ASC, title ASC')
+    pages = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return pages
+
+def add_page(title, slug, content, icon='📄'):
+    """Tambah page baru"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Get max order
+    cursor.execute('SELECT MAX(order_num) as max_order FROM pages')
+    row = cursor.fetchone()
+    max_order = (row['max_order'] or 0) + 1
+
+    cursor.execute('''
+        INSERT INTO pages (title, slug, content, icon, order_num, active)
+        VALUES (?, ?, ?, ?, ?, 1)
+    ''', (title, slug, content, icon, max_order))
+    conn.commit()
+    conn.close()
+
+def update_page(page_id, title, slug, content, icon, order_num, active):
+    """Update page"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE pages SET title = ?, slug = ?, content = ?, icon = ?, order_num = ?, active = ?
+        WHERE id = ?
+    ''', (title, slug, content, icon, order_num, active, page_id))
+    conn.commit()
+    conn.close()
+
+def delete_page(page_id):
+    """Hapus page"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM pages WHERE id = ?', (page_id,))
+    conn.commit()
+    conn.close()
+
+def toggle_page_active(page_id):
+    """Toggle status aktif page"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE pages SET active = CASE WHEN active = 1 THEN 0 ELSE 1 END WHERE id = ?', (page_id,))
     conn.commit()
     conn.close()
