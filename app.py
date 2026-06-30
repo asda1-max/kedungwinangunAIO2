@@ -50,14 +50,6 @@ def inject_openrouter_key():
         'openrouter_api_key': environ.get('OPENROUTER_API_KEY', '')
     }
 
-@app.context_processor
-def inject_pages():
-    """Inject custom pages to all templates for navbar"""
-    from models import get_all_pages
-    return {
-        'custom_pages': get_all_pages()
-    }
-
 # ── Register Blueprints ───────────────────────────────────────────────
 from routes import public_bp, admin_bp, user_bp, dinas_bp
 

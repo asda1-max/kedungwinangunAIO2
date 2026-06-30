@@ -92,11 +92,13 @@ def login():
 
     # Render login page
     desa_info = get_desa_info_with_maps()
+    custom_pages = get_all_pages()
     return render_template(
         "login.html",
         site_name=desa_info['nama'],
         site_tagline=desa_info['tagline'],
         site_description=desa_info['deskripsi'],
+        custom_pages=custom_pages,
     )
 
 
@@ -106,6 +108,7 @@ def index():
     from datetime import datetime
     desa_info = get_desa_info_with_maps()
     berita_list = get_all_berita()
+    custom_pages = get_all_pages()
 
     # Get config values
     max_unggulan = int(get_config("berita_unggulan_tampil", 3))
@@ -159,6 +162,7 @@ def index():
         show_hero=show_hero,
         show_views=show_views,
         show_tanggal=show_tanggal,
+        custom_pages=custom_pages,
         carousel_stacks=carousel_stacks,
     )
 
@@ -183,6 +187,7 @@ def berita():
         site_name=desa_info['nama'],
         site_tagline=desa_info['tagline'],
         site_description=desa_info['deskripsi'],
+        custom_pages=custom_pages,
     )
 
 
@@ -190,6 +195,7 @@ def berita():
 def detail_berita(berita_id):
     """Halaman detail berita"""
     desa_info = get_desa_info_with_maps()
+    custom_pages = get_all_pages()
     artikel = get_berita_by_id(berita_id)
     if not artikel:
         return "Berita tidak ditemukan", 404
@@ -206,6 +212,7 @@ def detail_berita(berita_id):
         site_name=desa_info['nama'],
         site_tagline=desa_info['tagline'],
         site_description=desa_info['deskripsi'],
+        custom_pages=custom_pages,
     )
 
 
@@ -225,6 +232,7 @@ def layanan():
     # User sudah login, tampilkan form permohonan surat
     from models import get_all_jenis_surat, create_permohonan_surat
 
+    custom_pages = get_all_pages()
     jenis_surat = get_all_jenis_surat()
     desa_info = get_desa_info_with_maps()
 
@@ -248,6 +256,7 @@ def layanan():
         site_name=desa_info['nama'],
         site_tagline=desa_info['tagline'],
         site_description=desa_info['deskripsi'],
+        custom_pages=custom_pages,
     )
 
 
@@ -256,6 +265,7 @@ def kontak():
     """Halaman informasi kontak desa"""
     from datetime import datetime
     desa_info = get_desa_info_with_maps()
+    custom_pages = get_all_pages()
 
     # Ambil data kontak dari config
     kontak_data = {
@@ -278,6 +288,7 @@ def kontak():
         site_name=desa_info['nama'],
         site_tagline=desa_info['tagline'],
         site_description=desa_info['deskripsi'],
+        custom_pages=custom_pages,
     )
 
 
@@ -287,6 +298,7 @@ def galeri():
     from datetime import datetime
     desa_info = get_desa_info_with_maps()
     foto_list = get_all_galeri(aktif=1)
+    custom_pages = get_all_pages()
 
     return render_template(
         "galeri.html",
@@ -297,6 +309,7 @@ def galeri():
         site_name=desa_info['nama'],
         site_tagline=desa_info['tagline'],
         site_description=desa_info['deskripsi'],
+        custom_pages=custom_pages,
     )
 
 
@@ -320,7 +333,7 @@ def view_page(slug):
             "href": "#",
             "active": False,
             "is_dropdown": True,
-            "children": [{"label": p.title, "href": f"/page/{p.slug}", "icon": p.icon} for p in custom_pages]
+            "children": [{"label": p['title'], "href": f"/page/{p['slug']}", "icon": p['icon']} for p in custom_pages]
         })
 
     return render_template(
@@ -332,4 +345,5 @@ def view_page(slug):
         site_name=desa_info['nama'],
         site_tagline=desa_info['tagline'],
         site_description=desa_info['deskripsi'],
+        custom_pages=custom_pages,
     )
