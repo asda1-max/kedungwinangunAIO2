@@ -198,7 +198,8 @@
                     </div>
 
                     {% if session.user_logged_in %}
-                    <div class="border-t border-white/10 pt-3 mt-1">
+                    <!-- User Account Section (Logged In) -->
+                    <div class="border-t border-white/10 pt-3 mt-1 mb-3">
                         <div class="flex items-center gap-3 mb-3">
                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#73AA0F] to-[#155C1B] flex items-center justify-center text-white font-bold">
                                 {{ session.user_nama[0]|upper if session.user_nama else 'U' }}
@@ -241,16 +242,31 @@
                             </a>
                         </div>
                     </div>
-                    {% endif %}
-
-                    {% if not session.user_logged_in %}
-                    <div class="border-t border-white/10 pt-3 mt-1 flex gap-2">
+                    {% else %}
+                    <!-- Sign In / Sign Up Buttons (Guest) -->
+                    <div class="border-t border-white/10 pt-3 mt-1 mb-3 flex gap-2">
                         <a href="{{ url_for('user.login') }}" class="flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition-colors">
                             Masuk
                         </a>
                         <a href="{{ url_for('user.register') }}" class="flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-[#73AA0F] text-white hover:bg-[#63930b] transition-colors">
                             Daftar
                         </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Custom Pages (Admin Created) - RAHASIA Section -->
+                    {% if custom_pages_nav %}
+                    <div class="border-t border-white/10 pt-3 mt-1">
+                        <div class="text-yellow-300 text-xs font-semibold uppercase tracking-wider mb-2 px-1">🔐 Rahasia</div>
+                        <div class="flex flex-col gap-1">
+                            {% for page in custom_pages_nav %}
+                            <a href="{{ url_for('public.view_page', slug=page.slug) }}"
+                               class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                                <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">{{ page.icon }}</span>
+                                <span class="font-medium">{{ page.title }}</span>
+                            </a>
+                            {% endfor %}
+                        </div>
                     </div>
                     {% endif %}
                 </div>
