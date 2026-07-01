@@ -10,7 +10,7 @@
 {% block content %}
 <div class="card animate-in">
     <div class="card-body">
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="title">Judul Page <span class="required">*</span></label>
                 <input type="text" id="title" name="title" placeholder="Contoh: Produk Hukum" required>
@@ -58,9 +58,15 @@
             </div>
 
             <div class="form-group">
+                <label for="html_file">Upload File HTML</label>
+                <input type="file" id="html_file" name="html_file" accept=".html,.htm" onchange="loadHtmlContent(this)">
+                <p class="hint">Upload file HTML untuk mengisi konten. File akan dibaca dan isinya dimasukkan ke kolom konten.</p>
+            </div>
+
+            <div class="form-group">
                 <label for="content">Konten Page</label>
                 <textarea id="content" name="content" placeholder="Tulis konten page di sini... (supports HTML)" style="min-height: 300px;"></textarea>
-                <p class="hint">Konten bisa menggunakan HTML untuk formatting</p>
+                <p class="hint">Konten bisa menggunakan HTML untuk formatting. Isi manual atau upload file HTML di atas.</p>
             </div>
 
             <div class="btn-group">
@@ -91,5 +97,29 @@ document.getElementById('title').addEventListener('input', function() {
         .trim();
     document.getElementById('slug').value = slug;
 });
+
+// Load HTML file content into textarea
+function loadHtmlContent(input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            document.getElementById('content').value = content;
+            // Show success message
+            const hint = input.parentElement.querySelector('.hint');
+            hint.textContent = '✓ File berhasil dimuat ke konten!';
+            hint.style.color = '#166534';
+            setTimeout(() => {
+                hint.textContent = 'Upload file HTML untuk mengisi konten. File akan dibaca dan isinya dimasukkan ke kolom konten.';
+                hint.style.color = '';
+            }, 3000);
+        };
+        reader.onerror = function() {
+            alert('Gagal membaca file!');
+        };
+        reader.readAsText(file);
+    }
+}
 </script>
 {% endblock %}

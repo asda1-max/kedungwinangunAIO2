@@ -551,6 +551,18 @@
                     <div class="nav-item-icon">🖼️</div>
                     Galeri
                 </a>
+
+                <a href="{{ url_for('admin.pages') }}"
+                   class="nav-item {% if request.endpoint and 'page' in request.endpoint %}active{% endif %}">
+                    <div class="nav-item-icon">📄</div>
+                    Halaman
+                </a>
+
+                <a href="{{ url_for('admin.add_page_route') }}"
+                   class="nav-item {% if request.endpoint == 'admin.add_page_route' %}active{% endif %}">
+                    <div class="nav-item-icon">➕</div>
+                    Tambah Halaman
+                </a>
             </nav>
 
             <!-- Settings Navigation -->

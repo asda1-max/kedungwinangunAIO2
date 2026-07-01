@@ -10,7 +10,7 @@
 {% block content %}
 <div class="card animate-in">
     <div class="card-body">
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="title">Judul Page <span class="required">*</span></label>
                 <input type="text" id="title" name="title" value="{{ page.title }}" placeholder="Contoh: Produk Hukum" required>
@@ -53,9 +53,15 @@
             </div>
 
             <div class="form-group">
+                <label for="html_file">Upload File HTML</label>
+                <input type="file" id="html_file" name="html_file" accept=".html,.htm" onchange="loadHtmlContent(this)">
+                <p class="hint">Upload file HTML untuk mengganti konten. File akan dibaca dan isinya menggantikan konten lama.</p>
+            </div>
+
+            <div class="form-group">
                 <label for="content">Konten Page</label>
                 <textarea id="content" name="content" placeholder="Tulis konten page di sini... (supports HTML)" style="min-height: 400px;">{{ page.content or '' }}</textarea>
-                <p class="hint">Konten bisa menggunakan HTML untuk formatting</p>
+                <p class="hint">Konten bisa menggunakan HTML untuk formatting. Upload file HTML di atas untuk mengisi konten.</p>
             </div>
 
             <div class="btn-group">
@@ -72,4 +78,48 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto-generate slug from title (hanya jika slug kosong atau default)
+document.getElementById('title').addEventListener('input', function() {
+    const slugInput = document.getElementById('slug');
+    // Jangan overwrite jika slug sudah di-set manual
+    if (slugInput.value === '' || slugInput.dataset.auto === 'true') {
+        slugInput.dataset.auto = 'true';
+        const slug = this.value
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+        slugInput.value = slug;
+    }
+});
+
+// Load HTML file content into textarea
+function loadHtmlContent(input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            document.getElementById('content').value = content;
+            // Show success message
+            const hint = input.parentElement.querySelector('.hint');
+            hint.textContent = '✓ File berhasil dimuat! Periksa konten sebelum menyimpan.';
+            hint.style.color = '#166534';
+            setTimeout(() => {
+                hint.textContent = 'Upload file HTML untuk mengganti konten. File akan dibaca dan isinya menggantikan konten lama.';
+                hint.style.color = '';
+            }, 5000);
+        };
+        reader.onerror = function() {
+            alert('Gagal membaca file!');
+        };
+        reader.readAsText(file);
+    }
+}
+</script>
 {% endblock %}
