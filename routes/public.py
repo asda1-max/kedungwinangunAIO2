@@ -347,3 +347,25 @@ def view_page(slug):
         site_description=desa_info['deskripsi'],
         custom_pages=custom_pages,
     )
+
+
+@public_bp.route("/peta-interaktif")
+def peta_interaktif():
+    """Halaman Peta Interaktif Desa Kedungwinangun"""
+    from datetime import datetime
+    from models import get_all_pages
+
+    desa_info = get_desa_info_with_maps()
+    custom_pages = get_all_pages()
+
+    return render_template(
+        "peta_interaktif.html",
+        page={"title": "Peta Interaktif"},
+        desa=desa_info,
+        nav_links=NAV_LINKS,
+        tahun=datetime.now().year,
+        site_name=desa_info['nama'],
+        site_tagline=desa_info['tagline'],
+        site_description=desa_info['deskripsi'],
+        custom_pages=custom_pages,
+    )

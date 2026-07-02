@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title if page else 'Peta Interaktif' }} - {{ site_name or 'Desa Kedungwinangun' }}</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/kebumen.png') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; }
+        #map { height: 70vh; min-height: 500px; border-radius: 16px; z-index: 1; }
+        .leaflet-popup-content-wrapper { border-radius: 12px; }
+        .leaflet-popup-content { font-family: 'Inter', sans-serif; margin: 12px; }
+        .legend { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .legend-color { width: 20px; height: 20px; border-radius: 4px; }
+        .feature-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: all 0.3s; }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .search-input { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; width: 100%; transition: all 0.2s; }
+        .search-input:focus { outline: none; border-color: #166534; box-shadow: 0 0 0 4px rgba(22, 101, 52, 0.1); }
+        .layer-btn { background: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; cursor: pointer; transition: all 0.2s; }
+        .layer-btn:hover { border-color: #166534; }
+        .layer-btn.active { background: #166534; color: white; border-color: #166534; }
+        .stats-card { background: white; border-radius: 12px; padding: 24px; text-align: center; }
+        .stats-number { font-size: 36px; font-weight: 800; color: #166534; }
+        .custom-marker { background: transparent !important; border: none !important; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        .marker-pulse { animation: pulse 1.5s infinite; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    {% include 'partials/navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-[#166534] to-[#22c55e] text-white py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">🗺️</div>
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold">{{ page.title if page else 'Peta Interaktif' }}</h1>
+                    <p class="text-green-100 mt-1">Eksplorasi wilayah Desa Kedungwinangun secara visual</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="stats-card">
+                <div class="stats-number">6</div>
+                <div class="text-gray-500 text-sm">Dusun</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-number">1,247</div>
+                <div class="text-gray-500 text-sm">Kartu Keluarga</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-number">4,521</div>
+                <div class="text-gray-500 text-sm">Penduduk</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-number">847</div>
+                <div class="text-gray-500 text-sm">Hektare</div>
+            </div>
+        </div>
+
+        <!-- Search & Layer Controls -->
+        <div class="bg-white rounded-2xl p-6 shadow-lg mb-8">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="relative w-full md:w-96">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" id="search-input" class="search-input pl-12" placeholder="Cari lokasi, dusun, atau fitur...">
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="toggleLayer('dusun')" class="layer-btn active" id="btn-dusun">🏘️ Zona</button>
+                    <button onclick="toggleLayer('fasilitas')" class="layer-btn active" id="btn-fasilitas">🏢 Fasilitas</button>
+                    <button onclick="toggleLayer('sungai')" class="layer-btn" id="btn-sungai">🌊 Sungai</button>
+                    <button onclick="toggleLayer('jalan')" class="layer-btn" id="btn-jalan">🛤️ Jalan</button>
+                    <button onclick="resetView()" class="layer-btn">🔄 Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="relative">
+            <div id="map"></div>
+
+            <!-- Legend -->
+            <div class="absolute top-4 right-4 z-[1000] legend" id="legend">
+                <h4 class="font-bold text-gray-700 mb-3">📍 Legenda</h4>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #166534;"></div>
+                    <span class="text-sm text-gray-600">Batas Desa</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f59e0b;"></div>
+                    <span class="text-sm text-gray-600">Zona / Wilayah</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #3b82f6;"></div>
+                    <span class="text-sm text-gray-600">Sungai</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #6b7280;"></div>
+                    <span class="text-sm text-gray-600">Jalan</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ef4444;"></div>
+                    <span class="text-sm text-gray-600">Fasilitas Umum</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <section class="py-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">📍 Fitur Peta Interaktif</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="feature-card">
+                    <div class="text-4xl mb-4">🔍</div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-2">Zoom & Navigasi</h3>
+                    <p class="text-gray-500 text-sm">Gunakan scroll atau pinch untuk zoom. Drag untuk navigasi peta.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="text-4xl mb-4">📍</div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-2">Marker Interaktif</h3>
+                    <p class="text-gray-500 text-sm">Klik marker untuk melihat informasi detail lokasi.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="text-4xl mb-4">🗂️</div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-2">Layer Toggle</h3>
+                    <p class="text-gray-500 text-sm">Aktifkan/nonaktifkan layer untuk melihat data tertentu.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="text-4xl mb-4">🏘️</div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-2">Zona Wilayah</h3>
+                    <p class="text-gray-500 text-sm">Lihat pembagian wilayah 6 dusun di Desa Kedungwinangun.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="text-4xl mb-4">📐</div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-2">Cari Lokasi</h3>
+                    <p class="text-gray-500 text-sm">Gunakan search untuk menemukan lokasi dengan cepat.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="text-4xl mb-4">🖼️</div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-2">Multi View</h3>
+                    <p class="text-gray-500 text-sm">Beralih ke tampilan satelit untuk detail lebih lanjut.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    {% include 'partials/footer.html' %}
+    {% include 'partials/chatbot.html' %}
+
+    <script>
+        // ── Inisialisasi Peta ──────────────────────────────────────────────
+        const map = L.map('map', {
+            center: [-7.6333, 109.5250], // Koordinat tengah Desa Kedungwinangun
+            zoom: 15,
+            scrollWheelZoom: true
+        });
+
+        // ── Tile Layers ───────────────────────────────────────────────────
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        });
+
+        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© ESRI',
+            maxZoom: 19
+        });
+
+        osmLayer.addTo(map);
+
+        // ── Base Maps Control ─────────────────────────────────────────────
+        const baseMaps = {
+            "🗺️ Peta": osmLayer,
+            "🛰️ Satelit": satelliteLayer
+        };
+        L.control.layers(baseMaps, null, { position: 'bottomright' }).addTo(map);
+
+        // ── Layer Groups ──────────────────────────────────────────────────
+        const dusunGroup = L.layerGroup();
+        const fasilitasGroup = L.layerGroup();
+        const jalanGroup = L.layerGroup();
+        const sungaiGroup = L.layerGroup();
+
+        // ── GeoJSON Data ───────────────────────────────────────────────────
+        const geojsonData = {
+            "type": "FeatureCollection",
+            "features": [
+                // Batas Desa
+                {
+                    "type": "Feature",
+                    "properties": { "name": "Desa Kedungwinangun", "type": "village_boundary", "kecamatan": "Klirong", "kabupaten": "Kebumen", "provinsi": "Jawa Tengah" },
+                    "geometry": { "type": "Polygon", "coordinates": [[[109.5167, -7.6083], [109.5333, -7.6083], [109.5500, -7.6167], [109.5583, -7.6333], [109.5500, -7.6500], [109.5417, -7.6583], [109.5250, -7.6667], [109.5083, -7.6583], [109.5000, -7.6417], [109.5000, -7.6250], [109.5083, -7.6167], [109.5167, -7.6083]]] }
+                },
+                // Zona 1: Kedungwaru
+                {
+                    "type": "Feature",
+                    "properties": { "name": "Dusun Kedungwaru", "type": "dusun", "rw": "01", "rt": "01, 02, 03", "penduduk": 892, "kk": 234 },
+                    "geometry": { "type": "Polygon", "coordinates": [[[109.5167, -7.6083], [109.5250, -7.6083], [109.5250, -7.6200], [109.5200, -7.6250], [109.5167, -7.6167], [109.5167, -7.6083]]] }
+                },
+                // Zona 2: Perna
+                {
+                    "type": "Feature",
+                    "properties": { "name": "Dusun Perna", "type": "dusun", "rw": "02", "rt": "01, 02, 03, 04", "penduduk": 756, "kk": 198 },
+                    "geometry": { "type": "Polygon", "coordinates": [[[109.5250, -7.6083], [109.5333, -7.6083], [109.5333, -7.6200], [109.5300, -7.6250], [109.5250, -7.6200], [109.5250, -7.6083]]] }
+                },
+                // Zona 3: Sasak
+                {
+                    "type": "Feature",
+                    "properties": { "name": "Dusun Sasak", "type": "dusun", "rw": "03", "rt": "01, 02, 03", "penduduk": 678, "kk": 179 },
+                    "geometry": { "type": "Polygon", "coordinates": [[[109.5083, -7.6167], [109.5167, -7.6167], [109.5200, -7.6250], [109.5167, -7.6333], [109.5083, -7.6250], [109.5083, -7.6167]]] }
+                },
+                // Zona 4: Entak
+                {
+                    "type": "Feature",
+                    "properties": { "name": "Dusun Entak", "type": "dusun", "rw": "04", "rt": "01, 02, 03, 04", "penduduk": 723, "kk": 195 },
+                    "geometry": { "type": "Polygon", "coordinates": [[[109.5250, -7.6200], [109.5333, -7.6200], [109.5417, -7.6333], [109.5333, -7.6417], [109.5250, -7.6333], [109.5250, -7.6200]]] }
+                },
+                // Zona 5: Grewing
+                {
+                    "type": "Feature",
+                    "properties": { "name": "Dusun Grewing", "type": "dusun", "rw": "05", "rt": "01, 02, 03", "penduduk": 812, "kk": 215 },
+                    "geometry": { "type": "Polygon", "coordinates": [[[109.5333, -7.6333], [109.5500, -7.6333], [109.5583, -7.6500], [109.5500, -7.6583], [109.5417, -7.6500], [109.5333, -7.6417], [109.5333, -7.6333]]] }
+                },
+                // Zona 6: Pedana
+                {
+                    "type": "Feature",
+                    "properties": { "name": "Dusun Pedana", "type": "dusun", "rw": "06", "rt": "01, 02, 03", "penduduk": 660, "kk": 226 },
+                    "geometry": { "type": "Polygon", "coordinates": [[[109.5000, -7.6250], [109.5083, -7.6250], [109.5167, -7.6333], [109.5083, -7.6417], [109.5000, -7.6417], [109.5000, -7.6250]]] }
+                },
+                // Sungai
+                {
+                    "type": "Feature",
+                    "properties": { "name": "Sungai Bodri", "type": "sungai", "panjang": "~3.5 km" },
+                    "geometry": { "type": "LineString", "coordinates": [[109.4950, -7.5950], [109.5000, -7.6083], [109.5083, -7.6167], [109.5167, -7.6250], [109.5250, -7.6333], [109.5333, -7.6417], [109.5417, -7.6500], [109.5500, -7.6583]] }
+                },
+                // Jalan Utama
+                {
+                    "type": "Feature",
+                    "properties": { "name": "Jalan Kabupaten (Klirong-Kutosari)", "type": "jalan_utama", "lebar": "~5 meter", "kondisi": "Aspal" },
+                    "geometry": { "type": "LineString", "coordinates": [[109.4950, -7.5900], [109.5100, -7.6100], [109.5250, -7.6250], [109.5400, -7.6400], [109.5550, -7.6550]] }
+                },
+                // Jalan Desa
+                {
+                    "type": "Feature",
+                    "properties": { "name": "Jalan Desa", "type": "jalan_desa", "keterangan": "Menghubungkan antar dusun" },
+                    "geometry": { "type": "LineString", "coordinates": [[109.5167, -7.6200], [109.5250, -7.6250], [109.5333, -7.6300], [109.5333, -7.6417]] }
+                }
+            ]
+        };
+
+        // ── Style Functions ───────────────────────────────────────────────
+        function getStyle(feature) {
+            const type = feature.properties.type;
+            if (type === 'dusun') {
+                return { fillColor: '#f59e0b', fillOpacity: 0.3, color: '#f59e0b', weight: 2, opacity: 0.8 };
+            } else if (type === 'village_boundary') {
+                return { fillColor: '#166534', fillOpacity: 0.1, color: '#166534', weight: 3, opacity: 0.9 };
+            } else if (type === 'sungai') {
+                return { color: '#3b82f6', weight: 4, opacity: 0.8 };
+            } else if (type === 'jalan_utama' || type === 'jalan_desa') {
+                return { color: '#6b7280', weight: 3, opacity: 0.8, dashArray: '5, 5' };
+            }
+            return { color: '#166534', weight: 2 };
+        }
+
+        // ── GeoJSON Layer ────────────────────────────────────────────────
+        let geojsonLayer = L.geoJSON(geojsonData, {
+            style: getStyle,
+            onEachFeature: function(feature, layer) {
+                const props = feature.properties;
+                const type = props.type;
+                let popupContent = '';
+
+                if (type === 'dusun') {
+                    popupContent = `<div class="p-3"><h3 class="font-bold text-lg text-green-700 mb-2">🏘️ ${props.name}</h3><div class="text-sm text-gray-600 space-y-1"><p>📌 RW: <strong>${props.rw}</strong></p><p>🏠 RT: <strong>${props.rt}</strong></p><p>👥 Penduduk: <strong>${props.penduduk}</strong></p><p>🏠 KK: <strong>${props.kk}</strong></p></div></div>`;
+                    dusunGroup.addLayer(layer);
+                } else if (type === 'village_boundary') {
+                    popupContent = `<div class="p-3"><h3 class="font-bold text-lg text-green-700 mb-2">🏘️ ${props.name}</h3><div class="text-sm text-gray-600"><p>📍 Kecamatan: <strong>${props.kecamatan}</strong></p><p>🏛️ Kabupaten: <strong>${props.kabupaten}</strong></p><p>🗺️ Provinsi: <strong>${props.provinsi}</strong></p></div></div>`;
+                } else if (type === 'sungai') {
+                    popupContent = `<div class="p-3"><h3 class="font-bold text-lg text-blue-700 mb-2">🌊 ${props.name}</h3><div class="text-sm text-gray-600"><p>📏 Panjang: <strong>${props.panjang}</strong></p></div></div>`;
+                    sungaiGroup.addLayer(layer);
+                } else if (type === 'jalan_utama' || type === 'jalan_desa') {
+                    popupContent = `<div class="p-3"><h3 class="font-bold text-lg text-gray-700 mb-2">🛤️ ${props.name}</h3><div class="text-sm text-gray-600">${props.lebar ? `<p>📏 Lebar: <strong>${props.lebar}</strong></p>` : ''}${props.kondisi ? `<p>🔧 Kondisi: <strong>${props.kondisi}</strong></p>` : ''}${props.keterangan ? `<p>📝 ${props.keterangan}</p>` : ''}</div></div>`;
+                    jalanGroup.addLayer(layer);
+                }
+
+                if (popupContent) layer.bindPopup(popupContent);
+
+                // Hover effect
+                layer.on({
+                    mouseover: function(e) { layer.setStyle({ weight: 4, color: '#22c55e', fillOpacity: 0.5 }); layer.bringToFront(); },
+                    mouseout: function(e) { geojsonLayer.resetStyle(layer); }
+                });
+            }
+        });
+        geojsonLayer.addTo(map);
+
+        // ── Markers untuk Fasilitas ──────────────────────────────────────
+        const facilities = [
+            { name: "🏛️ Kantor Desa", coords: [7.6217, 109.5250], desc: "Pusat pemerintahan desa", emoji: "🏛️" },
+            { name: "🕌 Masjid Al-Muhajirin", coords: [7.6240, 109.5220], desc: "Masjid utama", emoji: "🕌" },
+            { name: "⛪ Gereja", coords: [7.6260, 109.5280], desc: "Tempat ibadah Kristen", emoji: "⛪" },
+            { name: "🏫 SD Negeri 1", coords: [7.6180, 109.5280], desc: "Sekolah Dasar Negeri", emoji: "🏫" },
+            { name: "🏥 Puskesdes", coords: [7.6260, 109.5310], desc: "Puskesmas Pembantu", emoji: "🏥" },
+            { name: "🛒 Pasar Desa", coords: [7.6200, 109.5290], desc: "Pasar tradisional", emoji: "🛒" },
+            { name: "🏠 Balerom", coords: [7.6230, 109.5260], desc: "Balai pertemuan warga", emoji: "🏠" },
+            { name: "🛁 Mandi Bola", coords: [7.6350, 109.5350], desc: "Wisata sungai", emoji: "🛁" },
+            { name: "📦 UMKM Center", coords: [7.6270, 109.5310], desc: "Pusat Ekonomi Kreatif", emoji: "📦" }
+        ];
+
+        facilities.forEach((fac) => {
+            const marker = L.marker(fac.coords, {
+                icon: L.divIcon({
+                    html: `<div style="background: white; border: 3px solid #166534; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">${fac.emoji}</div>`,
+                    className: 'custom-marker',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                })
+            }).bindPopup(`<div class="p-3 min-w-[200px]"><h3 class="font-bold text-lg text-green-700">${fac.name}</h3><p class="text-sm text-gray-600 mt-1">${fac.desc}</p><div class="mt-2 pt-2 border-t"><a href="https://www.google.com/maps?q=${fac.coords[0]},${fac.coords[1]}" target="_blank" class="text-blue-600 text-sm hover:underline">📍 Lihat di Maps</a></div></div>`);
+            fasilitasGroup.addLayer(marker);
+        });
+        fasilitasGroup.addTo(map);
+
+        // ── Layer Toggle Functions ────────────────────────────────────────
+        const activeLayers = { dusun: true, fasilitas: true, jalan: false, sungai: false };
+
+        function toggleLayer(layerName) {
+            const btn = document.getElementById(`btn-${layerName}`);
+            activeLayers[layerName] = !activeLayers[layerName];
+            btn.classList.toggle('active', activeLayers[layerName]);
+
+            if (layerName === 'dusun') activeLayers[layerName] ? map.addLayer(dusunGroup) : map.removeLayer(dusunGroup);
+            if (layerName === 'fasilitas') activeLayers[layerName] ? map.addLayer(fasilitasGroup) : map.removeLayer(fasilitasGroup);
+            if (layerName === 'jalan') activeLayers[layerName] ? map.addLayer(jalanGroup) : map.removeLayer(jalanGroup);
+            if (layerName === 'sungai') activeLayers[layerName] ? map.addLayer(sungaiGroup) : map.removeLayer(sungaiGroup);
+        }
+
+        function resetView() { map.setView([-7.6333, 109.5250], 15); }
+
+        // ── Search Functionality ────────────────────────────────────────
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            if (query.length > 0) {
+                const found = facilities.find(f => f.name.toLowerCase().includes(query) || f.desc.toLowerCase().includes(query));
+                if (found) map.panTo(found.coords);
+            }
+        });
+
+        // ── Locate Button ─────────────────────────────────────────────
+        L.control.locate({ position: 'topright' }).addTo(map);
+    </script>
+</body>
+</html>

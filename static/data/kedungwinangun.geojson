@@ -1,0 +1,375 @@
+{
+    "type": "FeatureCollection",
+    "name": "Desa Kedungwinangun",
+    "description": "Data GeoJSON batas wilayah dan fitur geografis Desa Kedungwinangun, Kecamatan Klirong, Kabupaten Kebumen, Jawa Tengah",
+    "crs": {
+        "type": "name",
+        "properties": {
+            "name": "urn:ogc:def:crs:EPSG::4326"
+        }
+    },
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Batas Desa Kedungwinangun",
+                "type": "village_boundary",
+                "kecamatan": "Klirong",
+                "kabupaten": "Kebumen",
+                "provinsi": "Jawa Tengah"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [109.5167, -7.6083],
+                    [109.5333, -7.6083],
+                    [109.5500, -7.6167],
+                    [109.5583, -7.6333],
+                    [109.5500, -7.6500],
+                    [109.5417, -7.6583],
+                    [109.5250, -7.6667],
+                    [109.5083, -7.6583],
+                    [109.5000, -7.6417],
+                    [109.5000, -7.6250],
+                    [109.5083, -7.6167],
+                    [109.5167, -7.6083]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Dusun Kedungwaru",
+                "type": "dusun",
+                "nomor": 1,
+                "rw": "01",
+                "rt": ["01", "02", "03"],
+                "penduduk": 892,
+                "kk": 234
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [109.5167, -7.6083],
+                    [109.5250, -7.6083],
+                    [109.5250, -7.6200],
+                    [109.5200, -7.6250],
+                    [109.5167, -7.6167],
+                    [109.5167, -7.6083]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Dusun Perna",
+                "type": "dusun",
+                "nomor": 2,
+                "rw": "02",
+                "rt": ["01", "02", "03", "04"],
+                "penduduk": 756,
+                "kk": 198
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [109.5250, -7.6083],
+                    [109.5333, -7.6083],
+                    [109.5333, -7.6200],
+                    [109.5300, -7.6250],
+                    [109.5250, -7.6200],
+                    [109.5250, -7.6083]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Dusun Sasak",
+                "type": "dusun",
+                "nomor": 3,
+                "rw": "03",
+                "rt": ["01", "02", "03"],
+                "penduduk": 678,
+                "kk": 179
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [109.5083, -7.6167],
+                    [109.5167, -7.6167],
+                    [109.5200, -7.6250],
+                    [109.5167, -7.6333],
+                    [109.5083, -7.6250],
+                    [109.5083, -7.6167]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Dusun Entak",
+                "type": "dusun",
+                "nomor": 4,
+                "rw": "04",
+                "rt": ["01", "02", "03", "04"],
+                "penduduk": 723,
+                "kk": 195
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [109.5250, -7.6200],
+                    [109.5333, -7.6200],
+                    [109.5417, -7.6333],
+                    [109.5333, -7.6417],
+                    [109.5250, -7.6333],
+                    [109.5250, -7.6200]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Dusun Grewing",
+                "type": "dusun",
+                "nomor": 5,
+                "rw": "05",
+                "rt": ["01", "02", "03"],
+                "penduduk": 812,
+                "kk": 215
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [109.5333, -7.6333],
+                    [109.5500, -7.6333],
+                    [109.5583, -7.6500],
+                    [109.5500, -7.6583],
+                    [109.5417, -7.6500],
+                    [109.5333, -7.6417],
+                    [109.5333, -7.6333]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Dusun Pedana",
+                "type": "dusun",
+                "nomor": 6,
+                "rw": "06",
+                "rt": ["01", "02", "03"],
+                "penduduk": 660,
+                "kk": 226
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [109.5000, -7.6250],
+                    [109.5083, -7.6250],
+                    [109.5167, -7.6333],
+                    [109.5083, -7.6417],
+                    [109.5000, -7.6417],
+                    [109.5000, -7.6250]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Sungai Bodri",
+                "type": "sungai",
+                "kelas": "Sungai Kecil",
+                "panjang": "~3.5 km"
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [109.4950, -7.5950],
+                    [109.5000, -7.6083],
+                    [109.5083, -7.6167],
+                    [109.5167, -7.6250],
+                    [109.5250, -7.6333],
+                    [109.5333, -7.6417],
+                    [109.5417, -7.6500],
+                    [109.5500, -7.6583],
+                    [109.5600, -7.6700]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Jalan Kabupaten (Klirong-Kutosari)",
+                "type": "jalan_utama",
+                "lebar": "~5 meter",
+                "kondisi": "Aspal"
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [109.4950, -7.5900],
+                    [109.5100, -7.6100],
+                    [109.5250, -7.6250],
+                    [109.5400, -7.6400],
+                    [109.5550, -7.6550]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Jalan Desa",
+                "type": "jalan_desa",
+                "keterangan": "Menghubungkan antar dusun"
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [109.5167, -7.6200],
+                    [109.5250, -7.6250],
+                    [109.5333, -7.6300],
+                    [109.5333, -7.6417]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Kantor Desa Kedungwinangun",
+                "type": "fasilitas",
+                "kategori": "Pemerintahan",
+                "keterangan": "Pusat pemerintahan desa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [109.5250, -7.6217]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Masjid Al-Muhajirin",
+                "type": "fasilitas",
+                "kategori": "Tempat Ibadah",
+                "keterangan": "Masjid utama"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [109.5220, -7.6240]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "SD Negeri 1 Kedungwinangun",
+                "type": "fasilitas",
+                "kategori": "Pendidikan",
+                "keterangan": "Sekolah Dasar Negeri"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [109.5280, -7.6180]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Puskesdes Kedungwinangun",
+                "type": "fasilitas",
+                "kategori": "Kesehatan",
+                "keterangan": "Puskesmas Pembantu"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [109.5310, -7.6260]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Pasar Desa",
+                "type": "fasilitas",
+                "kategori": " Ekonomi",
+                "keterangan": "Pasar tradisional desa"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [109.5290, -7.6200]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Balai Desa (Balerom)",
+                "type": "fasilitas",
+                "kategori": "Pemerintahan",
+                "keterangan": "Balai pertemuan warga"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [109.5260, -7.6230]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Wisata Mandi Bola Sungai Bodri",
+                "type": "fasilitas",
+                "kategori": "Wisata",
+                "keterangan": "Area wisata sungai"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [109.5350, -7.6350]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Sawah Padan A",
+                "type": "lahan",
+                "kategori": "Pertanian",
+                "keterangan": "Lahan sawah irigasi"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [109.5100, -7.6120],
+                    [109.5180, -7.6120],
+                    [109.5180, -7.6180],
+                    [109.5100, -7.6180],
+                    [109.5100, -7.6120]
+                ]]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Sawah Padan B",
+                "type": "lahan",
+                "kategori": "Pertanian",
+                "keterangan": "Lahan sawah irigasi"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [109.5350, -7.6450],
+                    [109.5450, -7.6450],
+                    [109.5450, -7.6520],
+                    [109.5350, -7.6520],
+                    [109.5350, -7.6450]
+                ]]
+            }
+        }
+    ],
+    "metadata": {
+        "created": "2026-07-01",
+        "source": "Pemetaan Desa KKN",
+        "total_dusun": 6,
+        "total_fasilitas": 7,
+        "luas_desa": "~847 Ha",
+        "koordinat_tengah": [109.5250, -7.6333]
+    }
+}
