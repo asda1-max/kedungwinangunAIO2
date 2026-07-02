@@ -172,6 +172,7 @@ def berita():
     """Halaman daftar berita"""
     desa_info = get_desa_info_with_maps()
     berita_list = get_all_berita()
+    custom_pages = get_all_pages()
     max_berita = int(get_config("berita_tampil_di_halaman", 12))
     berita_list = berita_list[:max_berita]
     show_views = get_config("berita_tampilkan_views", "1") == "1"
