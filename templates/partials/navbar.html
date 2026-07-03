@@ -186,34 +186,6 @@
                 {% endfor %}
             </div>
 
-            {# ─── LAINNYA SECTION (Mobile) ─── #}
-            <div class="pt-3 mt-2 border-t border-white/10">
-                <div class="text-yellow-300 text-xs font-semibold uppercase tracking-wider mb-2">Lainnya</div>
-                <div class="flex flex-wrap gap-1">
-                    <a href="{{ url_for('public.galeri') }}" class="px-3 py-2 rounded-lg text-sm font-medium text-green-100 hover:bg-white/10 transition-colors">
-                        📷 Galeri
-                    </a>
-                    <a href="{{ url_for('public.struktur') }}" class="px-3 py-2 rounded-lg text-sm font-medium text-green-100 hover:bg-white/10 transition-colors">
-                        👥 Struktur
-                    </a>
-                    <a href="{{ url_for('public.transparansi') }}" class="px-3 py-2 rounded-lg text-sm font-medium text-green-100 hover:bg-white/10 transition-colors">
-                        💰 Transparansi
-                    </a>
-                    <a href="{{ url_for('public.peta_interaktif') }}" class="px-3 py-2 rounded-lg text-sm font-medium text-green-100 hover:bg-white/10 transition-colors">
-                        🗺️ Peta
-                    </a>
-                </div>
-                {% if custom_pages %}
-                <div class="flex flex-wrap gap-1 mt-2">
-                    {% for p in custom_pages %}
-                    <a href="{{ url_for('public.view_page', slug=p['slug']) }}" class="px-3 py-2 rounded-lg text-sm font-medium text-green-100 hover:bg-white/10 transition-colors">
-                        {{ p['icon'] }} {{ p['title'] }}
-                    </a>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-
             {# User Dropdown - TOGGLED BY HAMBURGER #}
             <div id="mobile-user-menu" class="pt-3 mt-2 border-t border-white/10 hidden">
 
@@ -270,6 +242,37 @@
                     <a href="{{ url_for('user.register') }}" class="flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-[#73AA0F] text-white hover:bg-[#63930b] transition-colors">Daftar</a>
                 </div>
                 {% endif %}
+
+                {# ─── LAINNYA (Inside Hamburger Menu) ─── #}
+                <div class="pt-3 mt-2 border-t border-white/10">
+                    <div class="text-yellow-300 text-xs font-semibold uppercase tracking-wider mb-2">Lainnya</div>
+                    <div class="space-y-1">
+                        <a href="{{ url_for('public.galeri') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">📷</span>
+                            Galeri
+                        </a>
+                        <a href="{{ url_for('public.struktur') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">👥</span>
+                            Struktur Organisasi
+                        </a>
+                        <a href="{{ url_for('public.transparansi') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">💰</span>
+                            Transparansi APBDes
+                        </a>
+                        <a href="{{ url_for('public.peta_interaktif') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">🗺️</span>
+                            Peta Interaktif
+                        </a>
+                        {% if custom_pages %}
+                        {% for p in custom_pages %}
+                        <a href="{{ url_for('public.view_page', slug=p['slug']) }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">{{ p['icon'] }}</span>
+                            {{ p['title'] }}
+                        </a>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
 
             </div>
         </div>
