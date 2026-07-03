@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengumuman — {{ site_name or desa.nama }}</title>
+    <meta name="description" content="Pengumuman penting dari Desa {{ desa.nama }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'desa-dark': '#155C1B', 'desa-mid': '#2A6726',
+                        'desa-light': '#73AA0F', 'desa-muted': '#5B8A4E',
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f4f7f2; }
+
+        /* Penting Badge Animation */
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .pulse-badge::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 9999px;
+            background: #ef4444;
+            animation: pulse-ring 2s ease-out infinite;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- HERO -->
+    <div class="bg-[#0F5B21] px-6 py-10 md:px-[5%] md:py-16 text-white">
+        <p class="text-xs md:text-sm text-green-300 mb-2">
+            <a href="{{ url_for('public.index') }}" class="hover:underline">Beranda</a> / Pengumuman
+        </p>
+        <h1 class="text-2xl md:text-4xl font-extrabold">📢 Pengumuman</h1>
+        <p class="text-sm md:text-base text-green-200 mt-1">Pengumuman penting dan informasi terkini dari Pemerintah Desa</p>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="px-6 py-10 md:px-[5%] md:py-14 max-w-5xl mx-auto">
+
+        <!-- Filter Tabs -->
+        <div class="flex flex-wrap gap-2 mb-8">
+            <button @click="filter = 'all'" :class="filter === 'all' ? 'bg-[#155C1B] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                    class="px-4 py-2 rounded-full text-sm font-semibold transition-all border border-gray-200">
+                Semua
+            </button>
+            <button @click="filter = 'penting'" :class="filter === 'penting' ? 'bg-red-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                    class="px-4 py-2 rounded-full text-sm font-semibold transition-all border border-gray-200">
+                🔴 Penting
+            </button>
+            <button @click="filter = 'kegiatan'" :class="filter === 'kegiatan' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                    class="px-4 py-2 rounded-full text-sm font-semibold transition-all border border-gray-200">
+                📅 Kegiatan
+            </button>
+            <button @click="filter = 'bantuan'" :class="filter === 'bantuan' ? 'bg-yellow-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                    class="px-4 py-2 rounded-full text-sm font-semibold transition-all border border-gray-200">
+                💰 Bantuan
+            </button>
+        </div>
+
+        <!-- Announcements List -->
+        <div x-data="{ filter: 'all' }" class="space-y-6">
+            <template x-for="ann in pengumuman.filter(a => filter === 'all' || a.kategori === filter)" :key="ann.id">
+                <div class="bg-white rounded-2xl shadow-sm border border-[rgba(21,92,27,0.08)] overflow-hidden hover:shadow-lg transition-all duration-300"
+                     :class="{ 'border-l-4 border-l-red-500': ann.is_penting }">
+                    <div class="p-6">
+                        <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <!-- Category Badge -->
+                                <span class="px-3 py-1 rounded-full text-xs font-bold"
+                                      :class="{
+                                          'bg-red-100 text-red-600': ann.kategori === 'penting',
+                                          'bg-blue-100 text-blue-600': ann.kategori === 'kegiatan',
+                                          'bg-yellow-100 text-yellow-600': ann.kategori === 'bantuan',
+                                          'bg-gray-100 text-gray-600': ann.kategori === 'umum'
+                                      }"
+                                      x-text="ann.kategori_label">
+                                </span>
+                                <!-- Important Badge -->
+                                <span x-show="ann.is_penting"
+                                      class="relative pulse-badge inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-red-500 text-white">
+                                    ⭐ Penting
+                                </span>
+                            </div>
+                            <!-- Date -->
+                            <div class="flex items-center gap-2 text-gray-400 text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <span x-text="ann.tanggal"></span>
+                            </div>
+                        </div>
+
+                        <!-- Title -->
+                        <h3 class="text-[#155C1B] font-bold text-lg md:text-xl mb-3" x-text="ann.judul"></h3>
+
+                        <!-- Content -->
+                        <p class="text-gray-600 leading-relaxed mb-4" x-text="ann.isi"></p>
+
+                        <!-- Footer -->
+                        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-100">
+                            <div class="flex items-center gap-2 text-gray-500 text-sm">
+                                <div class="w-8 h-8 rounded-full bg-[#155C1B]/10 flex items-center justify-center text-[#155C1B] text-xs font-bold">KD</div>
+                                <span x-text="ann.author"></span>
+                            </div>
+                            <div x-show="ann.lampiran" class="flex items-center gap-2 text-[#155C1B] text-sm font-medium">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                </svg>
+                                <span x-text="ann.lampiran"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Empty State -->
+            <div x-show="pengumuman.length === 0" class="bg-white rounded-2xl p-12 text-center">
+                <div class="text-6xl mb-4">📭</div>
+                <h3 class="text-xl font-bold text-gray-700 mb-2">Belum Ada Pengumuman</h3>
+                <p class="text-gray-500">Pengumuman akan muncul di sini ketika sudah ditambahkan.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    {% include 'partials/footer.html' %}
+
+    <!-- Alpine Data -->
+    <script>
+        window.pengumumanData = {{ pengumuman|tojson }};
+    </script>
+</body>
+</html>

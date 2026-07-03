@@ -17,17 +17,16 @@
             {# ─── DESKTOP NAV LINKS ─── #}
             <div class="hidden lg:flex items-center gap-1">
                 {% for link in nav_links %}
-                {% if link.label == 'Layanan Surat' %}
                 <a href="{{ link.href }}" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
                        {% if link.active %}bg-white/20 text-white{% else %}text-green-100 hover:bg-white/10 hover:text-white{% endif %}">
                     {{ link.label }}
                 </a>
+                {% endfor %}
+
                 {# ─── LAINNYA DROPDOWN (Desktop Only) ─── #}
-                {% if custom_pages %}
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" @click.away="open = false"
-                            class="px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1
-                                   {% if link.active %}bg-white/20 text-white{% else %}text-green-100 hover:bg-white/10 hover:text-white{% endif %}">
+                            class="px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 text-green-100 hover:bg-white/10 hover:text-white">
                         Lainnya
                         <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -37,23 +36,35 @@
                          x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
                          class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
                         <div class="py-2">
-                            {% for p in custom_pages %}
-                            <a href="{{ url_for('public.view_page', slug=p['slug']) }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                <span class="text-lg">{{ p['icon'] }}</span>
-                                <span class="font-medium">{{ p['title'] }}</span>
+                            <a href="{{ url_for('public.galeri') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
+                                <span class="text-lg">📷</span>
+                                <span class="font-medium">Galeri</span>
                             </a>
-                            {% endfor %}
+                            <a href="{{ url_for('public.struktur') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
+                                <span class="text-lg">👥</span>
+                                <span class="font-medium">Struktur Organisasi</span>
+                            </a>
+                            <a href="{{ url_for('public.transparansi') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
+                                <span class="text-lg">💰</span>
+                                <span class="font-medium">Transparansi APBDes</span>
+                            </a>
+                            <a href="{{ url_for('public.peta_interaktif') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
+                                <span class="text-lg">🗺️</span>
+                                <span class="font-medium">Peta Interaktif</span>
+                            </a>
+                            {% if custom_pages %}
+                            <div class="border-t border-gray-100 mt-2 pt-2">
+                                {% for p in custom_pages %}
+                                <a href="{{ url_for('public.view_page', slug=p['slug']) }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <span class="text-lg">{{ p['icon'] }}</span>
+                                    <span class="font-medium">{{ p['title'] }}</span>
+                                </a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                {% endif %}
-                {% else %}
-                <a href="{{ link.href }}" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                       {% if link.active %}bg-white/20 text-white{% else %}text-green-100 hover:bg-white/10 hover:text-white{% endif %}">
-                    {{ link.label }}
-                </a>
-                {% endif %}
-                {% endfor %}
             </div>
 
             {# ─── RIGHT ACTIONS ─── #}
@@ -175,6 +186,34 @@
                 {% endfor %}
             </div>
 
+            {# ─── LAINNYA SECTION (Mobile) ─── #}
+            <div class="pt-3 mt-2 border-t border-white/10">
+                <div class="text-yellow-300 text-xs font-semibold uppercase tracking-wider mb-2">Lainnya</div>
+                <div class="flex flex-wrap gap-1">
+                    <a href="{{ url_for('public.galeri') }}" class="px-3 py-2 rounded-lg text-sm font-medium text-green-100 hover:bg-white/10 transition-colors">
+                        📷 Galeri
+                    </a>
+                    <a href="{{ url_for('public.struktur') }}" class="px-3 py-2 rounded-lg text-sm font-medium text-green-100 hover:bg-white/10 transition-colors">
+                        👥 Struktur
+                    </a>
+                    <a href="{{ url_for('public.transparansi') }}" class="px-3 py-2 rounded-lg text-sm font-medium text-green-100 hover:bg-white/10 transition-colors">
+                        💰 Transparansi
+                    </a>
+                    <a href="{{ url_for('public.peta_interaktif') }}" class="px-3 py-2 rounded-lg text-sm font-medium text-green-100 hover:bg-white/10 transition-colors">
+                        🗺️ Peta
+                    </a>
+                </div>
+                {% if custom_pages %}
+                <div class="flex flex-wrap gap-1 mt-2">
+                    {% for p in custom_pages %}
+                    <a href="{{ url_for('public.view_page', slug=p['slug']) }}" class="px-3 py-2 rounded-lg text-sm font-medium text-green-100 hover:bg-white/10 transition-colors">
+                        {{ p['icon'] }} {{ p['title'] }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
             {# User Dropdown - TOGGLED BY HAMBURGER #}
             <div id="mobile-user-menu" class="pt-3 mt-2 border-t border-white/10 hidden">
 
@@ -229,21 +268,6 @@
                 <div class="flex gap-2">
                     <a href="{{ url_for('user.login') }}" class="flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition-colors">Masuk</a>
                     <a href="{{ url_for('user.register') }}" class="flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-[#73AA0F] text-white hover:bg-[#63930b] transition-colors">Daftar</a>
-                </div>
-                {% endif %}
-
-                {# Custom Pages (RAHASIA) - Only in Hamburger Menu #}
-                {% if custom_pages %}
-                <div class="pt-3 mt-2 border-t border-white/10">
-                    <div class="text-yellow-300 text-xs font-semibold uppercase tracking-wider mb-2">Lainya</div>
-                    <div class="space-y-1">
-                        {% for p in custom_pages %}
-                        <a href="{{ url_for('public.view_page', slug=p['slug']) }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">{{ p['icon'] }}</span>
-                            <span class="font-medium">{{ p['title'] }}</span>
-                        </a>
-                        {% endfor %}
-                    </div>
                 </div>
                 {% endif %}
 

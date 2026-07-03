@@ -60,8 +60,8 @@ DEFAULT_CONFIG = {
 NAV_LINKS = [
     {"label": "Beranda", "href": "/", "active": True},
     {"label": "Layanan Surat", "href": "/layanan", "active": False},
+    {"label": "Pengumuman", "href": "/pengumuman", "active": False},
     {"label": "Berita", "href": "/berita", "active": False},
-    {"label": "Galeri", "href": "/galeri", "active": False},
     {"label": "Kontak", "href": "/kontak", "active": False},
 ]
 

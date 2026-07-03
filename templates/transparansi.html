@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transparansi APBDes — {{ site_name or desa.nama }}</title>
+    <meta name="description" content="Transparansi Anggaran Pendapatan dan Belanja Desa {{ desa.nama }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'desa-dark': '#155C1B', 'desa-mid': '#2A6726',
+                        'desa-light': '#73AA0F', 'desa-muted': '#5B8A4E',
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f4f7f2; }
+
+        .progress-bar {
+            transition: width 1s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- HERO -->
+    <div class="bg-[#0F5B21] px-6 py-10 md:px-[5%] md:py-16 text-white">
+        <p class="text-xs md:text-sm text-green-300 mb-2">
+            <a href="{{ url_for('public.index') }}" class="hover:underline">Beranda</a> / Transparansi
+        </p>
+        <h1 class="text-2xl md:text-4xl font-extrabold">💰 Transparansi APBDes</h1>
+        <p class="text-sm md:text-base text-green-200 mt-1">Anggaran Pendapatan dan Belanja Desa {{ desa.nama }} Tahun {{ tahun }}</p>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="px-6 py-10 md:px-[5%] md:py-14 max-w-6xl mx-auto">
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <!-- Pendapatan -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-[rgba(21,92,27,0.08)]">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-14 h-14 rounded-xl bg-green-100 flex items-center justify-center">
+                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Pendapatan</p>
+                        <p class="text-2xl font-bold text-green-600">Rp {{ "{:,.0f}".format(apbdes.total_pendapatan) }}</p>
+                    </div>
+                </div>
+                <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-green-500 rounded-full" style="width: 100%"></div>
+                </div>
+            </div>
+
+            <!-- Belanja -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-[rgba(21,92,27,0.08)]">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-14 h-14 rounded-xl bg-red-100 flex items-center justify-center">
+                        <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Belanja</p>
+                        <p class="text-2xl font-bold text-red-600">Rp {{ "{:,.0f}".format(apbdes.total_belanja) }}</p>
+                    </div>
+                </div>
+                <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-red-500 rounded-full" style="width: {{ (apbdes.total_belanja / apbdes.total_pendapatan * 100)|round|int }}%"></div>
+                </div>
+            </div>
+
+            <!-- Pembiayaan -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-[rgba(21,92,27,0.08)]">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center">
+                        <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Pembiayaan Net</p>
+                        <p class="text-2xl font-bold text-blue-600">Rp {{ "{:,.0f}".format(apbdes.pembiayaan_net) }}</p>
+                    </div>
+                </div>
+                <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-500 rounded-full" style="width: {{ (apbdes.pembiayaan_net / apbdes.total_pendapatan * 100)|round|int }}%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div x-data="{ activeTab: 'pendapatan' }">
+            <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+                <button @click="activeTab = 'pendapatan'" :class="activeTab === 'pendapatan' ? 'bg-[#155C1B] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                        class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap border border-gray-200">
+                    📈 Pendapatan
+                </button>
+                <button @click="activeTab = 'belanja'" :class="activeTab === 'belanja' ? 'bg-[#155C1B] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                        class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap border border-gray-200">
+                    📉 Belanja
+                </button>
+                <button @click="activeTab = 'pembiayaan'" :class="activeTab === 'pembiayaan' ? 'bg-[#155C1B] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                        class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap border border-gray-200">
+                    🔄 Pembiayaan
+                </button>
+                <button @click="activeTab = 'realisasi'" :class="activeTab === 'realisasi' ? 'bg-[#155C1B] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                        class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap border border-gray-200">
+                    📊 Realisasi
+                </button>
+            </div>
+
+            <!-- PENDAPATAN TAB -->
+            <div x-show="activeTab === 'pendapatan'" class="bg-white rounded-2xl shadow-sm border border-[rgba(21,92,27,0.08)] overflow-hidden">
+                <div class="p-6 border-b border-gray-100">
+                    <h3 class="text-lg font-bold text-[#155C1B]">Rincian Pendapatan</h3>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    {% for item in apbdes.pendapatan %}
+                    <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">{{ item.icon }}</span>
+                            <div>
+                                <p class="font-semibold text-gray-800">{{ item.nama }}</p>
+                                <p class="text-sm text-gray-500">{{ item.deskripsi }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-green-600">Rp {{ "{:,.0f}".format(item.jumlah) }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="p-4 bg-green-50 border-t border-green-100">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-green-800">TOTAL PENDAPATAN</span>
+                        <span class="font-bold text-green-600 text-lg">Rp {{ "{:,.0f}".format(apbdes.total_pendapatan) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BELANJA TAB -->
+            <div x-show="activeTab === 'belanja'" class="bg-white rounded-2xl shadow-sm border border-[rgba(21,92,27,0.08)] overflow-hidden">
+                <div class="p-6 border-b border-gray-100">
+                    <h3 class="text-lg font-bold text-[#155C1B]">Rincian Belanja</h3>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    {% for item in apbdes.belanja %}
+                    <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">{{ item.icon }}</span>
+                            <div>
+                                <p class="font-semibold text-gray-800">{{ item.nama }}</p>
+                                <p class="text-sm text-gray-500">{{ item.deskripsi }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-red-600">Rp {{ "{:,.0f}".format(item.jumlah) }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="p-4 bg-red-50 border-t border-red-100">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-red-800">TOTAL BELANJA</span>
+                        <span class="font-bold text-red-600 text-lg">Rp {{ "{:,.0f}".format(apbdes.total_belanja) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PEMBIAYAAN TAB -->
+            <div x-show="activeTab === 'pembiayaan'" class="bg-white rounded-2xl shadow-sm border border-[rgba(21,92,27,0.08)] overflow-hidden">
+                <div class="p-6 border-b border-gray-100">
+                    <h3 class="text-lg font-bold text-[#155C1B]">Rincian Pembiayaan</h3>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    {% for item in apbdes.pembiayaan %}
+                    <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">{{ item.icon }}</span>
+                            <div>
+                                <p class="font-semibold text-gray-800">{{ item.nama }}</p>
+                                <p class="text-sm text-gray-500">{{ item.deskripsi }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-blue-600">Rp {{ "{:,.0f}".format(item.jumlah) }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="p-4 bg-blue-50 border-t border-blue-100">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-blue-800">PEMBIAYAAN NET</span>
+                        <span class="font-bold text-blue-600 text-lg">Rp {{ "{:,.0f}".format(apbdes.pembiayaan_net) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REALISASI TAB -->
+            <div x-show="activeTab === 'realisasi'" class="bg-white rounded-2xl shadow-sm border border-[rgba(21,92,27,0.08)] overflow-hidden">
+                <div class="p-6 border-b border-gray-100">
+                    <h3 class="text-lg font-bold text-[#155C1B]">Realisasi Anggaran</h3>
+                    <p class="text-sm text-gray-500 mt-1">Perbandingan antara rencana dan realiasi pelaksanaan</p>
+                </div>
+                <div class="p-6 space-y-6">
+                    {% for item in apbdes.realisasi %}
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">{{ item.icon }}</span>
+                                <span class="font-semibold text-gray-800">{{ item.nama }}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm text-gray-500">{{ item.realisasi }}%</span>
+                                <span class="font-bold ml-2" :class="item.realisasi >= 80 ? 'text-green-600' : item.realisasi >= 50 ? 'text-yellow-600' : 'text-red-600'"
+                                      x-text="'Rp {{ "{:,.0f}".format(item.jumlah_realisasi) }}'"></span>
+                            </div>
+                        </div>
+                        <div class="h-3 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full progress-bar"
+                                 :class="item.realisasi >= 80 ? 'bg-green-500' : item.realisasi >= 50 ? 'bg-yellow-500' : 'bg-red-500'"
+                                 :style="'width: ' + {{ item.realisasi }} + '%'"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Rencana: Rp {{ "{:,.0f}".format(item.jumlah_rencana) }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Download Info -->
+        <div class="mt-8 bg-gradient-to-r from-[#155C1B] to-[#2A6726] rounded-2xl p-6 text-white">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg">Dokumen APBDes</h3>
+                        <p class="text-green-200 text-sm">Rencana Anggaran Pendapatan dan Belanja Desa</p>
+                    </div>
+                </div>
+                <a href="#" class="px-6 py-3 bg-white text-[#155C1B] rounded-xl font-semibold hover:bg-green-50 transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Unduh PDF
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    {% include 'partials/footer.html' %}
+</body>
+</html>

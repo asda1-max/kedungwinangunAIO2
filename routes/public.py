@@ -379,6 +379,228 @@ def peta_interaktif():
 
 
 # ════════════════════════════════════════════════════════════════════════
+# ── STRUKTUR ORGANISASI ───────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+@public_bp.route("/struktur")
+def struktur():
+    """Halaman Struktur Organisasi Desa"""
+    from datetime import datetime
+    from models import get_all_pages
+
+    desa_info = get_desa_info_with_maps()
+    custom_pages = get_all_pages()
+
+    # Data contoh struktur organisasi
+    struktur_pemerintah = [
+        {'nama': 'Drs. H. Ahmad Zainuri', 'jabatan': 'Kepala Desa', 'status': 'PNS Desa'},
+        {'nama': 'Sri Hartati', 'jabatan': 'Sekretaris Desa', 'status': 'PNS Desa'},
+        {'nama': 'Budi Santoso', 'jabatan': 'Kasi Pemerintahan', 'status': ' perangkat Desa'},
+        {'nama': 'Siti Aminah', 'jabatan': 'Kasi Kesejahteraan', 'status': 'Perangkat Desa'},
+        {'nama': 'Joko Priyanto', 'jabatan': 'Kasi Pembangunan', 'status': 'Perangkat Desa'},
+        {'nama': 'Mariam', 'jabatan': 'Kaur Keuangan', 'status': 'Perangkat Desa'},
+        {'nama': 'Ahmad Dahlan', 'jabatan': 'Kaur Umum', 'status': 'Perangkat Desa'},
+    ]
+
+    struktur_bpd = [
+        {'nama': 'H. Suprianto', 'jabatan': 'Ketua BPD'},
+        {'nama': 'Nurasiah', 'jabatan': 'Wakil Ketua'},
+        {'nama': 'Mansur', 'jabatan': 'Sekretaris'},
+        {'nama': 'Rohmah', 'jabatan': 'Anggota'},
+        {'nama': 'Dedi Kurniawan', 'jabatan': 'Anggota'},
+        {'nama': 'Kartika Sari', 'jabatan': 'Anggota'},
+        {'nama': 'Hendra Wijaya', 'jabatan': 'Anggota'},
+        {'nama': 'Lestari', 'jabatan': 'Anggota'},
+    ]
+
+    struktur_rtrw = [
+        {'no_rw': '01', 'ketua_rw': 'Sugeng Riyanto', 'rt_list': [
+            {'no_rt': '01', 'ketua_rt': 'Warto'},
+            {'no_rt': '02', 'ketua_rt': 'Sukarman'},
+            {'no_rt': '03', 'ketua_rt': 'Maryono'},
+        ]},
+        {'no_rw': '02', 'ketua_rw': 'Karsono', 'rt_list': [
+            {'no_rt': '01', 'ketua_rt': 'Jiminem'},
+            {'no_rt': '02', 'ketua_rt': 'Sarwono'},
+        ]},
+        {'no_rw': '03', 'ketua_rw': 'Markowi', 'rt_list': [
+            {'no_rt': '01', 'ketua_rt': 'Tukinem'},
+            {'no_rt': '02', 'ketua_rt': 'Paimin'},
+            {'no_rt': '03', 'ketua_rt': 'Gatot'},
+        ]},
+    ]
+
+    struktur_kader = [
+        {'icon': '👩', 'nama': 'Kader PKK', 'jumlah': 15},
+        {'icon': '👶', 'nama': 'Kader POSYANDU', 'jumlah': 12},
+        {'icon': '🔥', 'nama': 'Kader Kebersihan', 'jumlah': 8},
+        {'icon': '🌾', 'nama': 'Kader Pertanian', 'jumlah': 10},
+        {'icon': '💪', 'nama': 'Relawan Desa', 'jumlah': 20},
+        {'icon': '🛡️', 'nama': 'Satgas COVID-19', 'jumlah': 15},
+    ]
+
+    return render_template(
+        "struktur.html",
+        page={"title": "Struktur Organisasi"},
+        desa=desa_info,
+        nav_links=NAV_LINKS,
+        tahun=datetime.now().year,
+        site_name=desa_info['nama'],
+        site_tagline=desa_info['tagline'],
+        site_description=desa_info['deskripsi'],
+        custom_pages=custom_pages,
+        struktur_pemerintah=struktur_pemerintah,
+        struktur_bpd=struktur_bpd,
+        struktur_rtrw=struktur_rtrw,
+        struktur_kader=struktur_kader,
+    )
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── PENGUMUMAN ────────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+@public_bp.route("/pengumuman")
+def pengumuman():
+    """Halaman Pengumuman Desa"""
+    from datetime import datetime
+    from models import get_all_pages
+
+    desa_info = get_desa_info_with_maps()
+    custom_pages = get_all_pages()
+
+    # Data contoh pengumuman
+    pengumuman = [
+        {
+            'id': 1,
+            'judul': 'Pendaftaran BLT-DD Tahun 2026',
+            'isi': 'Bapak/Ibu warga Desa Kedungwinangun yang membutuhkan bantuan Langsung Tunai dari Dana Desa, silakan mendaftar di Kantor Desa mulai tanggal 1-15 Juli 2026. Syarat: fc KTP, fc KK, surat keterangan tidak mampu dari RT/RW.',
+            'kategori': 'penting',
+            'kategori_label': '🔴 Penting',
+            'is_penting': True,
+            'tanggal': '28 Juni 2026',
+            'author': 'Pemerintahan Desa',
+            'lampiran': 'Formulir Pendaftaran.pdf',
+        },
+        {
+            'id': 2,
+            'judul': 'Rapat Bulanan Pemerintah Desa',
+            'isi': 'Akan dilaksanakan rapat bulanan pemerintah desa pada hari Sabtu, 5 Juli 2026 pukul 09.00 WIB di Aula Kantor Desa. Agenda: evaluasi program kerja semester I dan rencana kegiatan semester II.',
+            'kategori': 'kegiatan',
+            'kategori_label': '📅 Kegiatan',
+            'is_penting': False,
+            'tanggal': '1 Juli 2026',
+            'author': 'Sekretaris Desa',
+            'lampiran': None,
+        },
+        {
+            'id': 3,
+            'judul': 'Penerimaan Bantuan PKH & KIP',
+            'isi': 'Bantuan PKH (Program Keluarga Harapan) dan KIP (Kartu Indonesia Pintar) akan didistribusikan pada minggu ketiga Juli 2026. Keluarga penerima akan diinformasikan melalui RT/RW masing-masing.',
+            'kategori': 'bantuan',
+            'kategori_label': '💰 Bantuan',
+            'is_penting': True,
+            'tanggal': '25 Juni 2026',
+            'author': 'Kasi Kesejahteraan',
+            'lampiran': 'Daftar Penerima.pdf',
+        },
+        {
+            'id': 4,
+            'judul': 'Posyandu Balita - Bulan Juli',
+            'isi': 'Kegiatan Posyandu Balita akan dilaksanakan pada hari Minggu, 6 Juli 2026 pukul 08.00-12.00 di masing-masing balai dusun. Mari antar buah hati Anda untuk pemeriksaan kesehatan dan imunisasi.',
+            'kategori': 'kegiatan',
+            'kategori_label': '📅 Kegiatan',
+            'is_penting': False,
+            'tanggal': '28 Juni 2026',
+            'author': 'Kader PKK',
+            'lampiran': None,
+        },
+        {
+            'id': 5,
+            'judul': 'Pemberitahuan Pemadaman Listrik',
+            'isi': 'Akan dilakukan pemadaman listrik terencana pada hari Kamis, 3 Juli 2026 pukul 09.00-15.00 untuk perawatan jaringan. Mohon warga menyiapkan kebutuhan air dan listrik cadangan.',
+            'kategori': 'penting',
+            'kategori_label': '🔴 Penting',
+            'is_penting': True,
+            'tanggal': '30 Juni 2026',
+            'author': 'Pemerintahan Desa',
+            'lampiran': None,
+        },
+    ]
+
+    return render_template(
+        "pengumuman.html",
+        page={"title": "Pengumuman"},
+        desa=desa_info,
+        nav_links=NAV_LINKS,
+        tahun=datetime.now().year,
+        site_name=desa_info['nama'],
+        site_tagline=desa_info['tagline'],
+        site_description=desa_info['deskripsi'],
+        custom_pages=custom_pages,
+        pengumuman=pengumuman,
+    )
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── TRANSPARANSI APBDes ───────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+@public_bp.route("/transparansi")
+def transparansi():
+    """Halaman Transparansi APBDes"""
+    from datetime import datetime
+    from models import get_all_pages
+
+    desa_info = get_desa_info_with_maps()
+    custom_pages = get_all_pages()
+    tahun = 2026
+
+    # Data APBDes contoh
+    apbdes = {
+        'tahun': tahun,
+        'total_pendapatan': 850_000_000,
+        'total_belanja': 820_000_000,
+        'pembiayaan_net': 30_000_000,
+        'pendapatan': [
+            {'icon': '💵', 'nama': 'Pendapatan Asli Desa (PAD)', 'deskripsi': 'Hasil usaha, swadaya, dan sumbangan', 'jumlah': 50_000_000},
+            {'icon': '🏛️', 'nama': 'Dana Desa', 'deskripsi': 'Transfer dari APBN', 'jumlah': 500_000_000},
+            {'icon': '📊', 'nama': 'Alokasi Dana Desa (ADD)', 'deskripsi': 'Bagian dari DAU Kabupaten', 'jumlah': 200_000_000},
+            {'icon': '🎁', 'nama': 'Bantuan Kabupaten/Kota', 'deskripsi': 'Hibah dan bantuan lainnya', 'jumlah': 100_000_000},
+        ],
+        'belanja': [
+            {'icon': '🛠️', 'nama': 'Belanja Pembangunan', 'deskripsi': 'Infrastruktur, gedung, jalan', 'jumlah': 400_000_000},
+            {'icon': '👥', 'nama': 'Belanja Pemerintahan', 'deskripsi': 'Gaji Perangkat, ATK, operasional', 'jumlah': 200_000_000},
+            {'icon': '🤝', 'nama': 'Belanja Pemberdayaan', 'deskripsi': 'Pelatihan, BUMDes, kegiatan warga', 'jumlah': 120_000_000},
+            {'icon': '🎭', 'nama': 'Belanja Kegiatan', 'deskripsi': 'Event desa, perayaan hari besar', 'jumlah': 100_000_000},
+        ],
+        'pembiayaan': [
+            {'icon': '📥', 'nama': 'Penerimaan Pembiayaan', 'deskripsi': 'Sisa lebih tahun anggaran sebelumnya', 'jumlah': 50_000_000},
+            {'icon': '📤', 'nama': 'Pengeluaran Pembiayaan', 'deskripsi': 'Penyertaan modal BUMDes', 'jumlah': 20_000_000},
+        ],
+        'realisasi': [
+            {'icon': '🛠️', 'nama': 'Pembangunan', 'realisasi': 65, 'jumlah_rencana': 400_000_000, 'jumlah_realisasi': 260_000_000},
+            {'icon': '👥', 'nama': 'Pemerintahan', 'realisasi': 80, 'jumlah_rencana': 200_000_000, 'jumlah_realisasi': 160_000_000},
+            {'icon': '🤝', 'nama': 'Pemberdayaan', 'realisasi': 45, 'jumlah_rencana': 120_000_000, 'jumlah_realisasi': 54_000_000},
+            {'icon': '🎭', 'nama': 'Kegiatan', 'realisasi': 90, 'jumlah_rencana': 100_000_000, 'jumlah_realisasi': 90_000_000},
+        ],
+    }
+
+    return render_template(
+        "transparansi.html",
+        page={"title": "Transparansi"},
+        desa=desa_info,
+        nav_links=NAV_LINKS,
+        tahun=datetime.now().year,
+        site_name=desa_info['nama'],
+        site_tagline=desa_info['tagline'],
+        site_description=desa_info['deskripsi'],
+        custom_pages=custom_pages,
+        apbdes=apbdes,
+    )
+
+
+# ════════════════════════════════════════════════════════════════════════
 # ── API: KOMENTAR BERITA ───────────────────────────────────────────────
 # ════════════════════════════════════════════════════════════════════════
 
