@@ -23,6 +23,318 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        /* ── Komentar Section ── */
+        .komentar-section {
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e5e7eb;
+        }
+        .komentar-section h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #155C1B;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .komentar-section h3 .count {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        /* Comment Form */
+        .comment-form {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .comment-form.logged-in {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        .comment-form-aside {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .comment-form-aside .badge-role {
+            background: #155C1B;
+            color: white;
+            font-size: 0.7rem;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .comment-form input[type="text"] {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            outline: none;
+            transition: border-color 0.2s;
+            background: white;
+        }
+        .comment-form input[type="text"]:focus {
+            border-color: #155C1B;
+        }
+        .comment-form textarea {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 80px;
+            outline: none;
+            transition: border-color 0.2s;
+            background: white;
+            line-height: 1.5;
+        }
+        .comment-form textarea:focus,
+        .comment-form input[type="text"]:focus {
+            border-color: #155C1B;
+            box-shadow: 0 0 0 2px rgba(21, 92, 27, 0.1);
+        }
+        .comment-form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+        .comment-form-footer .hint {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+        .btn-kirim {
+            background: #155C1B;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-kirim:hover { background: #0f4a16; }
+        .btn-kirim:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Loading spinner */
+        .comment-loading {
+            text-align: center;
+            padding: 2rem;
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        /* Comments container */
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        /* Reddit-style stacking */
+        .comment-thread {
+            margin-left: 0;
+            border-left: 3px solid #e5e7eb;
+            padding-left: 1rem;
+        }
+        .comment-thread .comment-thread {
+            border-left-color: #c3d9c5;
+        }
+        .comment-thread .comment-thread .comment-thread {
+            border-left-color: #d8e8d3;
+        }
+
+        .comment-item {
+            padding: 0.85rem 0 0.5rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .comment-item:last-child {
+            border-bottom: none;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.35rem;
+            flex-wrap: wrap;
+        }
+        .comment-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #155C1B;
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .comment-author {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #155C1B;
+        }
+        .comment-author.is-admin {
+            color: #dc2626;
+        }
+        .comment-author.is-dinas {
+            color: #b45309;
+        }
+        .comment-role-badge {
+            font-size: 0.65rem;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .comment-role-badge.admin {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .comment-role-badge.dinas {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        .comment-time {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+        .comment-body {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #374151;
+            margin: 0.35rem 0 0.4rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .comment-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .comment-actions button {
+            background: none;
+            border: none;
+            font-size: 0.78rem;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: color 0.15s, background 0.15s;
+            font-family: inherit;
+        }
+        .comment-actions button:hover {
+            color: #155C1B;
+            background: #f0fdf4;
+        }
+        .comment-actions .btn-hapus:hover {
+            color: #dc2626;
+            background: #fef2f2;
+        }
+        .comment-actions .replied-to {
+            font-size: 0.75rem;
+            color: #155C1B;
+            font-weight: 500;
+        }
+
+        /* Reply form */
+        .reply-form {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            display: none;
+        }
+        .reply-form.active { display: block; }
+        .reply-form textarea {
+            width: 100%;
+            padding: 0.5rem 0.65rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            resize: vertical;
+            min-height: 60px;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .reply-form textarea:focus {
+            border-color: #155C1B;
+        }
+        .reply-form-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.4rem;
+            justify-content: flex-end;
+        }
+        .btn-batal {
+            background: #e5e7eb;
+            color: #374151;
+            border: none;
+            padding: 0.35rem 0.85rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-batal:hover { background: #d1d5db; }
+        .btn-kirim-reply {
+            background: #155C1B;
+            color: white;
+            border: none;
+            padding: 0.35rem 0.85rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-kirim-reply:hover { background: #0f4a16; }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: white;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            transform: translateY(1rem);
+            transition: opacity 0.25s, transform 0.25s;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success { background: #155C1B; }
+        .toast.error { background: #dc2626; }
+    </style>
 </head>
 
 <body class="font-sans m-0 bg-[#f4f7f2] text-gray-800">
@@ -95,6 +407,54 @@
                 </p>
             </div>
 
+            <!-- ── KOMENTAR SECTION ── -->
+            <section class="komentar-section" id="komentar">
+                <h3>
+                    💬 Komentar
+                    <span class="count" id="comment-count">(0)</span>
+                </h3>
+
+                <!-- Comment Form -->
+                <form id="comment-form" class="comment-form {% if session.user_logged_in %}logged-in{% endif %}">
+                    <div class="comment-form-aside">
+                        {% if session.user_logged_in %}
+                            <div class="comment-avatar" style="position:static;width:auto;height:auto;background:none;color:inherit;font-size:0.85rem;font-weight:600;">
+                                {{ session.user_nama }}
+                            </div>
+                            {% if session.user_role == 'admin' %}
+                                <span class="badge-role">Admin</span>
+                            {% elif session.user_role == 'dinas' %}
+                                <span class="badge-role" style="background:#fef3c7;color:#b45309;">Petugas</span>
+                            {% endif %}
+                        {% else %}
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            Berkomentar sebagai <strong>tamu</strong>
+                        {% endif %}
+                    </div>
+
+                    {% if not session.user_logged_in %}
+                    <input type="text" id="comment-nama" placeholder="Nama kamu" maxlength="50" autocomplete="name">
+                    {% endif %}
+
+                    <textarea id="comment-konten" placeholder="Tulis komentar..." rows="3" maxlength="2000"></textarea>
+
+                    <div class="comment-form-footer">
+                        <span class="hint" id="char-count">0 / 2000</span>
+                        {% if not session.user_logged_in %}
+                        <span class="hint">atau <a href="{{ url_for('public.login') }}" style="color:#155C1B;font-weight:600;">login</a> untuk fitur lengkap</span>
+                        {% endif %}
+                        <button type="submit" class="btn-kirim" id="btn-kirim-komentar">Kirim 💬</button>
+                    </div>
+                </form>
+
+                <!-- Comments Container -->
+                <div id="comments-container">
+                    <div class="comment-loading">Memuat komentar...</div>
+                </div>
+            </section>
+
             <!-- Back button -->
             <div class="mt-12 pt-6 border-t border-gray-100">
                 <a href="{{ url_for('public.berita') }}" class="news-readmore">
@@ -108,6 +468,254 @@
         </div>
 
     </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+    (function() {
+        const BERITA_ID = {{ artikel.id }};
+        const IS_LOGGED_IN = {{ 'true' if session.user_logged_in else 'false' }};
+        const USER_ROLE = "{{ session.user_role or '' }}";
+        const USER_ID = {{ session.user_id or 'null' }};
+
+        // ── Toast helper ──────────────────────────────────────────────
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            // Force reflow
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ── Format relative time ──────────────────────────────────────
+        function timeAgo(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            if (diff < 60) return ' baru saja';
+            if (diff < 3600) return ` ${Math.floor(diff / 60)} menit lalu`;
+            if (diff < 86400) return ` ${Math.floor(diff / 3600)} jam lalu`;
+            if (diff < 604800) return ` ${Math.floor(diff / 86400)} hari lalu`;
+            return ' ' + date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        // ── Get initials ─────────────────────────────────────────────
+        function initials(name) {
+            return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        }
+
+        // ── Count total comments (recursive) ─────────────────────────
+        function countAll(comments) {
+            return comments.reduce((n, c) => n + 1 + countAll(c.children || []), 0);
+        }
+
+        // ── Render a single comment item ──────────────────────────────
+        function renderComment(c, level) {
+            const isOwner = IS_LOGGED_IN && c.user_id && c.user_id === USER_ID;
+            const isAdmin = c.role === 'admin' || c.role === 'dinas';
+            const canDelete = IS_LOGGED_IN && (USER_ROLE === 'admin' || USER_ROLE === 'dinas' || isOwner);
+            const avatarColor = isAdmin
+                ? (c.role === 'admin' ? '#dc2626' : '#b45309')
+                : '#155C1B';
+
+            let childrenHtml = '';
+            if (c.children && c.children.length > 0) {
+                const childrenThreads = c.children.map(child => renderComment(child, level + 1)).join('');
+                childrenHtml = `<div class="comment-thread">${childrenThreads}</div>`;
+            }
+
+            return `
+            <div class="comment-item" id="k-${c.id}">
+                <div class="comment-header">
+                    <div class="comment-avatar" style="background:${avatarColor}">${initials(c.nama_pengirim)}</div>
+                    <span class="comment-author ${isAdmin ? 'is-' + c.role : ''}">${escHtml(c.nama_pengirim)}</span>
+                    ${isAdmin ? `<span class="comment-role-badge ${c.role}">${c.role === 'admin' ? 'Admin' : 'Petugas'}</span>` : ''}
+                    <span class="comment-time">${timeAgo(c.created_at)}</span>
+                </div>
+                <div class="comment-body">${escHtml(c.konten)}</div>
+                <div class="comment-actions">
+                    <button class="btn-reply" data-id="${c.id}" data-name="${escAttr(c.nama_pengirim)}">
+                        ↩ Balas
+                    </button>
+                    ${canDelete ? `<button class="btn-hapus" data-id="${c.id}">🗑 Hapus</button>` : ''}
+                </div>
+                <div class="reply-form" id="reply-form-${c.id}">
+                    <textarea id="reply-text-${c.id}" placeholder="Balas ${escAttr(c.nama_pengirim)}..."></textarea>
+                    <div class="reply-form-actions">
+                        <button class="btn-batal" data-id="${c.id}">Batal</button>
+                        <button class="btn-kirim-reply" data-id="${c.id}" data-parent="${c.id}">Kirim Balasan</button>
+                    </div>
+                </div>
+                ${childrenHtml}
+            </div>`;
+        }
+
+        function escHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+        function escAttr(str) {
+            return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        // ── Render all comments ────────────────────────────────────────
+        function renderComments(comments) {
+            const container = document.getElementById('comments-container');
+            const total = countAll(comments);
+            document.getElementById('comment-count').textContent = `(${total})`;
+
+            if (comments.length === 0) {
+                container.innerHTML = `<p style="color:#9ca3af;font-size:0.9rem;padding:1rem 0;">
+                    Belum ada komentar. Jadilah yang pertama! 👋
+                </p>`;
+                return;
+            }
+
+            container.innerHTML = `<div class="comments-list">${comments.map(c => renderComment(c, 0)).join('')}</div>`;
+        }
+
+        // ── Load comments from API ────────────────────────────────────
+        async function loadComments() {
+            try {
+                const res = await fetch(`/api/berita/${BERITA_ID}/komentar`);
+                const data = await res.json();
+                if (data.success) {
+                    renderComments(data.comments);
+                }
+            } catch (e) {
+                document.getElementById('comments-container').innerHTML =
+                    `<p style="color:#9ca3af;font-size:0.9rem;">Gagal memuat komentar.</p>`;
+            }
+        }
+
+        // ── Post a comment ─────────────────────────────────────────────
+        async function postComment(parentId = null) {
+            const form = document.getElementById('comment-form');
+            const textarea = document.getElementById('comment-konten');
+            const namaInput = document.getElementById('comment-nama');
+            const btn = document.getElementById('btn-kirim-komentar');
+
+            const konten = (textarea.value || '').trim();
+            const nama = (namaInput ? namaInput.value : '').trim();
+            const replyText = parentId ? document.getElementById(`reply-text-${parentId}`) : null;
+            const finalKonten = replyText ? (replyText.value || '').trim() : konten;
+
+            if (!finalKonten) {
+                showToast('Komentar tidak boleh kosong!', 'error');
+                return;
+            }
+            if (!IS_LOGGED_IN && !nama && !replyText) {
+                showToast('Nama wajib diisi untuk tamu!', 'error');
+                return;
+            }
+
+            // Disable button
+            if (btn) { btn.disabled = true; btn.textContent = 'Mengirim...'; }
+
+            const payload = {
+                konten: finalKonten,
+                parent_id: parentId,
+                nama_pengirim: IS_LOGGED_IN ? undefined : nama
+            };
+
+            try {
+                const res = await fetch(`/api/berita/${BERITA_ID}/komentar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (replyText) replyText.value = '';
+                    else textarea.value = '';
+                    loadComments();
+                    showToast('Komentar terkirim! 🎉');
+                } else {
+                    showToast(data.error || 'Gagal mengirim komentar', 'error');
+                }
+            } catch (e) {
+                showToast('Terjadi kesalahan koneksi', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Kirim 💬'; }
+            }
+        }
+
+        // ── Delete a comment ──────────────────────────────────────────
+        async function deleteComment(id) {
+            if (!confirm('Hapus komentar ini beserta semua balasannya?')) return;
+            try {
+                const res = await fetch(`/api/berita/${BERITA_ID}/komentar/${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                if (data.success) {
+                    loadComments();
+                    showToast('Komentar dihapus');
+                } else {
+                    showToast(data.error || 'Gagal menghapus', 'error');
+                }
+            } catch (e) {
+                showToast('Terjadi kesalahan koneksi', 'error');
+            }
+        }
+
+        // ── Event delegation on comments container ─────────────────────
+        document.getElementById('comments-container').addEventListener('click', function(e) {
+            const target = e.target;
+
+            // Reply button
+            if (target.classList.contains('btn-reply')) {
+                const id = target.dataset.id;
+                const name = target.dataset.name;
+                // Close all other reply forms
+                document.querySelectorAll('.reply-form').forEach(f => f.classList.remove('active'));
+                // Toggle this one
+                const form = document.getElementById(`reply-form-${id}`);
+                form.classList.toggle('active');
+                if (form.classList.contains('active')) {
+                    document.getElementById(`reply-text-${id}`).focus();
+                }
+            }
+
+            // Batal button
+            if (target.classList.contains('btn-batal')) {
+                const id = target.dataset.id;
+                document.getElementById(`reply-form-${id}`).classList.remove('active');
+            }
+
+            // Kirim balasan button
+            if (target.classList.contains('btn-kirim-reply')) {
+                const id = target.dataset.id;
+                postComment(parseInt(id));
+                document.getElementById(`reply-form-${id}`).classList.remove('active');
+            }
+
+            // Hapus button
+            if (target.classList.contains('btn-hapus')) {
+                const id = target.dataset.id;
+                deleteComment(parseInt(id));
+            }
+        });
+
+        // ── Main comment form submit ──────────────────────────────────
+        document.getElementById('comment-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            postComment();
+        });
+
+        // ── Character counter ──────────────────────────────────────────
+        document.getElementById('comment-konten').addEventListener('input', function() {
+            document.getElementById('char-count').textContent = `${this.value.length} / 2000`;
+        });
+
+        // ── Init ──────────────────────────────────────────────────────
+        loadComments();
+    })();
+    </script>
 </body>
 
 </html>

@@ -3,7 +3,7 @@ Public Routes
 Berisi route-route yang dapat diakses publik (tanpa login)
 """
 
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash, json
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify
 from functools import wraps
 from werkzeug.security import check_password_hash
 from models import (
@@ -16,6 +16,12 @@ from models import (
     verify_user,
     get_all_pages,
     get_page_by_slug,
+    get_komentar_by_berita,
+    build_comment_tree,
+    create_komentar,
+    delete_komentar,
+    get_komentar_by_id,
+    count_komentar_by_berita,
 )
 from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
 
@@ -370,3 +376,83 @@ def peta_interaktif():
         site_description=desa_info['deskripsi'],
         custom_pages=custom_pages,
     )
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── API: KOMENTAR BERITA ───────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+@public_bp.route("/api/berita/<int:berita_id>/komentar", methods=["GET"])
+def api_get_komentar(berita_id):
+    """Ambil semua komentar untuk sebuah berita (JSON tree)"""
+    flat = get_komentar_by_berita(berita_id)
+    tree = build_comment_tree(flat)
+    total = count_komentar_by_berita(berita_id)
+    return jsonify({
+        "success": True,
+        "comments": tree,
+        "total": total,
+    })
+
+
+@public_bp.route("/api/berita/<int:berita_id>/komentar", methods=["POST"])
+def api_post_komentar(berita_id):
+    """Post komentar baru atau reply"""
+    if request.is_json:
+        data = request.get_json()
+        konten = (data.get("konten") or "").strip()
+        parent_id = data.get("parent_id")
+        nama_pengirim = (data.get("nama_pengirim") or "").strip()
+    else:
+        konten = (request.form.get("konten") or "").strip()
+        parent_id = request.form.get("parent_id")
+        nama_pengirim = (request.form.get("nama_pengirim") or "").strip()
+
+    if not konten:
+        return jsonify({"success": False, "error": "Konten tidak boleh kosong"}), 400
+
+    user_id = session.get("user_id")
+    user_role = session.get("user_role")
+
+    # Tentukan nama pengirim
+    if user_id:
+        sender = session.get("user_nama", "Anonim")
+    elif nama_pengirim:
+        sender = nama_pengirim
+    else:
+        return jsonify({"success": False, "error": "Nama wajib diisi untuk tamu"}), 400
+
+    # Validate parent_id
+    if parent_id:
+        parent_id = int(parent_id)
+        # Pastikan parent comment ada dan milik berita yang sama
+        parent = get_komentar_by_id(parent_id)
+        if not parent or parent['berita_id'] != berita_id:
+            return jsonify({"success": False, "error": "Komentar induk tidak ditemukan"}), 400
+
+    create_komentar(berita_id, konten, sender, parent_id, user_id)
+    return jsonify({"success": True, "message": "Komentar terkirim!"})
+
+
+@public_bp.route("/api/berita/<int:berita_id>/komentar/<int:komentar_id>", methods=["DELETE"])
+def api_delete_komentar(berita_id, komentar_id):
+    """Hapus komentar (owner atau admin saja)"""
+    user_id = session.get("user_id")
+    user_role = session.get("user_role")
+
+    if not user_id:
+        return jsonify({"success": False, "error": "Login required"}), 401
+
+    if user_role not in ['admin', 'dinas']:
+        return jsonify({"success": False, "error": "Tidak memiliki hak hapus"}), 403
+
+    komentar = get_komentar_by_id(komentar_id)
+    if not komentar or komentar['berita_id'] != berita_id:
+        return jsonify({"success": False, "error": "Komentar tidak ditemukan"}), 404
+
+    # Admin/Dinas bisa hapus siapa saja; warga hanya hapusmilik sendiri
+    if user_role not in ['admin', 'dinas'] and komentar['user_id'] != user_id:
+        return jsonify({"success": False, "error": "Tidak memiliki hak hapus"}), 403
+
+    delete_komentar(komentar_id)
+    return jsonify({"success": True, "message": "Komentar dihapus"})

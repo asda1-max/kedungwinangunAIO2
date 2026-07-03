@@ -127,6 +127,20 @@ def init_database():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        -- Komentar Berita
+        CREATE TABLE IF NOT EXISTS komentar (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            berita_id INTEGER NOT NULL,
+            parent_id INTEGER,
+            user_id INTEGER,
+            nama_pengirim TEXT NOT NULL,
+            konten TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (berita_id) REFERENCES berita(id) ON DELETE CASCADE,
+            FOREIGN KEY (parent_id) REFERENCES komentar(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+        );
     ''')
 
     # Insert default config
@@ -627,3 +641,78 @@ def toggle_page_active(page_id):
     cursor.execute('UPDATE pages SET active = CASE WHEN active = 1 THEN 0 ELSE 1 END WHERE id = ?', (page_id,))
     conn.commit()
     conn.close()
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── KOMENTAR HELPERS ───────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_komentar_by_berita(berita_id):
+    """Ambil semua komentar untuk sebuah berita (flat list)"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT k.*, u.nama_lengkap, u.role
+        FROM komentar k
+        LEFT JOIN users u ON k.user_id = u.id
+        WHERE k.berita_id = ?
+        ORDER BY k.created_at ASC
+    ''', (berita_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+def build_comment_tree(flat_comments):
+    """Konversi flat list komentar -> nested tree untuk rendering Reddit-style"""
+    lookup = {}
+    for c in flat_comments:
+        lookup[c['id']] = {**c, 'children': []}
+    roots = []
+    for comment in flat_comments:
+        node = lookup[comment['id']]
+        if comment['parent_id'] is None:
+            roots.append(node)
+        else:
+            parent = lookup.get(comment['parent_id'])
+            if parent:
+                parent['children'].append(node)
+    return roots
+
+def create_komentar(berita_id, konten, nama_pengirim, parent_id=None, user_id=None):
+    """Buat komentar baru"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO komentar (berita_id, parent_id, user_id, nama_pengirim, konten)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (berita_id, parent_id, user_id, nama_pengirim, konten))
+    conn.commit()
+    conn.close()
+
+def delete_komentar(komentar_id):
+    """Hapus komentar beserta semua child-nya (recursive delete via FK cascade)"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # FK cascade ON DELETE CASCADE akan handle child comment otomatis,
+    # tapi kita hapus manual untuk memastikan bersih
+    cursor.execute('DELETE FROM komentar WHERE id = ?', (komentar_id,))
+    conn.commit()
+    conn.close()
+
+def get_komentar_by_id(komentar_id):
+    """Ambil satu komentar berdasarkan ID"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM komentar WHERE id = ?', (komentar_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def count_komentar_by_berita(berita_id):
+    """Hitung jumlah komentar untuk sebuah berita"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) as cnt FROM komentar WHERE berita_id = ?', (berita_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return row['cnt'] if row else 0
