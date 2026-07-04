@@ -141,6 +141,57 @@ def init_database():
             FOREIGN KEY (parent_id) REFERENCES komentar(id) ON DELETE CASCADE,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
         );
+
+        -- Struktur Organisasi
+        CREATE TABLE IF NOT EXISTS struktur_organisasi (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            kategori TEXT NOT NULL,
+            nama TEXT NOT NULL,
+            jabatan TEXT,
+            status TEXT,
+            icon TEXT,
+            no_urut INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Pengumuman
+        CREATE TABLE IF NOT EXISTS pengumuman (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            judul TEXT NOT NULL,
+            isi TEXT NOT NULL,
+            kategori TEXT DEFAULT 'umum',
+            is_penting INTEGER DEFAULT 0,
+            lampiran TEXT,
+            author TEXT DEFAULT 'Pemerintahan Desa',
+            aktif INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- APBDes
+        CREATE TABLE IF NOT EXISTS apbdes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tahun INTEGER NOT NULL,
+            jenis TEXT NOT NULL,
+            nama TEXT NOT NULL,
+            icon TEXT DEFAULT '📄',
+            jumlah INTEGER DEFAULT 0,
+            deskripsi TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- APBDes Summary
+        CREATE TABLE IF NOT EXISTS apbdes_summary (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tahun INTEGER NOT NULL,
+            total_pendapatan INTEGER DEFAULT 0,
+            total_belanja INTEGER DEFAULT 0,
+            pembiayaan_net INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
     ''')
 
     # Insert default config
@@ -716,3 +767,216 @@ def count_komentar_by_berita(berita_id):
     row = cursor.fetchone()
     conn.close()
     return row['cnt'] if row else 0
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── STRUKTUR ORGANISASI HELPERS ───────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_all_struktur():
+    """Ambil semua struktur organisasi"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM struktur_organisasi ORDER BY kategori, no_urut ASC')
+    items = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return items
+
+def get_struktur_by_kategori(kategori):
+    """Ambil struktur berdasarkan kategori"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM struktur_organisasi WHERE kategori = ? ORDER BY no_urut ASC', (kategori,))
+    items = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return items
+
+def get_struktur_by_id(struktur_id):
+    """Ambil satu struktur berdasarkan ID"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM struktur_organisasi WHERE id = ?', (struktur_id,))
+    item = cursor.fetchone()
+    conn.close()
+    return dict(item) if item else None
+
+def add_struktur(kategori, nama, jabatan='', status='', icon=''):
+    """Tambah struktur organisasi"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Get max order in kategori
+    cursor.execute('SELECT MAX(no_urut) as max_order FROM struktur_organisasi WHERE kategori = ?', (kategori,))
+    row = cursor.fetchone()
+    max_order = (row['max_order'] or 0) + 1
+
+    cursor.execute('''
+        INSERT INTO struktur_organisasi (kategori, nama, jabatan, status, icon, no_urut)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (kategori, nama, jabatan, status, icon, max_order))
+    conn.commit()
+    conn.close()
+
+def update_struktur(struktur_id, kategori, nama, jabatan, status, icon, no_urut):
+    """Update struktur organisasi"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE struktur_organisasi SET kategori = ?, nama = ?, jabatan = ?, status = ?, icon = ?, no_urut = ?
+        WHERE id = ?
+    ''', (kategori, nama, jabatan, status, icon, no_urut, struktur_id))
+    conn.commit()
+    conn.close()
+
+def delete_struktur(struktur_id):
+    """Hapus struktur organisasi"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM struktur_organisasi WHERE id = ?', (struktur_id,))
+    conn.commit()
+    conn.close()
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── PENGUMUMAN HELPERS ─────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_all_pengumuman(aktif=None):
+    """Ambil semua pengumuman"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if aktif is not None:
+        cursor.execute('SELECT * FROM pengumuman WHERE aktif = ? ORDER BY created_at DESC', (aktif,))
+    else:
+        cursor.execute('SELECT * FROM pengumuman ORDER BY created_at DESC')
+    items = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return items
+
+def get_pengumuman_by_id(pengumuman_id):
+    """Ambil satu pengumuman berdasarkan ID"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM pengumuman WHERE id = ?', (pengumuman_id,))
+    item = cursor.fetchone()
+    conn.close()
+    return dict(item) if item else None
+
+def add_pengumuman(judul, isi, kategori='umum', is_penting=0, lampiran='', author='Pemerintahan Desa'):
+    """Tambah pengumuman baru"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO pengumuman (judul, isi, kategori, is_penting, lampiran, author)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (judul, isi, kategori, is_penting, lampiran, author))
+    conn.commit()
+    conn.close()
+
+def update_pengumuman(pengumuman_id, judul, isi, kategori, is_penting, lampiran, author):
+    """Update pengumuman"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE pengumuman SET judul = ?, isi = ?, kategori = ?, is_penting = ?, lampiran = ?, author = ?
+        WHERE id = ?
+    ''', (judul, isi, kategori, is_penting, lampiran, author, pengumuman_id))
+    conn.commit()
+    conn.close()
+
+def delete_pengumuman(pengumuman_id):
+    """Hapus pengumuman"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM pengumuman WHERE id = ?', (pengumuman_id,))
+    conn.commit()
+    conn.close()
+
+def toggle_pengumuman_aktif(pengumuman_id):
+    """Toggle status aktif pengumuman"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE pengumuman SET aktif = CASE WHEN aktif = 1 THEN 0 ELSE 1 END WHERE id = ?', (pengumuman_id,))
+    conn.commit()
+    conn.close()
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── APBDes HELPERS ──────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_apbdes_by_tahun(tahun):
+    """Ambil semua data APBDes untuk tahun tertentu"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM apbdes WHERE tahun = ? ORDER BY jenis, id ASC', (tahun,))
+    items = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return items
+
+def get_apbdes_summary(tahun):
+    """Ambil summary APBDes untuk tahun tertentu"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM apbdes_summary WHERE tahun = ?', (tahun,))
+    item = cursor.fetchone()
+    conn.close()
+    return dict(item) if item else None
+
+def get_apbdes_by_id(apbdes_id):
+    """Ambil satu item APBDes berdasarkan ID"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM apbdes WHERE id = ?', (apbdes_id,))
+    item = cursor.fetchone()
+    conn.close()
+    return dict(item) if item else None
+
+def add_apbdes_item(tahun, jenis, nama, jumlah, icon='', deskripsi=''):
+    """Tambah item APBDes"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO apbdes (tahun, jenis, nama, jumlah, icon, deskripsi)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (tahun, jenis, nama, jumlah, icon, deskripsi))
+    conn.commit()
+    conn.close()
+
+def update_apbdes_item(apbdes_id, tahun, jenis, nama, jumlah, icon, deskripsi):
+    """Update item APBDes"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE apbdes SET tahun = ?, jenis = ?, nama = ?, jumlah = ?, icon = ?, deskripsi = ?
+        WHERE id = ?
+    ''', (tahun, jenis, nama, jumlah, icon, deskripsi, apbdes_id))
+    conn.commit()
+    conn.close()
+
+def delete_apbdes_item(apbdes_id):
+    """Hapus item APBDes"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM apbdes WHERE id = ?', (apbdes_id,))
+    conn.commit()
+    conn.close()
+
+def save_apbdes_summary(tahun, total_pendapatan, total_belanja, pembiayaan_net):
+    """Simpan/update summary APBDes"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT OR REPLACE INTO apbdes_summary (tahun, total_pendapatan, total_belanja, pembiayaan_net)
+        VALUES (?, ?, ?, ?)
+    ''', (tahun, total_pendapatan, total_belanja, pembiayaan_net))
+    conn.commit()
+    conn.close()
+
+def get_available_tahun():
+    """Ambil daftar tahun yang ada di APBDes"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT DISTINCT tahun FROM apbdes ORDER BY tahun DESC')
+    rows = cursor.fetchall()
+    conn.close()
+    return [row['tahun'] for row in rows]

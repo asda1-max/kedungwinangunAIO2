@@ -80,7 +80,7 @@
         </div>
 
         <!-- Announcements List -->
-        <div x-data="{ filter: 'all' }" class="space-y-6">
+        <div x-data="{ filter: 'all', pengumuman: {{ pengumuman|tojson }} }" class="space-y-6">
             <template x-for="ann in pengumuman.filter(a => filter === 'all' || a.kategori === filter)" :key="ann.id">
                 <div class="bg-white rounded-2xl shadow-sm border border-[rgba(21,92,27,0.08)] overflow-hidden hover:shadow-lg transition-all duration-300"
                      :class="{ 'border-l-4 border-l-red-500': ann.is_penting }">
@@ -147,10 +147,5 @@
 
     <!-- FOOTER -->
     {% include 'partials/footer.html' %}
-
-    <!-- Alpine Data -->
-    <script>
-        window.pengumumanData = {{ pengumuman|tojson }};
-    </script>
 </body>
 </html>

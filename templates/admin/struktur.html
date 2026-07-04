@@ -1,0 +1,93 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Struktur Organisasi - Admin{% endblock %}
+{% block page_title %}Struktur Organisasi{% endblock %}
+{% block page_subtitle %}Kelola data struktur organisasi Pemerintah Desa{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="p-4 rounded-xl {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Actions -->
+    <div class="flex items-center justify-between">
+        <p class="text-gray-600">Total: {{ struktur_list|length }} data</p>
+        <a href="{{ url_for('admin.add_struktur_route') }}" class="btn btn-primary">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Tambah Data
+        </a>
+    </div>
+
+    <!-- List by Kategori -->
+    {% for kategori, items in grouped.items() %}
+    <div class="card-section animate-in">
+        <div class="card-section-header">
+            <span class="icon">{% if kategori == 'pemerintah' %}🏛️{% elif kategori == 'bpd' %}🏢{% elif kategori == 'rtrw' %}🏠{% else %}👥{% endif %}</span>
+            <div>
+                <h2>{{ kategori|upper }}</h2>
+                <p>{{ items|length }} data</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>Jabatan</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl">{{ item.icon or '👤' }}</span>
+                                    <span class="font-semibold">{{ item.nama }}</span>
+                                </div>
+                            </td>
+                            <td>{{ item.jabatan or '-' }}</td>
+                            <td>{{ item.status or '-' }}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <a href="{{ url_for('admin.edit_struktur_route', struktur_id=item.id) }}" class="btn btn-sm btn-outline">Edit</a>
+                                    <form method="POST" action="{{ url_for('admin.delete_struktur_route', struktur_id=item.id) }}" onsubmit="return confirm('Hapus data ini?')">
+                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if not struktur_list %}
+    <div class="card-section animate-in">
+        <div class="p-12 text-center">
+            <div class="text-6xl mb-4">👥</div>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">Belum Ada Data</h3>
+            <p class="text-gray-500">Klik tombol "Tambah Data" untuk menambahkan struktur organisasi.</p>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

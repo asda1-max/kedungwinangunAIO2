@@ -56,16 +56,16 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for item in struktur_pemerintah %}
+                {% for item in grouped_struktur.pemerintah %}
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-[rgba(21,92,27,0.08)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                     <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#155C1B] to-[#2A6726] flex items-center justify-center text-white text-2xl font-bold">
-                        {{ item.nama[0]|upper }}
+                        {{ (item.icon or '👤') if item.icon else item.nama[0]|upper }}
                     </div>
                     <h3 class="text-[#155C1B] font-bold text-lg text-center mb-1">{{ item.nama }}</h3>
-                    <p class="text-[#73AA0F] font-semibold text-sm text-center mb-3">{{ item.jabatan }}</p>
+                    <p class="text-[#73AA0F] font-semibold text-sm text-center mb-3">{{ item.jabatan or '' }}</p>
                     <div class="flex items-center justify-center gap-2 text-gray-500 text-xs">
                         <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                        {{ item.status }}
+                        {{ item.status or '' }}
                     </div>
                 </div>
                 {% endfor %}
@@ -84,59 +84,19 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {% for item in struktur_bpd %}
+                {% for item in grouped_struktur.bpd %}
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-[rgba(21,92,27,0.08)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-center">
                     <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-xl font-bold">
-                        {{ item.nama[0]|upper }}
+                        {{ (item.icon or '👤') if item.icon else item.nama[0]|upper }}
                     </div>
                     <h3 class="text-[#155C1B] font-bold text-base mb-1">{{ item.nama }}</h3>
-                    <p class="text-blue-600 font-semibold text-sm">{{ item.jabatan }}</p>
+                    <p class="text-blue-600 font-semibold text-sm">{{ item.jabatan or '' }}</p>
                 </div>
                 {% endfor %}
             </div>
         </section>
 
-        <!-- RT / RW -->
-        <section class="mb-12">
-            <h2 class="text-[#155C1B] text-xl md:text-2xl font-extrabold mb-6 flex items-center gap-3">
-                <span class="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                    </svg>
-                </span>
-               RT & RW
-            </h2>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {% for item in struktur_rtrw %}
-                <div class="bg-white rounded-xl p-4 shadow-sm border border-[rgba(21,92,27,0.08)] hover:shadow-md transition-all duration-300">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-lg">
-                            {{ item.no_rw }}
-                        </div>
-                        <div>
-                            <p class="text-gray-500 text-xs">RW {{ item.no_rw }}</p>
-                            <p class="text-[#155C1B] font-semibold text-sm">{{ item.ketua_rw }}</p>
-                        </div>
-                    </div>
-                    {% if item.rt_list %}
-                    <div class="mt-3 pt-3 border-t border-gray-100">
-                        <p class="text-gray-400 text-xs mb-2">RT:</p>
-                        <div class="flex flex-wrap gap-1">
-                            {% for rt in item.rt_list %}
-                            <span class="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
-                                RT {{ rt.no_rt }}: {{ rt.ketua_rt }}
-                            </span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <!-- KADER & LINAS -->
+        <!-- KADER & LEMBAGA DESA -->
         <section>
             <h2 class="text-[#155C1B] text-xl md:text-2xl font-extrabold mb-6 flex items-center gap-3">
                 <span class="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center">
@@ -148,13 +108,13 @@
             </h2>
 
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {% for item in struktur_kader %}
+                {% for item in grouped_struktur.kader %}
                 <div class="bg-white rounded-xl p-5 shadow-sm border border-[rgba(21,92,27,0.08)] hover:shadow-md transition-all duration-300 text-center">
                     <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-purple-100 flex items-center justify-center text-2xl">
-                        {{ item.icon }}
+                        {{ item.icon or '👥' }}
                     </div>
                     <h3 class="text-[#155C1B] font-bold text-sm mb-1">{{ item.nama }}</h3>
-                    <p class="text-purple-600 font-medium text-xs">{{ item.jumlah }} orang</p>
+                    <p class="text-purple-600 font-medium text-xs">{{ item.jabatan or '' }}</p>
                 </div>
                 {% endfor %}
             </div>

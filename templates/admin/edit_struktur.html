@@ -1,0 +1,66 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Edit Struktur - Admin{% endblock %}
+{% block page_title %}Edit Struktur Organisasi{% endblock %}
+{% block page_subtitle %}Perbarui data struktur organisasi{% endblock %}
+
+{% block content %}
+<form method="POST">
+    <div class="card-section animate-in">
+        <div class="card-section-header">
+            <span class="icon">👥</span>
+            <div>
+                <h2>Data Struktur</h2>
+                <p>Perbarui form di bawah</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="kategori">Kategori <span class="required">*</span></label>
+                    <select id="kategori" name="kategori" required>
+                        <option value="pemerintah" {% if item.kategori == 'pemerintah' %}selected{% endif %}>Pemerintah Desa</option>
+                        <option value="bpd" {% if item.kategori == 'bpd' %}selected{% endif %}>BPD (Badan Permusyawaratan Desa)</option>
+                        <option value="rtrw" {% if item.kategori == 'rtrw' %}selected{% endif %}>RT & RW</option>
+                        <option value="kader" {% if item.kategori == 'kader' %}selected{% endif %}>Kader & Lembaga Desa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nama">Nama Lengkap <span class="required">*</span></label>
+                    <input type="text" id="nama" name="nama" value="{{ item.nama }}" placeholder="Contoh: Drs. H. Ahmad Zainuri" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="jabatan">Jabatan</label>
+                    <input type="text" id="jabatan" name="jabatan" value="{{ item.jabatan or '' }}" placeholder="Contoh: Kepala Desa">
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <input type="text" id="status" name="status" value="{{ item.status or '' }}" placeholder="Contoh: PNS Desa">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="icon">Icon (Emoji)</label>
+                    <input type="text" id="icon" name="icon" value="{{ item.icon or '' }}" placeholder="Contoh: 👤" maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label for="no_urut">No. Urut</label>
+                    <input type="number" id="no_urut" name="no_urut" value="{{ item.no_urut or 0 }}" min="0">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Simpan Perubahan
+        </button>
+        <a href="{{ url_for('admin.struktur') }}" class="btn btn-outline">Batal</a>
+    </div>
+</form>
+{% endblock %}

@@ -565,6 +565,29 @@
                 </a>
             </nav>
 
+            <!-- Fitur Desa Navigation -->
+            <nav class="nav-section">
+                <div class="nav-section-title">Fitur Desa</div>
+
+                <a href="{{ url_for('admin.pengumuman') }}"
+                   class="nav-item {% if request.endpoint and 'pengumuman' in request.endpoint %}active{% endif %}">
+                    <div class="nav-item-icon">📢</div>
+                    Pengumuman
+                </a>
+
+                <a href="{{ url_for('admin.struktur') }}"
+                   class="nav-item {% if request.endpoint and 'struktur' in request.endpoint %}active{% endif %}">
+                    <div class="nav-item-icon">👥</div>
+                    Struktur Organisasi
+                </a>
+
+                <a href="{{ url_for('admin.apbdes') }}"
+                   class="nav-item {% if request.endpoint and 'apbdes' in request.endpoint %}active{% endif %}">
+                    <div class="nav-item-icon">💰</div>
+                    Transparansi APBDes
+                </a>
+            </nav>
+
             <!-- Settings Navigation -->
             <nav class="nav-section">
                 <div class="nav-section-title">Pengaturan</div>

@@ -1,0 +1,62 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Tambah Struktur - Admin{% endblock %}
+{% block page_title %}Tambah Struktur Organisasi{% endblock %}
+{% block page_subtitle %}Tambah data baru struktur organisasi{% endblock %}
+
+{% block content %}
+<form method="POST">
+    <div class="card-section animate-in">
+        <div class="card-section-header">
+            <span class="icon">👥</span>
+            <div>
+                <h2>Data Struktur</h2>
+                <p>Isi form di bawah untuk menambah data</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="kategori">Kategori <span class="required">*</span></label>
+                    <select id="kategori" name="kategori" required>
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="pemerintah">Pemerintah Desa</option>
+                        <option value="bpd">BPD (Badan Permusyawaratan Desa)</option>
+                        <option value="rtrw">RT & RW</option>
+                        <option value="kader">Kader & Lembaga Desa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nama">Nama Lengkap <span class="required">*</span></label>
+                    <input type="text" id="nama" name="nama" placeholder="Contoh: Drs. H. Ahmad Zainuri" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="jabatan">Jabatan</label>
+                    <input type="text" id="jabatan" name="jabatan" placeholder="Contoh: Kepala Desa">
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <input type="text" id="status" name="status" placeholder="Contoh: PNS Desa">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="icon">Icon (Emoji)</label>
+                <input type="text" id="icon" name="icon" placeholder="Contoh: 👤" maxlength="10">
+                <p class="hint">Gunakan emoji untuk icon. Contoh: 👨‍💼 👩‍💼 🧑‍⚕️</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Simpan Data
+        </button>
+        <a href="{{ url_for('admin.struktur') }}" class="btn btn-outline">Batal</a>
+    </div>
+</form>
+{% endblock %}

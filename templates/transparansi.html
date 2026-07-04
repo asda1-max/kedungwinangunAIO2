@@ -82,7 +82,7 @@
                     </div>
                 </div>
                 <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-red-500 rounded-full" style="width: {{ (apbdes.total_belanja / apbdes.total_pendapatan * 100)|round|int }}%"></div>
+                    <div class="h-full bg-red-500 rounded-full" style="width: {% if apbdes.total_pendapatan > 0 %}{{ (apbdes.total_belanja / apbdes.total_pendapatan * 100)|round|int }}{% else %}0{% endif %}%"></div>
                 </div>
             </div>
 
@@ -100,7 +100,7 @@
                     </div>
                 </div>
                 <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-blue-500 rounded-full" style="width: {{ (apbdes.pembiayaan_net / apbdes.total_pendapatan * 100)|round|int }}%"></div>
+                    <div class="h-full bg-blue-500 rounded-full" style="width: {% if apbdes.total_pendapatan > 0 %}{{ (apbdes.pembiayaan_net / apbdes.total_pendapatan * 100)|round|int }}{% else %}0{% endif %}%"></div>
                 </div>
             </div>
         </div>

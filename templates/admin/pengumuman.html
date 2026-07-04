@@ -1,0 +1,105 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Pengumuman - Admin{% endblock %}
+{% block page_title %}Pengumuman{% endblock %}
+{% block page_subtitle %}Kelola pengumuman dan informasi penting{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="p-4 rounded-xl {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Actions -->
+    <div class="flex items-center justify-between">
+        <p class="text-gray-600">Total: {{ pengumuman_list|length }} pengumuman</p>
+        <a href="{{ url_for('admin.add_pengumuman_route') }}" class="btn btn-primary">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Buat Pengumuman
+        </a>
+    </div>
+
+    <div class="card-section animate-in">
+        <div class="card-section-header">
+            <span class="icon">📢</span>
+            <div>
+                <h2>Daftar Pengumuman</h2>
+                <p>Kelola pengumuman yang tampil di website</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            {% if pengumuman_list %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Judul</th>
+                            <th>Kategori</th>
+                            <th>Status</th>
+                            <th>Tanggal</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in pengumuman_list %}
+                        <tr>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    {% if item.is_penting %}
+                                    <span class="text-red-500">🔴</span>
+                                    {% endif %}
+                                    <span class="font-semibold">{{ item.judul }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {% if item.kategori == 'penting' %}badge-red{% elif item.kategori == 'kegiatan' %}badge-blue{% elif item.kategori == 'bantuan' %}badge-yellow{% else %}badge-gray{% endif %}">
+                                    {{ item.kategori }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if item.aktif %}
+                                <span class="badge badge-green">Aktif</span>
+                                {% else %}
+                                <span class="badge badge-gray">Nonaktif</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.created_at[:10] if item.created_at else '-' }}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <a href="{{ url_for('admin.edit_pengumuman_route', pengumuman_id=item.id) }}" class="btn btn-sm btn-outline">Edit</a>
+                                    <form method="POST" action="{{ url_for('admin.toggle_pengumuman_route', pengumuman_id=item.id) }}" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm {% if item.aktif %}btn-warning{% else %}btn-success{% endif %}">
+                                            {% if item.aktif %}Nonaktifkan{% else %}Aktifkan{% endif %}
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('admin.delete_pengumuman_route', pengumuman_id=item.id) }}" onsubmit="return confirm('Hapus pengumuman ini?')">
+                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-12 text-center">
+                <div class="text-6xl mb-4">📢</div>
+                <h3 class="text-xl font-bold text-gray-700 mb-2">Belum Ada Pengumuman</h3>
+                <p class="text-gray-500">Klik tombol "Buat Pengumuman" untuk menambahkan.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

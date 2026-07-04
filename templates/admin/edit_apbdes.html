@@ -1,0 +1,63 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Edit APBDes - Admin{% endblock %}
+{% block page_title %}Edit Item APBDes{% endblock %}
+{% block page_subtitle %}Perbarui item APBDes{% endblock %}
+
+{% block content %}
+<form method="POST">
+    <div class="card-section animate-in">
+        <div class="card-section-header">
+            <span class="icon">💰</span>
+            <div>
+                <h2>Detail Item</h2>
+                <p>Perbarui form di bawah</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tahun">Tahun <span class="required">*</span></label>
+                    <input type="number" id="tahun" name="tahun" value="{{ item.tahun }}" min="2020" max="2100" required>
+                </div>
+                <div class="form-group">
+                    <label for="jenis">Jenis <span class="required">*</span></label>
+                    <select id="jenis" name="jenis" required>
+                        <option value="pendapatan" {% if item.jenis == 'pendapatan' %}selected{% endif %}>Pendapatan</option>
+                        <option value="belanja" {% if item.jenis == 'belanja' %}selected{% endif %}>Belanja</option>
+                        <option value="pembiayaan" {% if item.jenis == 'pembiayaan' %}selected{% endif %}>Pembiayaan</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="nama">Nama Item <span class="required">*</span></label>
+                <input type="text" id="nama" name="nama" value="{{ item.nama }}" placeholder="Contoh: Dana Desa" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="jumlah">Jumlah (Rp) <span class="required">*</span></label>
+                    <input type="number" id="jumlah" name="jumlah" value="{{ item.jumlah }}" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="icon">Icon (Emoji)</label>
+                    <input type="text" id="icon" name="icon" value="{{ item.icon or '' }}" placeholder="Contoh: 💵" maxlength="10">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="deskripsi">Deskripsi</label>
+                <input type="text" id="deskripsi" name="deskripsi" value="{{ item.deskripsi or '' }}" placeholder="Deskripsi singkat">
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Simpan Perubahan
+        </button>
+        <a href="{{ url_for('admin.apbdes') }}" class="btn btn-outline">Batal</a>
+    </div>
+</form>
+{% endblock %}

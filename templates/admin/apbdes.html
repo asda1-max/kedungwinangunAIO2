@@ -1,0 +1,201 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}APBDes - Admin{% endblock %}
+{% block page_title %}Transparansi APBDes{% endblock %}
+{% block page_subtitle %}Kelola data Anggaran Pendapatan dan Belanja Desa{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="p-4 rounded-xl {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Year Selector & Actions -->
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <label class="text-gray-600">Tahun:</label>
+            <select onchange="window.location.href='?tahun='+this.value" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                {% for y in tahun_list %}
+                <option value="{{ y }}" {% if y == tahun %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <a href="{{ url_for('admin.add_apbdes_route') }}?tahun={{ tahun }}" class="btn btn-primary">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Tambah Item
+        </a>
+    </div>
+
+    <!-- Pendapatan -->
+    <div class="card-section animate-in">
+        <div class="card-section-header">
+            <span class="icon">💵</span>
+            <div>
+                <h2>Pendapatan</h2>
+                <p>Total: Rp {{ "{:,.0f}".format(grouped.pendapatan|sum(attribute='jumlah') if grouped.pendapatan else 0) }}</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            {% if grouped.pendapatan %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>Jumlah</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in grouped.pendapatan %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <span>{{ item.icon or '📄' }}</span>
+                                    <div>
+                                        <span class="font-semibold">{{ item.nama }}</span>
+                                        {% if item.deskripsi %}<br><span class="text-xs text-gray-500">{{ item.deskripsi }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="font-semibold text-green-600">Rp {{ "{:,.0f}".format(item.jumlah) }}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <a href="{{ url_for('admin.edit_apbdes_route', apbdes_id=item.id) }}" class="btn btn-sm btn-outline">Edit</a>
+                                    <form method="POST" action="{{ url_for('admin.delete_apbdes_route', apbdes_id=item.id) }}" onsubmit="return confirm('Hapus item ini?')">
+                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-8">Belum ada data pendapatan</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Belanja -->
+    <div class="card-section animate-in">
+        <div class="card-section-header">
+            <span class="icon">💸</span>
+            <div>
+                <h2>Belanja</h2>
+                <p>Total: Rp {{ "{:,.0f}".format(grouped.belanja|sum(attribute='jumlah') if grouped.belanja else 0) }}</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            {% if grouped.belanja %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>Jumlah</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in grouped.belanja %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <span>{{ item.icon or '📄' }}</span>
+                                    <div>
+                                        <span class="font-semibold">{{ item.nama }}</span>
+                                        {% if item.deskripsi %}<br><span class="text-xs text-gray-500">{{ item.deskripsi }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="font-semibold text-red-600">Rp {{ "{:,.0f}".format(item.jumlah) }}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <a href="{{ url_for('admin.edit_apbdes_route', apbdes_id=item.id) }}" class="btn btn-sm btn-outline">Edit</a>
+                                    <form method="POST" action="{{ url_for('admin.delete_apbdes_route', apbdes_id=item.id) }}" onsubmit="return confirm('Hapus item ini?')">
+                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-8">Belum ada data belanja</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pembiayaan -->
+    <div class="card-section animate-in">
+        <div class="card-section-header">
+            <span class="icon">🔄</span>
+            <div>
+                <h2>Pembiayaan</h2>
+                <p>Total: Rp {{ "{:,.0f}".format(grouped.pembiayaan|sum(attribute='jumlah') if grouped.pembiayaan else 0) }}</p>
+            </div>
+        </div>
+        <div class="card-section-body">
+            {% if grouped.pembiayaan %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>Jumlah</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in grouped.pembiayaan %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <span>{{ item.icon or '📄' }}</span>
+                                    <div>
+                                        <span class="font-semibold">{{ item.nama }}</span>
+                                        {% if item.deskripsi %}<br><span class="text-xs text-gray-500">{{ item.deskripsi }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="font-semibold text-blue-600">Rp {{ "{:,.0f}".format(item.jumlah) }}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <a href="{{ url_for('admin.edit_apbdes_route', apbdes_id=item.id) }}" class="btn btn-sm btn-outline">Edit</a>
+                                    <form method="POST" action="{{ url_for('admin.delete_apbdes_route', apbdes_id=item.id) }}" onsubmit="return confirm('Hapus item ini?')">
+                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-8">Belum ada data pembiayaan</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
