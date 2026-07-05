@@ -25,7 +25,11 @@
 <div class="stats-grid animate-in">
     <div class="stat-card">
         <div class="stat-header">
-            <div class="stat-icon green">📰</div>
+            <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2"/>
+                </svg>
+            </div>
         </div>
         <div class="stat-content">
             <h3>{{ total_berita }}</h3>
@@ -34,7 +38,11 @@
     </div>
     <div class="stat-card">
         <div class="stat-header">
-            <div class="stat-icon yellow">⭐</div>
+            <div class="stat-icon yellow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+            </div>
         </div>
         <div class="stat-content">
             <h3>{{ berita_unggulan }}</h3>
@@ -43,7 +51,12 @@
     </div>
     <div class="stat-card">
         <div class="stat-header">
-            <div class="stat-icon blue">👁</div>
+            <div class="stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </div>
         </div>
         <div class="stat-content">
             <h3>—</h3>
@@ -52,7 +65,14 @@
     </div>
     <div class="stat-card">
         <div class="stat-header">
-            <div class="stat-icon purple">👥</div>
+            <div class="stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+            </div>
         </div>
         <div class="stat-content">
             <h3>—</h3>
@@ -64,10 +84,11 @@
 <!-- News Table -->
 <div class="card animate-in" style="animation-delay: 0.2s;">
     <div class="card-header">
-        <h3>📋 Daftar Berita</h3>
-        <a href="{{ url_for('admin.add_berita_route') }}" class="btn btn-outline" style="padding: 10px 16px; font-size: 13px;">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        <h3>Daftar Berita</h3>
+        <a href="{{ url_for('admin.add_berita_route') }}" class="btn btn-outline" style="padding: 8px 14px; font-size: 12px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
             Tambah
         </a>
@@ -100,7 +121,12 @@
                     <td style="color: #64748b;">{{ berita.tanggal }}</td>
                     <td>
                         {% if berita.unggulan == 1 %}
-                        <span class="featured-badge">⭐ Unggulan</span>
+                        <span class="badge badge-orange">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 12px; height: 12px;">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            Unggulan
+                        </span>
                         {% else %}
                         <span style="color: #94a3b8; font-size: 13px;">—</span>
                         {% endif %}
@@ -133,12 +159,17 @@
     </div>
     {% else %}
     <div class="empty">
-        <div class="empty-icon">📰</div>
+        <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2"/>
+            </svg>
+        </div>
         <h3>Belum ada berita</h3>
         <p>Tambahkan berita pertama Anda untuk ditampilkan di website</p>
         <a href="{{ url_for('admin.add_berita_route') }}" class="btn btn-primary">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
             Tambah Berita
         </a>

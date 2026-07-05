@@ -99,9 +99,13 @@ DEFAULT_JENIS_SURAT = [
 ]
 
 # ── Default Users ───────────────────────────────────────────────────────
+# Format: (login_id, nama_lengkap, password, role)
+# - admin: username, nip: null
+# - dinas: username: null, nip
+# - warga: nik, username: null, nip: null
 DEFAULT_USERS = [
-    ('ADMIN001', 'Administrator', 'adminkedungwinangun', 'admin'),
-    ('DINAS001', 'Petugas Dinas', 'dinas123', 'dinas'),
+    ('admin', 'Administrator', 'adminkedungwinangun', 'admin'),      # Admin: login pakai username
+    ('199001012020011001', 'Petugas Dinas', 'dinas123', 'dinas'),  # Dinas: login pakai NIP
 ]
 
 # ── SQL Schema ─────────────────────────────────────────────────────────

@@ -60,7 +60,9 @@ def init_database():
             -- Users Table
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nik TEXT UNIQUE NOT NULL,
+                nik TEXT,
+                username TEXT,
+                nip TEXT,
                 nama_lengkap TEXT NOT NULL,
                 email TEXT,
                 no_telepon TEXT,
@@ -233,15 +235,21 @@ def init_database():
         for key, value in DEFAULT_CONFIG.items():
             cursor.execute('INSERT OR IGNORE INTO config (key, value) VALUES (?, ?)', (key, value))
 
-        # Insert default users
-        for nik, nama, password, role in DEFAULT_USERS:
-            cursor.execute('SELECT * FROM users WHERE nik = ?', (nik,))
+        # Insert default users (updated: admin uses username, dinas uses nip)
+        for login_id, nama, password, role in DEFAULT_USERS:
+            cursor.execute('SELECT * FROM users WHERE role = ?', (role,))
             if not cursor.fetchone():
                 hashed = generate_password_hash(password)
-                cursor.execute('''
-                    INSERT INTO users (nik, nama_lengkap, password_hash, role, status, approved_by, approved_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (nik, nama, hashed, role, 'approved', 1, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                if role == 'admin':
+                    cursor.execute('''
+                        INSERT INTO users (username, nama_lengkap, password_hash, role, status, approved_by, approved_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ''', (login_id, nama, hashed, role, 'approved', 1, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                elif role == 'dinas':
+                    cursor.execute('''
+                        INSERT INTO users (nip, nama_lengkap, password_hash, role, status, approved_by, approved_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ''', (login_id, nama, hashed, role, 'approved', 1, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
         # Insert default jenis surat
         for kode, nama, desc, docs, active in DEFAULT_JENIS_SURAT:
@@ -324,6 +332,32 @@ def get_desa_info():
 # ════════════════════════════════════════════════════════════════════════
 # ── USER HELPERS ───────────────────────────────────────────────────────
 # ════════════════════════════════════════════════════════════════════════
+
+def get_user_by_username(username):
+    """Ambil user berdasarkan username (untuk admin)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        user = cursor.fetchone()
+        conn.close()
+        return dict(user) if user else None
+    except Exception as e:
+        logger.error(f"Error getting user by username: {str(e)}")
+        return None
+
+def get_user_by_nip(nip):
+    """Ambil user berdasarkan NIP (untuk dinas)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE nip = ?', (nip,))
+        user = cursor.fetchone()
+        conn.close()
+        return dict(user) if user else None
+    except Exception as e:
+        logger.error(f"Error getting user by NIP: {str(e)}")
+        return None
 
 def get_user_by_nik(nik):
     """Ambil user berdasarkan NIK"""
@@ -465,6 +499,166 @@ def reject_user(user_id, processed_by, catatan=''):
     except Exception as e:
         logger.error(f"Error rejecting user {user_id}: {str(e)}")
         return False
+
+# ════════════════════════════════════════════════════════════════════════
+# ── ACCOUNT CENTER HELPERS ─────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_all_users():
+    """Ambil semua user (admin, dinas, penduduk)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users ORDER BY role, created_at DESC')
+        users = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return users
+    except Exception as e:
+        logger.error(f"Error getting all users: {str(e)}")
+        return []
+
+def get_users_by_role(role):
+    """Ambil user berdasarkan role"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE role = ? ORDER BY created_at DESC', (role,))
+        users = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return users
+    except Exception as e:
+        logger.error(f"Error getting users by role {role}: {str(e)}")
+        return []
+
+def get_user_stats():
+    """Ambil statistik user"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        stats = {}
+        # Total users
+        cursor.execute('SELECT COUNT(*) as count FROM users')
+        stats['total'] = cursor.fetchone()['count']
+        # By role
+        cursor.execute('SELECT role, COUNT(*) as count FROM users GROUP BY role')
+        stats['by_role'] = {row['role']: row['count'] for row in cursor.fetchall()}
+        # By status
+        cursor.execute('SELECT status, COUNT(*) as count FROM users GROUP BY status')
+        stats['by_status'] = {row['status']: row['count'] for row in cursor.fetchall()}
+        conn.close()
+        return stats
+    except Exception as e:
+        logger.error(f"Error getting user stats: {str(e)}")
+        return {'total': 0, 'by_role': {}, 'by_status': {}}
+
+def update_user_data(user_id, data):
+    """Update data user (bukan role)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Build update query dynamically
+        allowed_fields = ['nama_lengkap', 'email', 'no_telepon', 'alamat']
+        updates = []
+        values = []
+        for key, value in data.items():
+            if key in allowed_fields:
+                updates.append(f"{key} = ?")
+                values.append(value)
+
+        if updates:
+            values.append(user_id)
+            query = f"UPDATE users SET {', '.join(updates)} WHERE id = ?"
+            cursor.execute(query, values)
+            conn.commit()
+
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating user data {user_id}: {str(e)}")
+        return False
+
+def update_user_role(user_id, new_role, updated_by):
+    """Update role user"""
+    try:
+        if new_role not in ['admin', 'dinas', 'penduduk']:
+            return False
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Set status to approved automatically when promoted
+        cursor.execute('''
+            UPDATE users SET role = ?, status = 'approved', approved_by = ?, approved_at = ? WHERE id = ?
+        ''', (new_role, updated_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating user role {user_id}: {str(e)}")
+        return False
+
+def update_user_password(user_id, new_password):
+    """Update password user"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        hashed = generate_password_hash(new_password)
+        cursor.execute('UPDATE users SET password_hash = ? WHERE id = ?', (hashed, user_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating user password {user_id}: {str(e)}")
+        return False
+
+def delete_user_account(user_id):
+    """Hapus user account"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Check if user has any permits
+        cursor.execute('SELECT COUNT(*) as count FROM permohonan_surat WHERE user_id = ?', (user_id,))
+        if cursor.fetchone()['count'] > 0:
+            # Just mark as rejected instead of deleting
+            cursor.execute('UPDATE users SET status = ? WHERE id = ?', ('deleted', user_id))
+        else:
+            cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting user {user_id}: {str(e)}")
+        return False
+
+def create_staff_account(login_id, nama_lengkap, password, role):
+    """Buat akun admin/dinas baru langsung tanpa approval"""
+    try:
+        if role not in ['admin', 'dinas']:
+            return False, "Role tidak valid"
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        hashed = generate_password_hash(password)
+
+        if role == 'admin':
+            cursor.execute('''
+                INSERT INTO users (username, nama_lengkap, password_hash, role, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (login_id, nama_lengkap, hashed, role, 'approved', datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        elif role == 'dinas':
+            cursor.execute('''
+                INSERT INTO users (nip, nama_lengkap, password_hash, role, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (login_id, nama_lengkap, hashed, role, 'approved', datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+
+        user_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        return True, user_id
+    except sqlite3.IntegrityError as e:
+        logger.error(f"Login ID already exists: {login_id}")
+        return False, "ID Login sudah terdaftar"
+    except Exception as e:
+        logger.error(f"Error creating staff account: {str(e)}")
+        return False, str(e)
 
 
 # ════════════════════════════════════════════════════════════════════════

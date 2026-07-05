@@ -1,7 +1,7 @@
 {% extends 'admin/base.html' %}
 
 {% block title %}Tambah Galeri - Admin Panel{% endblock %}
-{% block page_title %}📷 Tambah Foto Galeri{% endblock %}
+{% block page_title %}Tambah Foto Galeri{% endblock %}
 {% block page_subtitle %}Tambahkan foto baru ke galeri desa{% endblock %}
 
 {% block header_actions %}
@@ -31,12 +31,12 @@
             <div class="form-group">
                 <label for="kategori">Kategori</label>
                 <select id="kategori" name="kategori">
-                    <option value="galeri">📷 Galeri Umum</option>
-                    <option value="kegiatan">🎉 Kegiatan Desa</option>
-                    <option value="pariwisata">🏞️ Pariwisata</option>
-                    <option value="pertanian">🌾 Pertanian</option>
-                    <option value="budaya">🎭 Budaya</option>
-                    <option value="fasilitas">🏢 Fasilitas Desa</option>
+                    <option value="galeri">Galeri Umum</option>
+                    <option value="kegiatan">Kegiatan Desa</option>
+                    <option value="pariwisata">Pariwisata</option>
+                    <option value="pertanian">Pertanian</option>
+                    <option value="budaya">Budaya</option>
+                    <option value="fasilitas">Fasilitas Desa</option>
                 </select>
             </div>
 
@@ -56,9 +56,9 @@
             <div class="btn-group">
                 <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #166534, #22c55e); color: white; box-shadow: 0 4px 14px rgba(22, 101, 52, 0.4);">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
                     </svg>
-                    💾 Simpan
+                    Simpan
                 </button>
                 <a href="{{ url_for('admin.galeri') }}" class="btn btn-outline" style="background: #e7e5e4; color: #1e293b; border: 2px solid #d6d3d1;">
                     Batal

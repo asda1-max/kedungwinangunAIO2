@@ -1,0 +1,225 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Account Center - Admin Panel{% endblock %}
+{% block page_title %}Account Center{% endblock %}
+{% block page_subtitle %}Kelola semua akun warga, dinas, dan admin{% endblock %}
+
+{% block header_actions %}
+<div class="user-menu">
+    <div class="user-avatar">{{ session.get('user_nama', 'A')[0]|upper }}</div>
+    <div class="user-info">
+        <h4>{{ session.get('user_nama', 'Admin') }}</h4>
+        <span>Administrator</span>
+    </div>
+</div>
+<a href="{{ url_for('admin.account_create') }}" class="btn btn-primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+        <circle cx="8.5" cy="7" r="4"/>
+        <line x1="20" y1="8" x2="20" y2="14"/>
+        <line x1="23" y1="11" x2="17" y2="11"/>
+    </svg>
+    Tambah Akun
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="stats-grid animate-in">
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+            </div>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.total }}</h3>
+            <p>Total Akun</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.by_role.get('admin', 0) }}</h3>
+            <p>Admin</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                    <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                </svg>
+            </div>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.by_role.get('dinas', 0) }}</h3>
+            <p>Petugas Dinas</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon yellow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.by_role.get('penduduk', 0) }}</h3>
+            <p>Warga</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filters & Search -->
+<div class="card animate-in" style="animation-delay: 0.1s;">
+    <div class="card-header">
+        <h3>Daftar Akun</h3>
+        <div class="flex items-center gap-3">
+            <!-- Role Filter -->
+            <select onchange="window.location.href='{{ url_for('admin.account_center') }}?role=' + this.value + '&status={{ status_filter }}&search={{ search }}'" class="px-3 py-2 border border-gray-200 rounded-lg text-sm" style="min-width: 120px;">
+                <option value="all" {{ 'selected' if role_filter == 'all' else '' }}>Semua Role</option>
+                <option value="admin" {{ 'selected' if role_filter == 'admin' else '' }}>Admin</option>
+                <option value="dinas" {{ 'selected' if role_filter == 'dinas' else '' }}>Dinas</option>
+                <option value="penduduk" {{ 'selected' if role_filter == 'penduduk' else '' }}>Warga</option>
+            </select>
+            <!-- Status Filter -->
+            <select onchange="window.location.href='{{ url_for('admin.account_center') }}?role={{ role_filter }}&status=' + this.value + '&search={{ search }}'" class="px-3 py-2 border border-gray-200 rounded-lg text-sm" style="min-width: 120px;">
+                <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>Semua Status</option>
+                <option value="approved" {{ 'selected' if status_filter == 'approved' else '' }}>Approved</option>
+                <option value="pending" {{ 'selected' if status_filter == 'pending' else '' }}>Pending</option>
+                <option value="rejected" {{ 'selected' if status_filter == 'rejected' else '' }}>Rejected</option>
+            </select>
+        </div>
+    </div>
+    <div class="p-4 border-b border-gray-100">
+        <form method="GET" action="{{ url_for('admin.account_center') }}" class="flex gap-3">
+            <input type="hidden" name="role" value="{{ role_filter }}">
+            <input type="hidden" name="status" value="{{ status_filter }}">
+            <div style="position: relative; flex: 1;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #9ca3af;">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" name="search" value="{{ search }}" placeholder="Cari NIK, nama, atau email..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg" style="padding-left: 40px;">
+            </div>
+            <button type="submit" class="btn btn-outline" style="padding: 8px 16px;">Cari</button>
+            {% if search %}
+            <a href="{{ url_for('admin.account_center') }}?role={{ role_filter }}&status={{ status_filter }}" class="btn btn-outline" style="padding: 8px 16px;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if users %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Akun</th>
+                    <th>ID Login</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Daftar</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm" style="background: {% if user.role == 'admin' %}#7c3aed{% elif user.role == 'dinas' %}#2563eb{% else %}#059669{% endif %};">
+                                {{ user.nama_lengkap[0]|upper if user.nama_lengkap else '?' }}
+                            </div>
+                            <div>
+                                <div class="font-medium">{{ user.nama_lengkap or '-' }}</div>
+                                <div class="text-sm text-gray-500">{{ user.email or '-' }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if user.role == 'admin' %}
+                        <code>{{ user.username or '-' }}</code>
+                        {% elif user.role == 'dinas' %}
+                        <code>{{ user.nip or '-' }}</code>
+                        {% else %}
+                        <code>{{ user.nik or '-' }}</code>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.role == 'admin' %}
+                        <span class="badge badge-purple">Admin</span>
+                        {% elif user.role == 'dinas' %}
+                        <span class="badge badge-blue">Dinas</span>
+                        {% else %}
+                        <span class="badge badge-green">Warga</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.status == 'approved' %}
+                        <span class="badge badge-green">Approved</span>
+                        {% elif user.status == 'pending' %}
+                        <span class="badge badge-orange">Pending</span>
+                        {% elif user.status == 'rejected' %}
+                        <span class="badge badge-red">Rejected</span>
+                        {% else %}
+                        <span class="badge badge-gray">{{ user.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-gray-500">{{ user.created_at[:10] if user.created_at else '-' }}</td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ url_for('admin.account_detail', user_id=user.id) }}" class="btn btn-outline btn-sm" style="padding: 6px 10px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                Detail
+                            </a>
+                            {% if user.id != session.user_id %}
+                            <form action="{{ url_for('admin.account_delete', user_id=user.id) }}" method="POST" onsubmit="return confirm('Hapus akun {{ user.nama_lengkap }}?')">
+                                <button type="submit" class="btn btn-delete btn-sm" style="padding: 6px 10px;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                    </svg>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty">
+        <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                <path d="M16 3.13a4 4 0 010 7.75"/>
+            </svg>
+        </div>
+        <h3>Tidak ada akun ditemukan</h3>
+        <p>Coba ubah filter atau kata kunci pencarian</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

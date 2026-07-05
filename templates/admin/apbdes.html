@@ -38,7 +38,9 @@
     <!-- Pendapatan -->
     <div class="card-section animate-in">
         <div class="card-section-header">
-            <span class="icon">💵</span>
+            <span class="icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            </span>
             <div>
                 <h2>Pendapatan</h2>
                 <p>Total: Rp {{ "{:,.0f}".format(grouped.pendapatan|sum(attribute='jumlah') if grouped.pendapatan else 0) }}</p>
@@ -62,7 +64,7 @@
                             <td>{{ loop.index }}</td>
                             <td>
                                 <div class="flex items-center gap-2">
-                                    <span>{{ item.icon or '📄' }}</span>
+                                    <span class="apbdes-icon">{{ item.icon or '' }}</span>
                                     <div>
                                         <span class="font-semibold">{{ item.nama }}</span>
                                         {% if item.deskripsi %}<br><span class="text-xs text-gray-500">{{ item.deskripsi }}</span>{% endif %}
@@ -72,9 +74,15 @@
                             <td class="font-semibold text-green-600">Rp {{ "{:,.0f}".format(item.jumlah) }}</td>
                             <td>
                                 <div class="flex gap-2">
-                                    <a href="{{ url_for('admin.edit_apbdes_route', apbdes_id=item.id) }}" class="btn btn-sm btn-outline">Edit</a>
+                                    <a href="{{ url_for('admin.edit_apbdes_route', apbdes_id=item.id) }}" class="btn btn-sm btn-outline">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        Edit
+                                    </a>
                                     <form method="POST" action="{{ url_for('admin.delete_apbdes_route', apbdes_id=item.id) }}" onsubmit="return confirm('Hapus item ini?')">
-                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                            Hapus
+                                        </button>
                                     </form>
                                 </div>
                             </td>
@@ -92,7 +100,9 @@
     <!-- Belanja -->
     <div class="card-section animate-in">
         <div class="card-section-header">
-            <span class="icon">💸</span>
+            <span class="icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8l-8 8M8 8l8 8"/></svg>
+            </span>
             <div>
                 <h2>Belanja</h2>
                 <p>Total: Rp {{ "{:,.0f}".format(grouped.belanja|sum(attribute='jumlah') if grouped.belanja else 0) }}</p>
@@ -116,7 +126,7 @@
                             <td>{{ loop.index }}</td>
                             <td>
                                 <div class="flex items-center gap-2">
-                                    <span>{{ item.icon or '📄' }}</span>
+                                    <span class="apbdes-icon">{{ item.icon or '' }}</span>
                                     <div>
                                         <span class="font-semibold">{{ item.nama }}</span>
                                         {% if item.deskripsi %}<br><span class="text-xs text-gray-500">{{ item.deskripsi }}</span>{% endif %}
@@ -126,9 +136,15 @@
                             <td class="font-semibold text-red-600">Rp {{ "{:,.0f}".format(item.jumlah) }}</td>
                             <td>
                                 <div class="flex gap-2">
-                                    <a href="{{ url_for('admin.edit_apbdes_route', apbdes_id=item.id) }}" class="btn btn-sm btn-outline">Edit</a>
+                                    <a href="{{ url_for('admin.edit_apbdes_route', apbdes_id=item.id) }}" class="btn btn-sm btn-outline">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        Edit
+                                    </a>
                                     <form method="POST" action="{{ url_for('admin.delete_apbdes_route', apbdes_id=item.id) }}" onsubmit="return confirm('Hapus item ini?')">
-                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                            Hapus
+                                        </button>
                                     </form>
                                 </div>
                             </td>
@@ -146,7 +162,9 @@
     <!-- Pembiayaan -->
     <div class="card-section animate-in">
         <div class="card-section-header">
-            <span class="icon">🔄</span>
+            <span class="icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+            </span>
             <div>
                 <h2>Pembiayaan</h2>
                 <p>Total: Rp {{ "{:,.0f}".format(grouped.pembiayaan|sum(attribute='jumlah') if grouped.pembiayaan else 0) }}</p>
@@ -170,7 +188,7 @@
                             <td>{{ loop.index }}</td>
                             <td>
                                 <div class="flex items-center gap-2">
-                                    <span>{{ item.icon or '📄' }}</span>
+                                    <span class="apbdes-icon">{{ item.icon or '' }}</span>
                                     <div>
                                         <span class="font-semibold">{{ item.nama }}</span>
                                         {% if item.deskripsi %}<br><span class="text-xs text-gray-500">{{ item.deskripsi }}</span>{% endif %}
@@ -180,9 +198,15 @@
                             <td class="font-semibold text-blue-600">Rp {{ "{:,.0f}".format(item.jumlah) }}</td>
                             <td>
                                 <div class="flex gap-2">
-                                    <a href="{{ url_for('admin.edit_apbdes_route', apbdes_id=item.id) }}" class="btn btn-sm btn-outline">Edit</a>
+                                    <a href="{{ url_for('admin.edit_apbdes_route', apbdes_id=item.id) }}" class="btn btn-sm btn-outline">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        Edit
+                                    </a>
                                     <form method="POST" action="{{ url_for('admin.delete_apbdes_route', apbdes_id=item.id) }}" onsubmit="return confirm('Hapus item ini?')">
-                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                            Hapus
+                                        </button>
                                     </form>
                                 </div>
                             </td>

@@ -1,7 +1,7 @@
 {% extends 'admin/base.html' %}
 
 {% block title %}Edit Page - Admin Panel{% endblock %}
-{% block page_title %}📄 Edit Page{% endblock %}
+{% block page_title %}Edit Page{% endblock %}
 {% block page_subtitle %}Perbarui halaman: {{ page.title }}{% endblock %}
 
 {% block header_actions %}
@@ -47,7 +47,10 @@
             <div class="form-group">
                 <div class="checkbox-group">
                     <input type="checkbox" id="active" name="active" {% if page.active %}checked{% endif %}>
-                    <label for="active">✓ Aktifkan page ini</label>
+                    <label for="active">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        Aktifkan page ini
+                    </label>
                 </div>
                 <p class="hint">Page yang tidak aktif tidak akan muncul di menu</p>
             </div>
@@ -67,12 +70,13 @@
             <div class="btn-group">
                 <button type="submit" class="btn btn-primary">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
                     </svg>
-                    💾 Simpan Perubahan
+                    Simpan Perubahan
                 </button>
                 <a href="{{ url_for('admin.pages') }}" class="btn btn-outline">
-                    ← Kembali
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    Kembali
                 </a>
             </div>
         </form>

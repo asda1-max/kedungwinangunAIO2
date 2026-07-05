@@ -1,0 +1,253 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Detail Akun - {{ user.nama_lengkap }} - Admin Panel{% endblock %}
+{% block page_title %}Detail Akun{% endblock %}
+{% block page_subtitle %}{{ user.nama_lengkap }}{% endblock %}
+
+{% block header_actions %}
+<div class="flex items-center gap-3">
+    <a href="{{ url_for('admin.account_center') }}" class="btn btn-outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Kembali
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left: User Info -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Profile Card -->
+        <div class="card animate-in">
+            <div class="card-header">
+                <h3>Informasi Akun</h3>
+                {% if user.id != session.user_id %}
+                <span class="badge badge-red">Bukan Akun Anda</span>
+                {% else %}
+                <span class="badge badge-blue">Akun Anda</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="action" value="update_data">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                            <input type="text" name="nama_lengkap" value="{{ user.nama_lengkap or '' }}" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% if user.role == 'admin' %}Username{% elif user.role == 'dinas' %}NIP{% else %}NIK{% endif %}</label>
+                            <input type="text" value="{% if user.role == 'admin' %}{{ user.username or '-' }}{% elif user.role == 'dinas' %}{{ user.nip or '-' }}{% else %}{{ user.nik or '-' }}{% endif %}" class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" name="email" value="{{ user.email or '' }}" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">No. Telepon</label>
+                            <input type="text" name="no_telepon" value="{{ user.no_telepon or '' }}" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                        <textarea name="alamat" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg">{{ user.alamat or '' }}</textarea>
+                    </div>
+
+                    <div class="flex justify-end pt-4 border-t border-gray-100">
+                        <button type="submit" class="btn btn-primary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                                <polyline points="17 21 17 13 7 13 7 21"/>
+                                <polyline points="7 3 7 8 15 8"/>
+                            </svg>
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Role Management -->
+        <div class="card animate-in" style="animation-delay: 0.1s;">
+            <div class="card-header">
+                <h3>Role & Status</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="action" value="change_role">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Role Saat Ini</label>
+                            {% if user.role == 'admin' %}
+                            <span class="badge badge-purple text-sm px-3 py-2">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                </svg>
+                                Admin
+                            </span>
+                            {% elif user.role == 'dinas' %}
+                            <span class="badge badge-blue text-sm px-3 py-2">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                                    <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                                </svg>
+                                Dinas
+                            </span>
+                            {% else %}
+                            <span class="badge badge-green text-sm px-3 py-2">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                Warga
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ubah Role</label>
+                            {% if user.id == session.user_id %}
+                            <p class="text-sm text-gray-500">Tidak dapat mengubah role sendiri</p>
+                            {% else %}
+                            <div class="flex gap-2">
+                                <button type="submit" name="new_role" value="admin" class="btn {{ 'btn-primary' if user.role == 'admin' else 'btn-outline' }} btn-sm" style="padding: 8px 14px;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    </svg>
+                                    Admin
+                                </button>
+                                <button type="submit" name="new_role" value="dinas" class="btn {{ 'btn-primary' if user.role == 'dinas' else 'btn-outline' }} btn-sm" style="padding: 8px 14px;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                                        <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                                    </svg>
+                                    Dinas
+                                </button>
+                                <button type="submit" name="new_role" value="penduduk" class="btn {{ 'btn-primary' if user.role == 'penduduk' else 'btn-outline' }} btn-sm" style="padding: 8px 14px;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                    Warga
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status Saat Ini</label>
+                        <span class="badge {{ 'badge-green' if user.status == 'approved' else 'badge-orange' if user.status == 'pending' else 'badge-red' }} text-sm px-3 py-2">
+                            {{ user.status|title }}
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Quick Actions -->
+    <div class="space-y-6">
+        <!-- User Avatar & Quick Info -->
+        <div class="card animate-in">
+            <div class="card-body text-center">
+                <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold" style="background: {% if user.role == 'admin' %}#7c3aed{% elif user.role == 'dinas' %}#2563eb{% else %}#059669{% endif %};">
+                    {{ user.nama_lengkap[0]|upper if user.nama_lengkap else '?' }}
+                </div>
+                <h4 class="font-semibold text-lg">{{ user.nama_lengkap or '-' }}</h4>
+                <p class="text-gray-500 text-sm">{{ user.nik or '-' }}</p>
+                <div class="mt-3">
+                    {% if user.role == 'admin' %}
+                    <span class="badge badge-purple">Admin</span>
+                    {% elif user.role == 'dinas' %}
+                    <span class="badge badge-blue">Dinas</span>
+                    {% else %}
+                    <span class="badge badge-green">Warga</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Reset Password -->
+        <div class="card animate-in" style="animation-delay: 0.1s;">
+            <div class="card-header">
+                <h3>Reset Password</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="action" value="update_password">
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password Baru</label>
+                            <input type="password" name="new_password" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required minlength="6">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password</label>
+                            <input type="password" name="confirm_password" class="w-full px-3 py-2 border border-gray-200 rounded-lg" required minlength="6">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-outline w-full mt-4" style="padding: 10px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0110 0v4"/>
+                        </svg>
+                        Update Password
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        {% if user.id != session.user_id %}
+        <div class="card animate-in border-red-200" style="animation-delay: 0.2s;">
+            <div class="card-header" style="background: #fef2f2;">
+                <h3 class="text-red-600">Zona Berbahaya</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-sm text-gray-600 mb-4">Menghapus akun tidak dapat dibatalkan.</p>
+                <form action="{{ url_for('admin.account_delete', user_id=user.id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus akun {{ user.nama_lengkap }}?')">
+                    <button type="submit" class="btn btn-delete w-full" style="padding: 10px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                        Hapus Akun
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Account Info -->
+        <div class="card animate-in" style="animation-delay: 0.3s;">
+            <div class="card-header">
+                <h3>Info Akun</h3>
+            </div>
+            <div class="card-body">
+                <dl class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <dt class="text-gray-500">Dibuat</dt>
+                        <dd class="font-medium">{{ user.created_at[:19] if user.created_at else '-' }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-gray-500">Disetujui</dt>
+                        <dd class="font-medium">{{ user.approved_at[:19] if user.approved_at else '-' }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-gray-500">Approved By</dt>
+                        <dd class="font-medium">{{ user.approved_by or '-' }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -33,23 +33,23 @@
                 <div class="form-group">
                     <label for="kategori">Kategori</label>
                     <select id="kategori" name="kategori">
-                        <option value="Berita">📰 Berita</option>
-                        <option value="Kegiatan">🌿 Kegiatan</option>
-                        <option value="Kesehatan">🏥 Kesehatan</option>
-                        <option value="Keuangan">💰 Keuangan</option>
-                        <option value="Musyawarah">🗳️ Musyawarah</option>
-                        <option value="Pembangunan">🏗️ Pembangunan</option>
-                        <option value="Pendidikan">📚 Pendidikan</option>
-                        <option value="Lainnya">📌 Lainnya</option>
+                        <option value="Berita">Berita</option>
+                        <option value="Kegiatan">Kegiatan</option>
+                        <option value="Kesehatan">Kesehatan</option>
+                        <option value="Keuangan">Keuangan</option>
+                        <option value="Musyawarah">Musyawarah</option>
+                        <option value="Pembangunan">Pembangunan</option>
+                        <option value="Pendidikan">Pendidikan</option>
+                        <option value="Lainnya">Lainnya</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="badge_class">Warna Label</label>
                     <select id="badge_class" name="badge_class">
-                        <option value="badge-green">🟢 Hijau</option>
-                        <option value="badge-blue">🔵 Biru</option>
-                        <option value="badge-orange">🟠 Orange</option>
-                        <option value="badge-purple">🟣 Ungu</option>
+                        <option value="badge-green">Hijau</option>
+                        <option value="badge-blue">Biru</option>
+                        <option value="badge-orange">Orange</option>
+                        <option value="badge-purple">Ungu</option>
                     </select>
                 </div>
             </div>
@@ -57,14 +57,14 @@
             <div class="form-group">
                 <label for="kategori_icon">Ikon Kategori</label>
                 <select id="kategori_icon" name="kategori_icon">
-                    <option value="📰">📰 Berita</option>
-                    <option value="🌿">🌿 Kegiatan</option>
-                    <option value="🏥">🏥 Kesehatan</option>
-                    <option value="💰">💰 Keuangan</option>
-                    <option value="🗳️">🗳️ Musyawarah</option>
-                    <option value="🏗️">🏗️ Pembangunan</option>
-                    <option value="📚">📚 Pendidikan</option>
-                    <option value="📌">📌 Lainnya</option>
+                    <option value="newspaper">📰 Berita</option>
+                    <option value="leaf">🌿 Kegiatan</option>
+                    <option value="health">🏥 Kesehatan</option>
+                    <option value="finance">💰 Keuangan</option>
+                    <option value="vote">🗳️ Musyawarah</option>
+                    <option value="building">🏗️ Pembangunan</option>
+                    <option value="book">📚 Pendidikan</option>
+                    <option value="pin">📌 Lainnya</option>
                 </select>
             </div>
 
@@ -82,19 +82,23 @@
             <div class="form-group">
                 <div class="checkbox-group">
                     <input type="checkbox" id="unggulan" name="unggulan">
-                    <label for="unggulan">⭐ Tandai sebagai berita unggulan</label>
+                    <label for="unggulan">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        Tandai sebagai berita unggulan
+                    </label>
                 </div>
             </div>
 
             <div class="btn-group">
                 <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #166534, #22c55e); color: white; box-shadow: 0 4px 14px rgba(22, 101, 52, 0.4);">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
                     </svg>
-                    💾 Simpan Berita
+                    Simpan Berita
                 </button>
                 <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline" style="background: #e7e5e4; color: #1e293b; border: 2px solid #d6d3d1;">
-                    ← Kembali ke Dashboard
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    Kembali ke Dashboard
                 </a>
             </div>
         </form>

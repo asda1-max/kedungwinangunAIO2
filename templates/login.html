@@ -164,7 +164,7 @@
         /* Role Tabs */
         .role-tabs {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 24px;
             padding: 4px;
             background: var(--bg);
@@ -173,11 +173,11 @@
 
         .role-tab {
             flex: 1;
-            padding: 12px 16px;
+            padding: 10px 8px;
             border: none;
             background: transparent;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             font-family: inherit;
             cursor: pointer;
@@ -186,7 +186,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .role-tab:hover {
@@ -199,8 +199,9 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        .role-tab span {
-            font-size: 18px;
+        .role-tab svg {
+            width: 16px;
+            height: 16px;
         }
 
         /* Login Forms */
@@ -213,22 +214,22 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         label {
             display: block;
             font-size: 14px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         input {
             width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
             font-family: inherit;
             background: var(--surface);
             transition: all 0.15s ease;
@@ -242,17 +243,17 @@
 
         input::placeholder {
             color: #a8a29e;
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .btn {
             width: 100%;
-            padding: 16px 24px;
+            padding: 14px 24px;
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 15px;
             font-weight: 600;
             font-family: inherit;
             cursor: pointer;
@@ -274,8 +275,8 @@
         }
 
         .alert {
-            padding: 14px 18px;
-            border-radius: 10px;
+            padding: 14px 16px;
+            border-radius: 8px;
             font-size: 14px;
             margin-bottom: 20px;
             display: flex;
@@ -312,7 +313,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-top: 32px;
+            margin-top: 28px;
             color: var(--text-muted);
             text-decoration: none;
             font-size: 14px;
@@ -350,6 +351,19 @@
 
         .hint {
             font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
             color: var(--text-muted);
             margin-top: 6px;
         }
@@ -402,14 +416,28 @@
         <!-- Role Tabs -->
         <div class="role-tabs">
             <button type="button" class="role-tab active" onclick="switchTab('admin')" id="tab-admin">
-                <span>👑</span> Admin / Dinas
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Admin
+            </button>
+            <button type="button" class="role-tab" onclick="switchTab('dinas')" id="tab-dinas">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                    <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                </svg>
+                Dinas
             </button>
             <button type="button" class="role-tab" onclick="switchTab('warga')" id="tab-warga">
-                <span>👤</span> Warga
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Warga
             </button>
         </div>
 
-        <!-- Admin/Dinas Login Form -->
+        <!-- Admin Login Form -->
         <form method="POST" action="{{ url_for('public.login') }}" class="login-form active" id="form-admin">
             <input type="hidden" name="login_type" value="admin">
             <div class="form-group">
@@ -422,7 +450,30 @@
             </div>
             <button type="submit" class="btn">
                 Masuk sebagai Admin
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </button>
+        </form>
+
+        <!-- Dinas Login Form -->
+        <form method="POST" action="{{ url_for('public.login') }}" class="login-form" id="form-dinas">
+            <input type="hidden" name="login_type" value="dinas">
+            <div class="form-group">
+                <label for="dinas_nip">NIP (Nomor Induk Pegawai)</label>
+                <input type="text" id="dinas_nip" name="nip" placeholder="Ketik NIP..." required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="dinas_password">Password</label>
+                <input type="password" id="dinas_password" name="password" placeholder="Ketik password..." required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn">
+                Masuk sebagai Dinas
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
             </button>
         </form>
 
@@ -432,6 +483,7 @@
             <div class="form-group">
                 <label for="warga_nik">NIK (Nomor Induk Kependudukan)</label>
                 <input type="text" id="warga_nik" name="nik" placeholder="Ketik 16 digit NIK..." required autocomplete="username" maxlength="16" pattern="[0-9]{16}">
+                <p class="hint">NIK ada di KTP Anda</p>
             </div>
             <div class="form-group">
                 <label for="warga_password">Password</label>
@@ -439,7 +491,10 @@
             </div>
             <button type="submit" class="btn">
                 Masuk sebagai Warga
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
             </button>
             <div class="register-link">
                 Belum punya akun? <a href="{{ url_for('user.register') }}">Daftar di sini</a>
@@ -447,7 +502,10 @@
         </form>
 
         <a href="{{ url_for('public.index') }}" class="back">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
             Kembali ke beranda
         </a>
     </div>
@@ -456,15 +514,19 @@
         function switchTab(tab) {
             // Update tabs
             document.getElementById('tab-admin').classList.toggle('active', tab === 'admin');
+            document.getElementById('tab-dinas').classList.toggle('active', tab === 'dinas');
             document.getElementById('tab-warga').classList.toggle('active', tab === 'warga');
 
             // Update forms
             document.getElementById('form-admin').classList.toggle('active', tab === 'admin');
+            document.getElementById('form-dinas').classList.toggle('active', tab === 'dinas');
             document.getElementById('form-warga').classList.toggle('active', tab === 'warga');
         }
 
         // Check URL hash for default tab
-        if (window.location.hash === '#warga') {
+        if (window.location.hash === '#dinas') {
+            switchTab('dinas');
+        } else if (window.location.hash === '#warga') {
             switchTab('warga');
         }
     </script>

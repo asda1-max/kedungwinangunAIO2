@@ -18,6 +18,8 @@ from models import (
     get_config,
     get_all_galeri,
     get_user_by_nik,
+    get_user_by_username,
+    get_user_by_nip,
     verify_user,
     get_all_pages,
     get_page_by_slug,
@@ -67,7 +69,7 @@ def login():
         login_type = request.form.get('login_type', 'admin')
 
         if login_type == 'admin':
-            # Admin/Dinas Login
+            # Admin Login (using username)
             username = request.form.get('username', '').strip()
             password = request.form.get('password', '')
 
@@ -75,22 +77,38 @@ def login():
                 flash('Username dan password wajib diisi!', 'error')
                 return redirect(request.url)
 
-            user = get_user_by_nik(username)
-            if user and user['role'] in ['admin', 'dinas'] and check_password_hash(user['password_hash'], password):
+            user = get_user_by_username(username)
+            if user and user['role'] == 'admin' and check_password_hash(user['password_hash'], password):
                 session['user_logged_in'] = True
                 session['user_id'] = user['id']
                 session['user_nama'] = user['nama_lengkap']
-                session['user_nik'] = user['nik']
+                session['user_nik'] = user.get('nik', '')
                 session['user_role'] = user['role']
-
                 flash(f'Selamat datang, {user["nama_lengkap"]}!', 'success')
-
-                if user['role'] == 'admin':
-                    return redirect(url_for('admin.dashboard'))
-                else:
-                    return redirect(url_for('dinas.dashboard'))
+                return redirect(url_for('admin.dashboard'))
             else:
                 flash('Username atau password salah!', 'error')
+
+        elif login_type == 'dinas':
+            # Dinas Login (using NIP)
+            nip = request.form.get('nip', '').strip()
+            password = request.form.get('password', '')
+
+            if not nip or not password:
+                flash('NIP dan password wajib diisi!', 'error')
+                return redirect(request.url)
+
+            user = get_user_by_nip(nip)
+            if user and user['role'] == 'dinas' and check_password_hash(user['password_hash'], password):
+                session['user_logged_in'] = True
+                session['user_id'] = user['id']
+                session['user_nama'] = user['nama_lengkap']
+                session['user_nik'] = user.get('nik', '')
+                session['user_role'] = user['role']
+                flash(f'Selamat datang, {user["nama_lengkap"]}!', 'success')
+                return redirect(url_for('dinas.dashboard'))
+            else:
+                flash('NIP atau password salah!', 'error')
 
         elif login_type == 'warga':
             # Warga Login

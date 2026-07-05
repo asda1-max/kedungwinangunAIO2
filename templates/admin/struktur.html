@@ -32,7 +32,17 @@
     {% for kategori, items in grouped.items() %}
     <div class="card-section animate-in">
         <div class="card-section-header">
-            <span class="icon">{% if kategori == 'pemerintah' %}🏛️{% elif kategori == 'bpd' %}🏢{% elif kategori == 'rtrw' %}🏠{% else %}👥{% endif %}</span>
+            <span class="icon">
+                {% if kategori == 'pemerintah' %}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6"/></svg>
+                {% elif kategori == 'bpd' %}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                {% elif kategori == 'rtrw' %}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                {% else %}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                {% endif %}
+            </span>
             <div>
                 <h2>{{ kategori|upper }}</h2>
                 <p>{{ items|length }} data</p>
@@ -56,7 +66,7 @@
                             <td>{{ loop.index }}</td>
                             <td>
                                 <div class="flex items-center gap-3">
-                                    <span class="text-2xl">{{ item.icon or '👤' }}</span>
+                                    <span class="struktur-icon">{{ item.icon or '' }}</span>
                                     <span class="font-semibold">{{ item.nama }}</span>
                                 </div>
                             </td>
@@ -64,9 +74,15 @@
                             <td>{{ item.status or '-' }}</td>
                             <td>
                                 <div class="flex gap-2">
-                                    <a href="{{ url_for('admin.edit_struktur_route', struktur_id=item.id) }}" class="btn btn-sm btn-outline">Edit</a>
+                                    <a href="{{ url_for('admin.edit_struktur_route', struktur_id=item.id) }}" class="btn btn-sm btn-outline">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        Edit
+                                    </a>
                                     <form method="POST" action="{{ url_for('admin.delete_struktur_route', struktur_id=item.id) }}" onsubmit="return confirm('Hapus data ini?')">
-                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                            Hapus
+                                        </button>
                                     </form>
                                 </div>
                             </td>
@@ -82,7 +98,13 @@
     {% if not struktur_list %}
     <div class="card-section animate-in">
         <div class="p-12 text-center">
-            <div class="text-6xl mb-4">👥</div>
+            <div class="empty-icon" style="margin: 0 auto 16px;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+            </div>
             <h3 class="text-xl font-bold text-gray-700 mb-2">Belum Ada Data</h3>
             <p class="text-gray-500">Klik tombol "Tambah Data" untuk menambahkan struktur organisasi.</p>
         </div>
