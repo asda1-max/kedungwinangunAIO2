@@ -1,0 +1,125 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Potensi Desa - Admin Panel{% endblock %}
+{% block page_title %}Potensi Desa{% endblock %}
+{% block page_subtitle %}Kelola potensi dan kekayaan desa{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('admin.add_potensi_route') }}" class="btn btn-primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Tambah Potensi
+</a>
+{% endblock %}
+
+{% block content %}
+{% if potensi_list %}
+{% for kategori, items in grouped.items() %}
+<div class="card animate-in" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+    <div class="card-header">
+        <h3>{{ kategori|title }}</h3>
+        <span class="badge badge-gray">{{ items|length }} item</span>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 60px;">Gambar</th>
+                    <th>Nama</th>
+                    <th>Deskripsi</th>
+                    <th style="width: 100px;">Status</th>
+                    <th style="width: 120px;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        {% if item.gambar_url %}
+                        <img src="{{ item.gambar_url }}" alt="{{ item.nama }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                        {% else %}
+                        <div style="width: 50px; height: 50px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="width: 20px; height: 20px;">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="font-medium">{{ item.nama }}</div>
+                        {% if item.icon %}
+                        <div class="text-sm text-gray-500">{{ item.icon }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="text-sm text-gray-600" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {{ item.deskripsi or '-' }}
+                        </div>
+                    </td>
+                    <td>
+                        {% if item.aktif %}
+                        <span class="badge badge-green">Aktif</span>
+                        {% else %}
+                        <span class="badge badge-gray">Nonaktif</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="flex items-center gap-1">
+                            <a href="{{ url_for('admin.edit_potensi_route', potensi_id=item.id) }}" class="btn btn-outline btn-sm" style="padding: 6px 8px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                            </a>
+                            <form action="{{ url_for('admin.toggle_potensi_route', potensi_id=item.id) }}" method="POST">
+                                <button type="submit" class="btn btn-outline btn-sm" style="padding: 6px 8px;" title="Toggle Status">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                        <polyline points="23 4 23 10 17 10"/>
+                                        <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+                                    </svg>
+                                </button>
+                            </form>
+                            <form action="{{ url_for('admin.delete_potensi_route', potensi_id=item.id) }}" method="POST" onsubmit="return confirm('Hapus potensi {{ item.nama }}?')">
+                                <button type="submit" class="btn btn-delete btn-sm" style="padding: 6px 8px;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="card animate-in">
+    <div class="empty">
+        <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+        </div>
+        <h3>Belum ada potensi desa</h3>
+        <p>Tambahkan potensi desa seperti wisata, produk lokal, atau fasilitas umum</p>
+        <a href="{{ url_for('admin.add_potensi_route') }}" class="btn btn-primary" style="margin-top: 16px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Tambah Potensi Pertama
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

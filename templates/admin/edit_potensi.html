@@ -1,17 +1,17 @@
 {% extends 'admin/base.html' %}
 
-{% block title %}Edit Galeri - Admin Panel{% endblock %}
-{% block page_title %}Edit Foto Galeri{% endblock %}
-{% block page_subtitle %}Perbarui informasi foto galeri{% endblock %}
+{% block title %}Edit Potensi - Admin Panel{% endblock %}
+{% block page_title %}Edit Potensi Desa{% endblock %}
+{% block page_subtitle %}{{ item.nama }}{% endblock %}
 
 {% block header_actions %}
-<div class="user-menu">
-    <div class="user-avatar">{{ session.get('user_nama', 'A')[0]|upper }}</div>
-    <div class="user-info">
-        <h4>{{ session.get('user_nama', 'Admin') }}</h4>
-        <span>Administrator</span>
-    </div>
-</div>
+<a href="{{ url_for('admin.potensi') }}" class="btn btn-outline">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+    </svg>
+    Kembali
+</a>
 {% endblock %}
 
 {% block content %}
@@ -19,25 +19,43 @@
     <div class="card-body">
         <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="judul">Judul Foto</label>
-                <input type="text" id="judul" name="judul" value="{{ galeri.judul }}" placeholder="Contoh: Gotong Royong Minggu Kedua" required>
+                <label for="nama">Nama Potensi <span class="required">*</span></label>
+                <input type="text" id="nama" name="nama" value="{{ item.nama }}" placeholder="Contoh: Pantai Pasir Hitam, Kerajinan Batik" required>
             </div>
 
             <div class="form-group">
-                <label for="deskripsi">Deskripsi <span class="hint">(opsional)</span></label>
-                <textarea id="deskripsi" name="deskripsi" placeholder="Jelaskan tentang foto ini...">{{ galeri.deskripsi or '' }}</textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="kategori">Kategori</label>
-                <select id="kategori" name="kategori">
-                    <option value="galeri" {% if galeri.kategori == 'galeri' %}selected{% endif %}>Galeri Umum</option>
-                    <option value="kegiatan" {% if galeri.kategori == 'kegiatan' %}selected{% endif %}>Kegiatan Desa</option>
-                    <option value="pariwisata" {% if galeri.kategori == 'pariwisata' %}selected{% endif %}>Pariwisata</option>
-                    <option value="pertanian" {% if galeri.kategori == 'pertanian' %}selected{% endif %}>Pertanian</option>
-                    <option value="budaya" {% if galeri.kategori == 'budaya' %}selected{% endif %}>Budaya</option>
-                    <option value="fasilitas" {% if galeri.kategori == 'fasilitas' %}selected{% endif %}>Fasilitas Desa</option>
+                <label for="kategori">Kategori <span class="required">*</span></label>
+                <select id="kategori" name="kategori" required>
+                    <option value="">Pilih Kategori</option>
+                    <optgroup label="Pariwisata">
+                        <option value="Wisata Alam" {% if item.kategori == 'Wisata Alam' %}selected{% endif %}>Wisata Alam</option>
+                        <option value="Wisata Buatan" {% if item.kategori == 'Wisata Buatan' %}selected{% endif %}>Wisata Buatan</option>
+                        <option value="Wisata Budaya" {% if item.kategori == 'Wisata Budaya' %}selected{% endif %}>Wisata Budaya</option>
+                    </optgroup>
+                    <optgroup label="Ekonomi">
+                        <option value="Produk Unggulan" {% if item.kategori == 'Produk Unggulan' %}selected{% endif %}>Produk Unggulan</option>
+                        <option value="Kerajinan" {% if item.kategori == 'Kerajinan' %}selected{% endif %}>Kerajinan</option>
+                        <option value="Kuliner" {% if item.kategori == 'Kuliner' %}selected{% endif %}>Kuliner</option>
+                        <option value="Pertanian" {% if item.kategori == 'Pertanian' %}selected{% endif %}>Pertanian</option>
+                        <option value="Perikanan" {% if item.kategori == 'Perikanan' %}selected{% endif %}>Perikanan</option>
+                    </optgroup>
+                    <optgroup label="Fasilitas">
+                        <option value="Fasilitas Umum" {% if item.kategori == 'Fasilitas Umum' %}selected{% endif %}>Fasilitas Umum</option>
+                        <option value="Fasilitas Pendidikan" {% if item.kategori == 'Fasilitas Pendidikan' %}selected{% endif %}>Fasilitas Pendidikan</option>
+                        <option value="Fasilitas Kesehatan" {% if item.kategori == 'Fasilitas Kesehatan' %}selected{% endif %}>Fasilitas Kesehatan</option>
+                        <option value="Fasilitas Ibadah" {% if item.kategori == 'Fasilitas Ibadah' %}selected{% endif %}>Fasilitas Ibadah</option>
+                    </optgroup>
+                    <optgroup label="Lainnya">
+                        <option value="Kebudayaan" {% if item.kategori == 'Kebudayaan' %}selected{% endif %}>Kebudayaan</option>
+                        <option value="Tradisi" {% if item.kategori == 'Tradisi' %}selected{% endif %}>Tradisi</option>
+                        <option value="Lainnya" {% if item.kategori == 'Lainnya' %}selected{% endif %}>Lainnya</option>
+                    </optgroup>
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label for="deskripsi">Deskripsi</label>
+                <textarea id="deskripsi" name="deskripsi" rows="4" placeholder="Jelaskan tentang potensi ini secara detail...">{{ item.deskripsi or '' }}</textarea>
             </div>
 
             <!-- Image Upload: File or URL -->
@@ -65,10 +83,10 @@
 
                 <!-- URL Upload -->
                 <div id="upload-url" class="upload-panel">
-                    <input type="url" id="gambar_url" name="gambar_url" value="{{ galeri.gambar_url }}" placeholder="https://example.com/gambar.jpg" oninput="previewUrl(this.value)">
+                    <input type="url" id="gambar_url" name="gambar_url" value="{{ item.gambar_url }}" placeholder="https://example.com/gambar.jpg" oninput="previewUrl(this.value)">
                     <div class="preview-box" id="url-preview">
-                        {% if galeri.gambar_url %}
-                        <img src="{{ galeri.gambar_url }}" alt="Preview" onerror="this.parentElement.innerHTML='<p class=preview-placeholder>Gambar tidak dapat dimuat</p>'">
+                        {% if item.gambar_url %}
+                        <img src="{{ item.gambar_url }}" alt="Preview" onerror="this.parentElement.innerHTML='<p class=preview-placeholder>Gambar tidak dapat dimuat</p>'">
                         {% else %}
                         <p class="preview-placeholder">Masukkan URL untuk melihat preview</p>
                         {% endif %}
@@ -77,11 +95,19 @@
             </div>
 
             <div class="form-group">
-                <label for="gambar_alt">Alt Text <span class="hint">(untuk SEO & aksesibilitas)</span></label>
-                <input type="text" id="gambar_alt" name="gambar_alt" value="{{ galeri.gambar_alt or '' }}" placeholder="Deskripsi singkat tentang gambar">
+                <label for="icon">Icon <span class="hint">(opsional)</span></label>
+                <input type="text" id="icon" name="icon" value="{{ item.icon or '' }}" placeholder="Contoh: bi bi-geo-alt">
+                <p class="hint">Gunakan nama icon dari Bootstrap Icons atau Feather Icons</p>
             </div>
 
-            <div class="btn-group">
+            <div class="form-group">
+                <label class="checkbox-group">
+                    <input type="checkbox" name="aktif" value="1" {% if item.aktif %}checked{% endif %}>
+                    <span>Aktif / Ditampilkan di website</span>
+                </label>
+            </div>
+
+            <div class="btn-group" style="margin-top: 24px;">
                 <button type="submit" class="btn btn-primary">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
@@ -90,7 +116,7 @@
                     </svg>
                     Simpan Perubahan
                 </button>
-                <a href="{{ url_for('admin.galeri') }}" class="btn btn-outline">Batal</a>
+                <a href="{{ url_for('admin.potensi') }}" class="btn btn-outline">Batal</a>
             </div>
         </form>
     </div>

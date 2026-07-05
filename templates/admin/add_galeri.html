@@ -17,7 +17,7 @@
 {% block content %}
 <div class="card animate-in">
     <div class="card-body">
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="judul">Judul Foto</label>
                 <input type="text" id="judul" name="judul" placeholder="Contoh: Gotong Royong Minggu Kedua" required>
@@ -40,11 +40,35 @@
                 </select>
             </div>
 
+            <!-- Image Upload: File or URL -->
             <div class="form-group">
-                <label for="gambar_url">URL Gambar</label>
-                <input type="url" id="gambar_url" name="gambar_url" placeholder="https://example.com/gambar.jpg" required oninput="previewImage(this.value)">
-                <div class="preview-box" id="preview-box">
-                    <p class="preview-placeholder" id="preview-placeholder">Masukkan URL untuk melihat preview</p>
+                <label>Gambar</label>
+                <div class="upload-tabs">
+                    <button type="button" class="upload-tab active" onclick="switchUploadTab('file')">Upload File</button>
+                    <button type="button" class="upload-tab" onclick="switchUploadTab('url')">Dari URL</button>
+                </div>
+
+                <!-- File Upload -->
+                <div id="upload-file" class="upload-panel active">
+                    <div class="file-upload-box" onclick="document.getElementById('gambar_file').click()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <p><strong>Klik untuk upload</strong> atau drag & drop</p>
+                        <span>PNG, JPG, JPEG, GIF, WEBP (Max 16MB)</span>
+                        <input type="file" id="gambar_file" name="gambar_file" accept=".png,.jpg,.jpeg,.gif,.webp" onchange="previewUpload(this)" hidden>
+                    </div>
+                    <div class="preview-box" id="upload-preview" style="display: none;"></div>
+                </div>
+
+                <!-- URL Upload -->
+                <div id="upload-url" class="upload-panel">
+                    <input type="url" id="gambar_url" name="gambar_url" placeholder="https://example.com/gambar.jpg" oninput="previewUrl(this.value)">
+                    <div class="preview-box" id="url-preview">
+                        <p class="preview-placeholder">Masukkan URL untuk melihat preview</p>
+                    </div>
                 </div>
             </div>
 
@@ -54,17 +78,121 @@
             </div>
 
             <div class="btn-group">
-                <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #166534, #22c55e); color: white; box-shadow: 0 4px 14px rgba(22, 101, 52, 0.4);">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+                <button type="submit" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
                     </svg>
                     Simpan
                 </button>
-                <a href="{{ url_for('admin.galeri') }}" class="btn btn-outline" style="background: #e7e5e4; color: #1e293b; border: 2px solid #d6d3d1;">
-                    Batal
-                </a>
+                <a href="{{ url_for('admin.galeri') }}" class="btn btn-outline">Batal</a>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+.upload-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.upload-tab {
+    padding: 8px 16px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.upload-tab.active {
+    background: #166534;
+    color: white;
+    border-color: #166534;
+}
+.upload-panel { display: none; }
+.upload-panel.active { display: block; }
+.file-upload-box {
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: #fafafa;
+}
+.file-upload-box:hover {
+    border-color: #166534;
+    background: #f0fdf4;
+}
+.file-upload-box svg {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 12px;
+    color: #9ca3af;
+}
+.file-upload-box p {
+    margin: 0 0 4px;
+    color: #374151;
+}
+.file-upload-box span {
+    font-size: 12px;
+    color: #9ca3af;
+}
+.preview-box {
+    margin-top: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    min-height: 120px;
+    max-height: 250px;
+    background: #f9fafb;
+}
+.preview-box img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    max-height: 250px;
+}
+.preview-placeholder {
+    padding: 40px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 14px;
+}
+</style>
+
+<script>
+function switchUploadTab(tab) {
+    document.querySelectorAll('.upload-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.upload-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('upload-' + tab).classList.add('active');
+    event.target.classList.add('active');
+}
+
+function previewUpload(input) {
+    const preview = document.getElementById('upload-preview');
+    const placeholder = preview.querySelector('.preview-placeholder') || document.createElement('p');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function previewUrl(url) {
+    const preview = document.getElementById('url-preview');
+    if (url) {
+        preview.innerHTML = '<img src="' + url + '" alt="Preview" onerror="this.parentElement.innerHTML=\'<p class=preview-placeholder>Gagal memuat gambar</p>\'">';
+    } else {
+        preview.innerHTML = '<p class="preview-placeholder">Masukkan URL untuk melihat preview</p>';
+    }
+}
+</script>
 {% endblock %}

@@ -273,6 +273,19 @@ def init_database():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- Potensi Desa
+            CREATE TABLE IF NOT EXISTS potensi_desa (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nama TEXT NOT NULL,
+                kategori TEXT NOT NULL,
+                deskripsi TEXT,
+                gambar_url TEXT,
+                icon TEXT,
+                aktif INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         ''')
 
         # Insert default config
@@ -1560,3 +1573,92 @@ def get_available_tahun():
     except Exception as e:
         logger.error(f"Error getting available tahun: {str(e)}")
         return []
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── POTENSI DESA ──────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_all_potensi():
+    """Ambil semua potensi desa"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM potensi_desa ORDER BY kategori, id DESC')
+        data = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return data
+    except Exception as e:
+        logger.error(f"Error getting all potensi: {str(e)}")
+        return []
+
+def get_potensi_by_id(potensi_id):
+    """Ambil potensi berdasarkan ID"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM potensi_desa WHERE id = ?', (potensi_id,))
+        data = cursor.fetchone()
+        conn.close()
+        return dict(data) if data else None
+    except Exception as e:
+        logger.error(f"Error getting potensi {potensi_id}: {str(e)}")
+        return None
+
+def add_potensi(nama, kategori, deskripsi, gambar_url, icon, aktif=1):
+    """Tambah potensi desa baru"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO potensi_desa (nama, kategori, deskripsi, gambar_url, icon, aktif)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (nama, kategori, deskripsi, gambar_url, icon, aktif))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding potensi: {str(e)}")
+        return False
+
+def update_potensi(potensi_id, nama, kategori, deskripsi, gambar_url, icon, aktif):
+    """Update potensi desa"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE potensi_desa SET nama = ?, kategori = ?, deskripsi = ?, gambar_url = ?, icon = ?, aktif = ?
+            WHERE id = ?
+        ''', (nama, kategori, deskripsi, gambar_url, icon, aktif, potensi_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating potensi {potensi_id}: {str(e)}")
+        return False
+
+def delete_potensi(potensi_id):
+    """Hapus potensi desa"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM potensi_desa WHERE id = ?', (potensi_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting potensi {potensi_id}: {str(e)}")
+        return False
+
+def toggle_potensi_aktif(potensi_id):
+    """Toggle status aktif/nonaktif potensi"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE potensi_desa SET aktif = NOT aktif WHERE id = ?', (potensi_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling potensi {potensi_id}: {str(e)}")
+        return False

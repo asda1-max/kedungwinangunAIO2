@@ -9,9 +9,12 @@ Error Handling:
     - flash_error: Flash error messages
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+import os
+import uuid
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app, send_from_directory
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from models import (
     get_all_berita,
     get_berita_by_id,
@@ -41,8 +44,44 @@ from models import (
     update_user_password,
     delete_user_account,
     create_staff_account,
+    # Potensi Desa
+    get_all_potensi,
+    get_potensi_by_id,
+    add_potensi,
+    update_potensi,
+    delete_potensi,
+    toggle_potensi_aktif,
 )
 from errors import admin_required, flash_error
+from config import Config
+
+# File upload helpers
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+ALLOWED_DOC_EXTENSIONS = {'pdf', 'doc', 'docx'}
+
+def allowed_image(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+def save_uploaded_file(file, subfolder=''):
+    """Save uploaded file and return the URL/path"""
+    if file and file.filename and allowed_image(file.filename):
+        # Create unique filename
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"{uuid.uuid4().hex}.{ext}"
+
+        # Create upload directory
+        upload_dir = os.path.join(Config.UPLOAD_FOLDER, subfolder) if subfolder else Config.UPLOAD_FOLDER
+        os.makedirs(upload_dir, exist_ok=True)
+
+        # Save file
+        filepath = os.path.join(upload_dir, filename)
+        file.save(filepath)
+
+        # Return relative URL path
+        if subfolder:
+            return f"/uploads/{subfolder}/{filename}"
+        return f"/uploads/{filename}"
+    return None
 import logging
 
 # Setup logging
@@ -99,10 +138,17 @@ def add_berita_route():
             excerpt = request.form.get('excerpt', '').strip()
             kategori = request.form.get('kategori', 'Berita')
             badge_class = request.form.get('badge_class', 'badge-green')
-            kategori_icon = request.form.get('kategori_icon', '📰')
-            gambar_url = request.form.get('gambar_url', '').strip()
+            kategori_icon = request.form.get('kategori_icon', '')
             gambar_alt = request.form.get('gambar_alt', '').strip()
             unggulan = 1 if request.form.get('unggulan') else 0
+
+            # Handle image upload (file or URL)
+            gambar_url = ''
+            file = request.files.get('gambar_file')
+            if file and file.filename:
+                gambar_url = save_uploaded_file(file, 'berita')
+            if not gambar_url:
+                gambar_url = request.form.get('gambar_url', '').strip()
 
             if not judul:
                 flash_error('Judul berita harus diisi!')
@@ -138,10 +184,17 @@ def edit_berita_route(berita_id):
             excerpt = request.form.get('excerpt', '').strip()
             kategori = request.form.get('kategori', 'Berita')
             badge_class = request.form.get('badge_class', 'badge-green')
-            kategori_icon = request.form.get('kategori_icon', '📰')
-            gambar_url = request.form.get('gambar_url', '').strip()
+            kategori_icon = request.form.get('kategori_icon', '')
             gambar_alt = request.form.get('gambar_alt', '').strip()
             unggulan = 1 if request.form.get('unggulan') else 0
+
+            # Handle image upload (file or URL)
+            gambar_url = ''
+            file = request.files.get('gambar_file')
+            if file and file.filename:
+                gambar_url = save_uploaded_file(file, 'berita')
+            if not gambar_url:
+                gambar_url = request.form.get('gambar_url', '').strip()
 
             if not judul:
                 flash_error('Judul berita harus diisi!')
@@ -483,11 +536,18 @@ def add_galeri_route():
             judul = request.form.get('judul', '').strip()
             deskripsi = request.form.get('deskripsi', '').strip()
             kategori = request.form.get('kategori', 'galeri')
-            gambar_url = request.form.get('gambar_url', '').strip()
             gambar_alt = request.form.get('gambar_alt', '').strip()
 
+            # Handle image upload (file or URL)
+            gambar_url = ''
+            file = request.files.get('gambar_file')
+            if file and file.filename:
+                gambar_url = save_uploaded_file(file, 'galeri')
+            if not gambar_url:
+                gambar_url = request.form.get('gambar_url', '').strip()
+
             if not judul or not gambar_url:
-                flash_error('Judul dan URL gambar harus diisi!')
+                flash_error('Judul dan gambar harus diisi!')
                 return redirect(request.url)
 
             result = add_galeri(judul, gambar_url, deskripsi, kategori, gambar_alt)
@@ -519,11 +579,18 @@ def edit_galeri_route(galeri_id):
             judul = request.form.get('judul', '').strip()
             deskripsi = request.form.get('deskripsi', '').strip()
             kategori = request.form.get('kategori', 'galeri')
-            gambar_url = request.form.get('gambar_url', '').strip()
             gambar_alt = request.form.get('gambar_alt', '').strip()
 
+            # Handle image upload (file or URL)
+            gambar_url = ''
+            file = request.files.get('gambar_file')
+            if file and file.filename:
+                gambar_url = save_uploaded_file(file, 'galeri')
+            if not gambar_url:
+                gambar_url = request.form.get('gambar_url', '').strip()
+
             if not judul or not gambar_url:
-                flash_error('Judul dan URL gambar harus diisi!')
+                flash_error('Judul dan gambar harus diisi!')
                 return redirect(request.url)
 
             result = update_galeri(galeri_id, judul, gambar_url, deskripsi, kategori, gambar_alt)
@@ -1077,3 +1144,143 @@ def delete_apbdes_route(apbdes_id):
         logger.error(f"Error deleting apbdes {apbdes_id}: {str(e)}")
         flash_error('Terjadi kesalahan saat menghapus item')
     return redirect(url_for('admin.apbdes'))
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── POTENSI DESA MANAGEMENT ─────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+@admin_bp.route("/potensi")
+@admin_required
+def potensi():
+    """Halaman manajemen potensi desa"""
+    try:
+        potensi_list = get_all_potensi()
+
+        # Group by kategori
+        grouped = {}
+        for item in potensi_list:
+            kat = item.get('kategori', 'Lainnya')
+            if kat not in grouped:
+                grouped[kat] = []
+            grouped[kat].append(item)
+
+        return render_template("admin/potensi.html", potensi_list=potensi_list, grouped=grouped)
+    except Exception as e:
+        logger.error(f"Error loading potensi page: {str(e)}")
+        flash_error('Terjadi kesalahan saat memuat halaman potensi')
+        return redirect(url_for('admin.dashboard'))
+
+
+@admin_bp.route("/potensi/add", methods=['GET', 'POST'])
+@admin_required
+def add_potensi_route():
+    """Form tambah potensi desa"""
+    try:
+        if request.method == 'POST':
+            nama = request.form.get('nama', '').strip()
+            kategori = request.form.get('kategori', '').strip()
+            deskripsi = request.form.get('deskripsi', '').strip()
+            icon = request.form.get('icon', '').strip()
+
+            # Handle image upload (file or URL)
+            gambar_url = ''
+            file = request.files.get('gambar_file')
+            if file and file.filename:
+                gambar_url = save_uploaded_file(file, 'potensi')
+            if not gambar_url:
+                gambar_url = request.form.get('gambar_url', '').strip()
+
+            if not nama or not kategori:
+                flash_error('Nama dan Kategori harus diisi!')
+                return redirect(request.url)
+
+            result = add_potensi(nama, kategori, deskripsi, gambar_url, icon)
+            if result:
+                flash('Potensi berhasil ditambahkan!', 'success')
+                return redirect(url_for('admin.potensi'))
+            else:
+                flash_error('Gagal menambahkan potensi. Silakan coba lagi.')
+                return redirect(request.url)
+
+        return render_template("admin/add_potensi.html")
+    except Exception as e:
+        logger.error(f"Error in add_potensi_route: {str(e)}")
+        flash_error('Terjadi kesalahan saat memuat form potensi')
+        return redirect(url_for('admin.potensi'))
+
+
+@admin_bp.route("/potensi/edit/<int:potensi_id>", methods=['GET', 'POST'])
+@admin_required
+def edit_potensi_route(potensi_id):
+    """Form edit potensi desa"""
+    try:
+        item = get_potensi_by_id(potensi_id)
+        if not item:
+            flash_error('Potensi tidak ditemukan!')
+            return redirect(url_for('admin.potensi'))
+
+        if request.method == 'POST':
+            nama = request.form.get('nama', '').strip()
+            kategori = request.form.get('kategori', '').strip()
+            deskripsi = request.form.get('deskripsi', '').strip()
+            icon = request.form.get('icon', '').strip()
+            aktif = 1 if request.form.get('aktif') else 0
+
+            # Handle image upload (file or URL)
+            gambar_url = ''
+            file = request.files.get('gambar_file')
+            if file and file.filename:
+                gambar_url = save_uploaded_file(file, 'potensi')
+            if not gambar_url:
+                gambar_url = request.form.get('gambar_url', '').strip()
+
+            if not nama or not kategori:
+                flash_error('Nama dan Kategori harus diisi!')
+                return redirect(request.url)
+
+            result = update_potensi(potensi_id, nama, kategori, deskripsi, gambar_url, icon, aktif)
+            if result:
+                flash('Potensi berhasil diperbarui!', 'success')
+                return redirect(url_for('admin.potensi'))
+            else:
+                flash_error('Gagal memperbarui potensi. Silakan coba lagi.')
+                return redirect(request.url)
+
+        return render_template("admin/edit_potensi.html", item=item)
+    except Exception as e:
+        logger.error(f"Error in edit_potensi_route {potensi_id}: {str(e)}")
+        flash_error('Terjadi kesalahan saat memuat form potensi')
+        return redirect(url_for('admin.potensi'))
+
+
+@admin_bp.route("/potensi/delete/<int:potensi_id>", methods=['POST'])
+@admin_required
+def delete_potensi_route(potensi_id):
+    """Hapus potensi desa"""
+    try:
+        result = delete_potensi(potensi_id)
+        if result:
+            flash('Potensi berhasil dihapus!', 'success')
+        else:
+            flash_error('Gagal menghapus potensi. Silakan coba lagi.')
+    except Exception as e:
+        logger.error(f"Error deleting potensi {potensi_id}: {str(e)}")
+        flash_error('Terjadi kesalahan saat menghapus potensi')
+    return redirect(url_for('admin.potensi'))
+
+
+@admin_bp.route("/potensi/toggle/<int:potensi_id>", methods=['POST'])
+@admin_required
+def toggle_potensi_route(potensi_id):
+    """Toggle status aktif/nonaktif potensi"""
+    try:
+        result = toggle_potensi_aktif(potensi_id)
+        if result:
+            flash('Status potensi berhasil diubah!', 'success')
+        else:
+            flash_error('Gagal mengubah status potensi.')
+    except Exception as e:
+        logger.error(f"Error toggling potensi {potensi_id}: {str(e)}")
+        flash_error('Terjadi kesalahan saat mengubah status potensi')
+    return redirect(url_for('admin.potensi'))
