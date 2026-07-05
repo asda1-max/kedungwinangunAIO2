@@ -48,12 +48,56 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+# ── Database Migration ──────────────────────────────────────────────────
+def migrate_database():
+    """Migrate database schema from old version (NIK-based) to new version"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Add new columns if they don't exist
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN username TEXT")
+            logger.info("Added 'username' column to users table")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN nip TEXT")
+            logger.info("Added 'nip' column to users table")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+
+        # Migrate existing admin accounts (old nik -> username)
+        cursor.execute("UPDATE users SET username = nik WHERE role = 'admin' AND username IS NULL")
+        migrated_admins = cursor.rowcount
+
+        # Migrate existing dinas accounts (old nik -> nip)
+        cursor.execute("UPDATE users SET nip = nik WHERE role = 'dinas' AND nip IS NULL")
+        migrated_dinas = cursor.rowcount
+
+        conn.commit()
+        conn.close()
+
+        if migrated_admins > 0 or migrated_dinas > 0:
+            logger.info(f"Migrated {migrated_admins} admin(s) and {migrated_dinas} dinas account(s)")
+        else:
+            logger.info("No migration needed or all accounts already migrated")
+
+        return True
+    except Exception as e:
+        logger.error(f"Migration error: {str(e)}")
+        return False
+
 # ── Database Initialization ────────────────────────────────────────────
 def init_database():
     """Initialize database with all tables and default data"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
+
+        # Run migration first
+        migrate_database()
 
         # Execute schema
         cursor.executescript('''
@@ -338,8 +382,13 @@ def get_user_by_username(username):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        # First try username field
+        cursor.execute('SELECT * FROM users WHERE username = ? AND role = ?', (username, 'admin'))
         user = cursor.fetchone()
+        # Fallback: check old nik field for admin (backward compatibility)
+        if not user:
+            cursor.execute('SELECT * FROM users WHERE nik = ? AND role = ?', (username, 'admin'))
+            user = cursor.fetchone()
         conn.close()
         return dict(user) if user else None
     except Exception as e:
@@ -351,8 +400,13 @@ def get_user_by_nip(nip):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE nip = ?', (nip,))
+        # First try nip field
+        cursor.execute('SELECT * FROM users WHERE nip = ? AND role = ?', (nip, 'dinas'))
         user = cursor.fetchone()
+        # Fallback: check old nik field for dinas (backward compatibility)
+        if not user:
+            cursor.execute('SELECT * FROM users WHERE nik = ? AND role = ?', (nip, 'dinas'))
+            user = cursor.fetchone()
         conn.close()
         return dict(user) if user else None
     except Exception as e:
