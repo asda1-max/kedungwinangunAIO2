@@ -1,14 +1,48 @@
 """
 Database Models & Helpers
 Berisi semua fungsi untuk berinteraksi dengan database
+
+Error Handling:
+    Semua error handling database sudah menggunakan database.py
+    Import dari: from database import DatabaseError, db_fetch_one, db_fetch_all, etc.
 """
 
 import sqlite3
+import logging
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config, DEFAULT_CONFIG, DEFAULT_JENIS_SURAT, DEFAULT_USERS
+from database import (
+    DatabaseError,
+    db_fetch_one,
+    db_fetch_all,
+    db_execute,
+    get_db_connection,
+    get_db_error_message,
+)
 
-# ── Database Connection ────────────────────────────────────────────────
+# Setup logging
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
+
+# ── Database Error Handling ──────────────────────────────────────────────
+
+def handle_db_error(error, operation="database operation", conn=None):
+    """
+    Handle database error dengan logging dan cleanup
+
+    Args:
+        error: Exception yang terjadi
+        operation: Deskripsi operasi yang gagal
+        conn: Database connection untuk cleanup
+
+    Returns:
+        str: User-friendly error message
+    """
+    return get_db_error_message(error)
+
+
+# ── Database Connection ────────────────────────────────────────────────────
 def get_db_connection():
     conn = sqlite3.connect(Config.DB_NAME)
     conn.row_factory = sqlite3.Row
@@ -17,208 +51,214 @@ def get_db_connection():
 # ── Database Initialization ────────────────────────────────────────────
 def init_database():
     """Initialize database with all tables and default data"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    # Execute schema
-    cursor.executescript('''
-        -- Users Table
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nik TEXT UNIQUE NOT NULL,
-            nama_lengkap TEXT NOT NULL,
-            email TEXT,
-            no_telepon TEXT,
-            alamat TEXT,
-            password_hash TEXT NOT NULL,
-            role TEXT DEFAULT 'penduduk',
-            status TEXT DEFAULT 'pending',
-            ktp_path TEXT,
-            kk_path TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            approved_by INTEGER,
-            approved_at TIMESTAMP
-        );
+        # Execute schema
+        cursor.executescript('''
+            -- Users Table
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nik TEXT UNIQUE NOT NULL,
+                nama_lengkap TEXT NOT NULL,
+                email TEXT,
+                no_telepon TEXT,
+                alamat TEXT,
+                password_hash TEXT NOT NULL,
+                role TEXT DEFAULT 'penduduk',
+                status TEXT DEFAULT 'pending',
+                ktp_path TEXT,
+                kk_path TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                approved_by INTEGER,
+                approved_at TIMESTAMP
+            );
 
-        -- Permohonan ACC
-        CREATE TABLE IF NOT EXISTS permohonan_acc (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            status TEXT DEFAULT 'pending',
-            catatan TEXT,
-            processed_by INTEGER,
-            processed_at TIMESTAMP,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-        );
+            -- Permohonan ACC
+            CREATE TABLE IF NOT EXISTS permohonan_acc (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                status TEXT DEFAULT 'pending',
+                catatan TEXT,
+                processed_by INTEGER,
+                processed_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            );
 
-        -- Jenis Surat
-        CREATE TABLE IF NOT EXISTS jenis_surat (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            kode TEXT UNIQUE NOT NULL,
-            nama TEXT NOT NULL,
-            deskripsi TEXT,
-            required_docs TEXT,
-            active INTEGER DEFAULT 1,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
+            -- Jenis Surat
+            CREATE TABLE IF NOT EXISTS jenis_surat (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                kode TEXT UNIQUE NOT NULL,
+                nama TEXT NOT NULL,
+                deskripsi TEXT,
+                required_docs TEXT,
+                active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-        -- Permohonan Surat
-        CREATE TABLE IF NOT EXISTS permohonan_surat (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            jenis_surat_id INTEGER NOT NULL,
-            nomor_surat TEXT,
-            data_json TEXT,
-            status TEXT DEFAULT 'pending',
-            catatan TEXT,
-            file_surat TEXT,
-            approved_by INTEGER,
-            approved_at TIMESTAMP,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id),
-            FOREIGN KEY (jenis_surat_id) REFERENCES jenis_surat (id)
-        );
+            -- Permohonan Surat
+            CREATE TABLE IF NOT EXISTS permohonan_surat (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                jenis_surat_id INTEGER NOT NULL,
+                nomor_surat TEXT,
+                data_json TEXT,
+                status TEXT DEFAULT 'pending',
+                catatan TEXT,
+                file_surat TEXT,
+                approved_by INTEGER,
+                approved_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id),
+                FOREIGN KEY (jenis_surat_id) REFERENCES jenis_surat (id)
+            );
 
-        -- Berita
-        CREATE TABLE IF NOT EXISTS berita (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            judul TEXT NOT NULL,
-            excerpt TEXT,
-            kategori TEXT,
-            badge_class TEXT DEFAULT 'badge-green',
-            kategori_icon TEXT DEFAULT '📰',
-            tanggal TEXT,
-            views TEXT DEFAULT '0',
-            gambar_url TEXT,
-            gambar_alt TEXT,
-            penulis TEXT DEFAULT 'Admin Desa Kedungwinangun',
-            unggulan INTEGER DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
+            -- Berita
+            CREATE TABLE IF NOT EXISTS berita (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                judul TEXT NOT NULL,
+                excerpt TEXT,
+                kategori TEXT,
+                badge_class TEXT DEFAULT 'badge-green',
+                kategori_icon TEXT DEFAULT '📰',
+                tanggal TEXT,
+                views TEXT DEFAULT '0',
+                gambar_url TEXT,
+                gambar_alt TEXT,
+                penulis TEXT DEFAULT 'Admin Desa Kedungwinangun',
+                unggulan INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-        -- Config
-        CREATE TABLE IF NOT EXISTS config (
-            key TEXT PRIMARY KEY,
-            value TEXT
-        );
+            -- Config
+            CREATE TABLE IF NOT EXISTS config (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            );
 
-        -- Galeri
-        CREATE TABLE IF NOT EXISTS galeri (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            judul TEXT NOT NULL,
-            deskripsi TEXT,
-            kategori TEXT DEFAULT 'galeri',
-            gambar_url TEXT NOT NULL,
-            gambar_alt TEXT,
-            aktif INTEGER DEFAULT 1,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
+            -- Galeri
+            CREATE TABLE IF NOT EXISTS galeri (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                judul TEXT NOT NULL,
+                deskripsi TEXT,
+                kategori TEXT DEFAULT 'galeri',
+                gambar_url TEXT NOT NULL,
+                gambar_alt TEXT,
+                aktif INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-        -- Pages (Custom Pages)
-        CREATE TABLE IF NOT EXISTS pages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            slug TEXT UNIQUE NOT NULL,
-            content TEXT,
-            icon TEXT DEFAULT '📄',
-            order_num INTEGER DEFAULT 0,
-            active INTEGER DEFAULT 1,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
+            -- Pages (Custom Pages)
+            CREATE TABLE IF NOT EXISTS pages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                slug TEXT UNIQUE NOT NULL,
+                content TEXT,
+                icon TEXT DEFAULT '📄',
+                order_num INTEGER DEFAULT 0,
+                active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-        -- Komentar Berita
-        CREATE TABLE IF NOT EXISTS komentar (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            berita_id INTEGER NOT NULL,
-            parent_id INTEGER,
-            user_id INTEGER,
-            nama_pengirim TEXT NOT NULL,
-            konten TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (berita_id) REFERENCES berita(id) ON DELETE CASCADE,
-            FOREIGN KEY (parent_id) REFERENCES komentar(id) ON DELETE CASCADE,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-        );
+            -- Komentar Berita
+            CREATE TABLE IF NOT EXISTS komentar (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                berita_id INTEGER NOT NULL,
+                parent_id INTEGER,
+                user_id INTEGER,
+                nama_pengirim TEXT NOT NULL,
+                konten TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (berita_id) REFERENCES berita(id) ON DELETE CASCADE,
+                FOREIGN KEY (parent_id) REFERENCES komentar(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+            );
 
-        -- Struktur Organisasi
-        CREATE TABLE IF NOT EXISTS struktur_organisasi (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            kategori TEXT NOT NULL,
-            nama TEXT NOT NULL,
-            jabatan TEXT,
-            status TEXT,
-            icon TEXT,
-            no_urut INTEGER DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
+            -- Struktur Organisasi
+            CREATE TABLE IF NOT EXISTS struktur_organisasi (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                kategori TEXT NOT NULL,
+                nama TEXT NOT NULL,
+                jabatan TEXT,
+                status TEXT,
+                icon TEXT,
+                no_urut INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-        -- Pengumuman
-        CREATE TABLE IF NOT EXISTS pengumuman (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            judul TEXT NOT NULL,
-            isi TEXT NOT NULL,
-            kategori TEXT DEFAULT 'umum',
-            is_penting INTEGER DEFAULT 0,
-            lampiran TEXT,
-            author TEXT DEFAULT 'Pemerintahan Desa',
-            aktif INTEGER DEFAULT 1,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
+            -- Pengumuman
+            CREATE TABLE IF NOT EXISTS pengumuman (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                judul TEXT NOT NULL,
+                isi TEXT NOT NULL,
+                kategori TEXT DEFAULT 'umum',
+                is_penting INTEGER DEFAULT 0,
+                lampiran TEXT,
+                author TEXT DEFAULT 'Pemerintahan Desa',
+                aktif INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-        -- APBDes
-        CREATE TABLE IF NOT EXISTS apbdes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            tahun INTEGER NOT NULL,
-            jenis TEXT NOT NULL,
-            nama TEXT NOT NULL,
-            icon TEXT DEFAULT '📄',
-            jumlah INTEGER DEFAULT 0,
-            deskripsi TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
+            -- APBDes
+            CREATE TABLE IF NOT EXISTS apbdes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tahun INTEGER NOT NULL,
+                jenis TEXT NOT NULL,
+                nama TEXT NOT NULL,
+                icon TEXT DEFAULT '📄',
+                jumlah INTEGER DEFAULT 0,
+                deskripsi TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-        -- APBDes Summary
-        CREATE TABLE IF NOT EXISTS apbdes_summary (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            tahun INTEGER NOT NULL,
-            total_pendapatan INTEGER DEFAULT 0,
-            total_belanja INTEGER DEFAULT 0,
-            pembiayaan_net INTEGER DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-    ''')
+            -- APBDes Summary
+            CREATE TABLE IF NOT EXISTS apbdes_summary (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tahun INTEGER NOT NULL,
+                total_pendapatan INTEGER DEFAULT 0,
+                total_belanja INTEGER DEFAULT 0,
+                pembiayaan_net INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        ''')
 
-    # Insert default config
-    for key, value in DEFAULT_CONFIG.items():
-        cursor.execute('INSERT OR IGNORE INTO config (key, value) VALUES (?, ?)', (key, value))
+        # Insert default config
+        for key, value in DEFAULT_CONFIG.items():
+            cursor.execute('INSERT OR IGNORE INTO config (key, value) VALUES (?, ?)', (key, value))
 
-    # Insert default users
-    for nik, nama, password, role in DEFAULT_USERS:
-        cursor.execute('SELECT * FROM users WHERE nik = ?', (nik,))
-        if not cursor.fetchone():
-            hashed = generate_password_hash(password)
-            cursor.execute('''
-                INSERT INTO users (nik, nama_lengkap, password_hash, role, status, approved_by, approved_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (nik, nama, hashed, role, 'approved', 1, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        # Insert default users
+        for nik, nama, password, role in DEFAULT_USERS:
+            cursor.execute('SELECT * FROM users WHERE nik = ?', (nik,))
+            if not cursor.fetchone():
+                hashed = generate_password_hash(password)
+                cursor.execute('''
+                    INSERT INTO users (nik, nama_lengkap, password_hash, role, status, approved_by, approved_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (nik, nama, hashed, role, 'approved', 1, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
-    # Insert default jenis surat
-    for kode, nama, desc, docs, active in DEFAULT_JENIS_SURAT:
-        cursor.execute('SELECT * FROM jenis_surat WHERE kode = ?', (kode,))
-        if not cursor.fetchone():
-            cursor.execute('''
-                INSERT INTO jenis_surat (kode, nama, deskripsi, required_docs, active)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (kode, nama, desc, docs, active))
+        # Insert default jenis surat
+        for kode, nama, desc, docs, active in DEFAULT_JENIS_SURAT:
+            cursor.execute('SELECT * FROM jenis_surat WHERE kode = ?', (kode,))
+            if not cursor.fetchone():
+                cursor.execute('''
+                    INSERT INTO jenis_surat (kode, nama, deskripsi, required_docs, active)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (kode, nama, desc, docs, active))
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
+        logger.info("Database initialized successfully")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {str(e)}")
+        raise
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -227,34 +267,47 @@ def init_database():
 
 def get_config(key, default=None):
     """Ambil satu nilai konfigurasi"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT value FROM config WHERE key = ?', (key,))
-    row = cursor.fetchone()
-    conn.close()
-    return row['value'] if row else (default if default is not None else DEFAULT_CONFIG.get(key, ''))
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT value FROM config WHERE key = ?', (key,))
+        row = cursor.fetchone()
+        conn.close()
+        return row['value'] if row else (default if default is not None else DEFAULT_CONFIG.get(key, ''))
+    except Exception as e:
+        logger.error(f"Error getting config '{key}': {str(e)}")
+        return default if default is not None else DEFAULT_CONFIG.get(key, '')
 
 def get_all_config():
     """Ambil semua konfigurasi"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT key, value FROM config')
-    rows = cursor.fetchall()
-    conn.close()
-    config = {row['key']: row['value'] for row in rows}
-    # Fill missing keys with defaults
-    for key, value in DEFAULT_CONFIG.items():
-        if key not in config:
-            config[key] = value
-    return config
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT key, value FROM config')
+        rows = cursor.fetchall()
+        conn.close()
+        config = {row['key']: row['value'] for row in rows}
+        # Fill missing keys with defaults
+        for key, value in DEFAULT_CONFIG.items():
+            if key not in config:
+                config[key] = value
+        return config
+    except Exception as e:
+        logger.error(f"Error getting all config: {str(e)}")
+        return DEFAULT_CONFIG.copy()
 
 def update_config(key, value):
     """Update satu konfigurasi"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)', (key, value))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)', (key, value))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating config '{key}': {str(e)}")
+        return False
 
 def get_desa_info():
     """Ambil info desa untuk template"""
@@ -274,21 +327,29 @@ def get_desa_info():
 
 def get_user_by_nik(nik):
     """Ambil user berdasarkan NIK"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE nik = ?', (nik,))
-    user = cursor.fetchone()
-    conn.close()
-    return dict(user) if user else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE nik = ?', (nik,))
+        user = cursor.fetchone()
+        conn.close()
+        return dict(user) if user else None
+    except Exception as e:
+        logger.error(f"Error getting user by NIK: {str(e)}")
+        return None
 
 def get_user_by_id(user_id):
     """Ambil user berdasarkan ID"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
-    user = cursor.fetchone()
-    conn.close()
-    return dict(user) if user else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
+        conn.close()
+        return dict(user) if user else None
+    except Exception as e:
+        logger.error(f"Error getting user by ID {user_id}: {str(e)}")
+        return None
 
 def verify_user(nik, password):
     """Verifikasi login user"""
@@ -299,10 +360,11 @@ def verify_user(nik, password):
 
 def register_user(nik, nama_lengkap, email, no_telepon, alamat, password, ktp_path=None, kk_path=None):
     """Registrasi user baru"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    hashed = generate_password_hash(password)
+    conn = None
     try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        hashed = generate_password_hash(password)
         cursor.execute('''
             INSERT INTO users (nik, nama_lengkap, email, no_telepon, alamat, password_hash, ktp_path, kk_path, role, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -318,60 +380,91 @@ def register_user(nik, nama_lengkap, email, no_telepon, alamat, password, ktp_pa
         conn.commit()
         conn.close()
         return True, "Pendaftaran berhasil! Mohon tunggu persetujuan dari petugas dinas."
-    except sqlite3.IntegrityError:
-        conn.close()
-        return False, "NIK sudah terdaftar!"
+    except sqlite3.IntegrityError as e:
+        if conn:
+            conn.rollback()
+            conn.close()
+        msg = handle_db_error(e, "register_user")
+        return False, msg
+    except Exception as e:
+        if conn:
+            conn.rollback()
+            conn.close()
+        logger.error(f"Error registering user: {str(e)}")
+        return False, "Terjadi kesalahan saat registrasi. Silakan coba lagi."
 
 def get_pending_users():
     """Ambil semua user pending"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE status = ? ORDER BY created_at DESC', ('pending',))
-    users = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return users
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE status = ? ORDER BY created_at DESC', ('pending',))
+        users = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return users
+    except Exception as e:
+        logger.error(f"Error getting pending users: {str(e)}")
+        return []
 
 def get_all_warga():
     """Ambil semua warga (role=penduduk)"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE role = ? ORDER BY created_at DESC', ('penduduk',))
-    users = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return users
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE role = ? ORDER BY created_at DESC', ('penduduk',))
+        users = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return users
+    except Exception as e:
+        logger.error(f"Error getting all warga: {str(e)}")
+        return []
 
 def get_all_warga_approved():
     """Ambil semua warga yang sudah disetujui"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE role = ? AND status = ? ORDER BY created_at DESC", ('penduduk', 'approved'))
-    users = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return users
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE role = ? AND status = ? ORDER BY created_at DESC", ('penduduk', 'approved'))
+        users = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return users
+    except Exception as e:
+        logger.error(f"Error getting approved warga: {str(e)}")
+        return []
 
 def approve_user(user_id, processed_by):
     """Setujui pendaftaran user"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        UPDATE users SET status = ?, approved_by = ?, approved_at = ? WHERE id = ?
-    ''', ('approved', processed_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
-    cursor.execute('''
-        UPDATE permohonan_acc SET status = ?, processed_by = ?, processed_at = ? WHERE user_id = ?
-    ''', ('approved', processed_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE users SET status = ?, approved_by = ?, approved_at = ? WHERE id = ?
+        ''', ('approved', processed_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
+        cursor.execute('''
+            UPDATE permohonan_acc SET status = ?, processed_by = ?, processed_at = ? WHERE user_id = ?
+        ''', ('approved', processed_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error approving user {user_id}: {str(e)}")
+        return False
 
 def reject_user(user_id, processed_by, catatan=''):
     """Tolak pendaftaran user"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('UPDATE users SET status = ? WHERE id = ?', ('rejected', user_id))
-    cursor.execute('''
-        UPDATE permohonan_acc SET status = ?, processed_by = ?, catatan = ?, processed_at = ? WHERE user_id = ?
-    ''', ('rejected', processed_by, catatan, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE users SET status = ? WHERE id = ?', ('rejected', user_id))
+        cursor.execute('''
+            UPDATE permohonan_acc SET status = ?, processed_by = ?, catatan = ?, processed_at = ? WHERE user_id = ?
+        ''', ('rejected', processed_by, catatan, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error rejecting user {user_id}: {str(e)}")
+        return False
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -380,52 +473,75 @@ def reject_user(user_id, processed_by, catatan=''):
 
 def get_all_berita():
     """Ambil semua berita"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM berita ORDER BY created_at DESC')
-    berita = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return berita
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM berita ORDER BY created_at DESC')
+        berita = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return berita
+    except Exception as e:
+        logger.error(f"Error getting all berita: {str(e)}")
+        return []
 
 def get_berita_by_id(berita_id):
     """Ambil berita berdasarkan ID"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM berita WHERE id = ?', (berita_id,))
-    berita = cursor.fetchone()
-    conn.close()
-    return dict(berita) if berita else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM berita WHERE id = ?', (berita_id,))
+        berita = cursor.fetchone()
+        conn.close()
+        return dict(berita) if berita else None
+    except Exception as e:
+        logger.error(f"Error getting berita {berita_id}: {str(e)}")
+        return None
 
 def add_berita(judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, unggulan):
     """Tambah berita baru"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    tanggal = datetime.now().strftime("%d %b %Y")
-    cursor.execute('''
-        INSERT INTO berita (judul, excerpt, kategori, badge_class, kategori_icon, tanggal, views, gambar_url, gambar_alt, unggulan)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (judul, excerpt, kategori, badge_class, kategori_icon, tanggal, "0", gambar_url, gambar_alt, unggulan))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        tanggal = datetime.now().strftime("%d %b %Y")
+        cursor.execute('''
+            INSERT INTO berita (judul, excerpt, kategori, badge_class, kategori_icon, tanggal, views, gambar_url, gambar_alt, unggulan)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (judul, excerpt, kategori, badge_class, kategori_icon, tanggal, "0", gambar_url, gambar_alt, unggulan))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding berita: {str(e)}")
+        return False
 
 def update_berita(berita_id, judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, unggulan):
     """Update berita"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        UPDATE berita SET judul = ?, excerpt = ?, kategori = ?, badge_class = ?, kategori_icon = ?, gambar_url = ?, gambar_alt = ?, unggulan = ?
-        WHERE id = ?
-    ''', (judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, unggulan, berita_id))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE berita SET judul = ?, excerpt = ?, kategori = ?, badge_class = ?, kategori_icon = ?, gambar_url = ?, gambar_alt = ?, unggulan = ?
+            WHERE id = ?
+        ''', (judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, unggulan, berita_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating berita {berita_id}: {str(e)}")
+        return False
 
 def delete_berita(berita_id):
     """Hapus berita"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM berita WHERE id = ?', (berita_id,))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM berita WHERE id = ?', (berita_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting berita {berita_id}: {str(e)}")
+        return False
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -434,116 +550,155 @@ def delete_berita(berita_id):
 
 def get_all_jenis_surat():
     """Ambil semua jenis surat aktif"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM jenis_surat WHERE active = 1 ORDER BY nama')
-    surats = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return surats
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM jenis_surat WHERE active = 1 ORDER BY nama')
+        surats = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return surats
+    except Exception as e:
+        logger.error(f"Error getting all jenis surat: {str(e)}")
+        return []
 
 def get_jenis_surat_by_id(jenis_id):
     """Ambil jenis surat berdasarkan ID"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM jenis_surat WHERE id = ?', (jenis_id,))
-    surat = cursor.fetchone()
-    conn.close()
-    return dict(surat) if surat else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM jenis_surat WHERE id = ?', (jenis_id,))
+        surat = cursor.fetchone()
+        conn.close()
+        return dict(surat) if surat else None
+    except Exception as e:
+        logger.error(f"Error getting jenis surat {jenis_id}: {str(e)}")
+        return None
 
 def create_permohonan_surat(user_id, jenis_surat_id, data_json):
     """Buat permohonan surat baru"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO permohonan_surat (user_id, jenis_surat_id, data_json, status, created_at)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (user_id, jenis_surat_id, data_json, 'pending', datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO permohonan_surat (user_id, jenis_surat_id, data_json, status, created_at)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (user_id, jenis_surat_id, data_json, 'pending', datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error creating permohonan surat: {str(e)}")
+        return False
 
 def get_permohonan_surat_by_user(user_id):
     """Ambil permohonan surat berdasarkan user"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode
-        FROM permohonan_surat ps
-        JOIN jenis_surat js ON ps.jenis_surat_id = js.id
-        WHERE ps.user_id = ?
-        ORDER BY ps.created_at DESC
-    ''', (user_id,))
-    permits = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return permits
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode
+            FROM permohonan_surat ps
+            JOIN jenis_surat js ON ps.jenis_surat_id = js.id
+            WHERE ps.user_id = ?
+            ORDER BY ps.created_at DESC
+        ''', (user_id,))
+        permits = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return permits
+    except Exception as e:
+        logger.error(f"Error getting permohonan by user {user_id}: {str(e)}")
+        return []
 
 def get_all_permohonan_surat():
     """Ambil semua permohonan surat"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode, u.nama_lengkap, u.nik, u.alamat
-        FROM permohonan_surat ps
-        JOIN jenis_surat js ON ps.jenis_surat_id = js.id
-        JOIN users u ON ps.user_id = u.id
-        ORDER BY ps.created_at DESC
-    ''')
-    permits = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return permits
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode, u.nama_lengkap, u.nik, u.alamat
+            FROM permohonan_surat ps
+            JOIN jenis_surat js ON ps.jenis_surat_id = js.id
+            JOIN users u ON ps.user_id = u.id
+            ORDER BY ps.created_at DESC
+        ''')
+        permits = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return permits
+    except Exception as e:
+        logger.error(f"Error getting all permohonan surat: {str(e)}")
+        return []
 
 def get_pending_permohonan_surat():
     """Ambil permohonan surat pending"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode, u.nama_lengkap, u.nik
-        FROM permohonan_surat ps
-        JOIN jenis_surat js ON ps.jenis_surat_id = js.id
-        JOIN users u ON ps.user_id = u.id
-        WHERE ps.status = ?
-        ORDER BY ps.created_at DESC
-    ''', ('pending',))
-    permits = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return permits
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode, u.nama_lengkap, u.nik
+            FROM permohonan_surat ps
+            JOIN jenis_surat js ON ps.jenis_surat_id = js.id
+            JOIN users u ON ps.user_id = u.id
+            WHERE ps.status = ?
+            ORDER BY ps.created_at DESC
+        ''', ('pending',))
+        permits = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return permits
+    except Exception as e:
+        logger.error(f"Error getting pending permohonan: {str(e)}")
+        return []
 
 def get_permohonan_detail(permit_id):
     """Ambil detail permohonan surat"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode, js.required_docs,
-               u.nama_lengkap, u.nik, u.alamat, u.no_telepon, u.email
-        FROM permohonan_surat ps
-        JOIN jenis_surat js ON ps.jenis_surat_id = js.id
-        JOIN users u ON ps.user_id = u.id
-        WHERE ps.id = ?
-    ''', (permit_id,))
-    permit = cursor.fetchone()
-    conn.close()
-    return dict(permit) if permit else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode, js.required_docs,
+                   u.nama_lengkap, u.nik, u.alamat, u.no_telepon, u.email
+            FROM permohonan_surat ps
+            JOIN jenis_surat js ON ps.jenis_surat_id = js.id
+            JOIN users u ON ps.user_id = u.id
+            WHERE ps.id = ?
+        ''', (permit_id,))
+        permit = cursor.fetchone()
+        conn.close()
+        return dict(permit) if permit else None
+    except Exception as e:
+        logger.error(f"Error getting permohonan detail {permit_id}: {str(e)}")
+        return None
 
 def approve_permohonan_surat(permit_id, approved_by, nomor_surat, catatan=''):
     """Setujui permohonan surat"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        UPDATE permohonan_surat
-        SET status = ?, approved_by = ?, approved_at = ?, nomor_surat = ?, catatan = ?
-        WHERE id = ?
-    ''', ('approved', approved_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), nomor_surat, catatan, permit_id))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE permohonan_surat
+            SET status = ?, approved_by = ?, approved_at = ?, nomor_surat = ?, catatan = ?
+            WHERE id = ?
+        ''', ('approved', approved_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), nomor_surat, catatan, permit_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error approving permohonan {permit_id}: {str(e)}")
+        return False
 
 def reject_permohonan_surat(permit_id, processed_by, catatan=''):
     """Tolak permohonan surat"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        UPDATE permohonan_surat SET status = ?, catatan = ? WHERE id = ?
-    ''', ('rejected', catatan, permit_id))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE permohonan_surat SET status = ?, catatan = ? WHERE id = ?
+        ''', ('rejected', catatan, permit_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error rejecting permohonan {permit_id}: {str(e)}")
+        return False
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -552,62 +707,90 @@ def reject_permohonan_surat(permit_id, processed_by, catatan=''):
 
 def get_all_galeri(aktif=None):
     """Ambil semua foto galeri"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    if aktif is not None:
-        cursor.execute('SELECT * FROM galeri WHERE aktif = ? ORDER BY created_at DESC', (aktif,))
-    else:
-        cursor.execute('SELECT * FROM galeri ORDER BY created_at DESC')
-    galeri = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return galeri
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if aktif is not None:
+            cursor.execute('SELECT * FROM galeri WHERE aktif = ? ORDER BY created_at DESC', (aktif,))
+        else:
+            cursor.execute('SELECT * FROM galeri ORDER BY created_at DESC')
+        galeri = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return galeri
+    except Exception as e:
+        logger.error(f"Error getting all galeri: {str(e)}")
+        return []
 
 def get_galeri_by_id(galeri_id):
     """Ambil satu foto galeri"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM galeri WHERE id = ?', (galeri_id,))
-    galeri = cursor.fetchone()
-    conn.close()
-    return dict(galeri) if galeri else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM galeri WHERE id = ?', (galeri_id,))
+        galeri = cursor.fetchone()
+        conn.close()
+        return dict(galeri) if galeri else None
+    except Exception as e:
+        logger.error(f"Error getting galeri {galeri_id}: {str(e)}")
+        return None
 
 def add_galeri(judul, gambar_url, deskripsi='', kategori='galeri', gambar_alt=''):
     """Tambah foto galeri"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO galeri (judul, deskripsi, kategori, gambar_url, gambar_alt)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (judul, deskripsi, kategori, gambar_url, gambar_alt))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO galeri (judul, deskripsi, kategori, gambar_url, gambar_alt)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (judul, deskripsi, kategori, gambar_url, gambar_alt))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding galeri: {str(e)}")
+        return False
 
 def update_galeri(galeri_id, judul, gambar_url, deskripsi, kategori, gambar_alt):
     """Update foto galeri"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        UPDATE galeri SET judul = ?, deskripsi = ?, kategori = ?, gambar_url = ?, gambar_alt = ?
-        WHERE id = ?
-    ''', (judul, deskripsi, kategori, gambar_url, gambar_alt, galeri_id))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE galeri SET judul = ?, deskripsi = ?, kategori = ?, gambar_url = ?, gambar_alt = ?
+            WHERE id = ?
+        ''', (judul, deskripsi, kategori, gambar_url, gambar_alt, galeri_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating galeri {galeri_id}: {str(e)}")
+        return False
 
 def delete_galeri(galeri_id):
     """Hapus foto galeri"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM galeri WHERE id = ?', (galeri_id,))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM galeri WHERE id = ?', (galeri_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting galeri {galeri_id}: {str(e)}")
+        return False
 
 def toggle_galeri_aktif(galeri_id):
     """Toggle status aktif/nonaktif galeri"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('UPDATE galeri SET aktif = CASE WHEN aktif = 1 THEN 0 ELSE 1 END WHERE id = ?', (galeri_id,))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE galeri SET aktif = CASE WHEN aktif = 1 THEN 0 ELSE 1 END WHERE id = ?', (galeri_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling galeri {galeri_id}: {str(e)}")
+        return False
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -616,82 +799,118 @@ def toggle_galeri_aktif(galeri_id):
 
 def get_all_pages():
     """Ambil semua page aktif"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM pages WHERE active = 1 ORDER BY order_num ASC, title ASC')
-    pages = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return pages
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM pages WHERE active = 1 ORDER BY order_num ASC, title ASC')
+        pages = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return pages
+    except Exception as e:
+        logger.error(f"Error getting all pages: {str(e)}")
+        return []
 
 def get_page_by_slug(slug):
     """Ambil page berdasarkan slug"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM pages WHERE slug = ? AND active = 1', (slug,))
-    page = cursor.fetchone()
-    conn.close()
-    return dict(page) if page else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM pages WHERE slug = ? AND active = 1', (slug,))
+        page = cursor.fetchone()
+        conn.close()
+        return dict(page) if page else None
+    except Exception as e:
+        logger.error(f"Error getting page by slug '{slug}': {str(e)}")
+        return None
 
 def get_page_by_id(page_id):
     """Ambil page berdasarkan ID"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM pages WHERE id = ?', (page_id,))
-    page = cursor.fetchone()
-    conn.close()
-    return dict(page) if page else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM pages WHERE id = ?', (page_id,))
+        page = cursor.fetchone()
+        conn.close()
+        return dict(page) if page else None
+    except Exception as e:
+        logger.error(f"Error getting page by id {page_id}: {str(e)}")
+        return None
 
 def get_all_pages_admin():
     """Ambil semua page (termasuk nonaktif) untuk admin"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM pages ORDER BY order_num ASC, title ASC')
-    pages = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return pages
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM pages ORDER BY order_num ASC, title ASC')
+        pages = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return pages
+    except Exception as e:
+        logger.error(f"Error getting all pages admin: {str(e)}")
+        return []
 
 def add_page(title, slug, content, icon='📄'):
     """Tambah page baru"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # Get max order
-    cursor.execute('SELECT MAX(order_num) as max_order FROM pages')
-    row = cursor.fetchone()
-    max_order = (row['max_order'] or 0) + 1
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Get max order
+        cursor.execute('SELECT MAX(order_num) as max_order FROM pages')
+        row = cursor.fetchone()
+        max_order = (row['max_order'] or 0) + 1
 
-    cursor.execute('''
-        INSERT INTO pages (title, slug, content, icon, order_num, active)
-        VALUES (?, ?, ?, ?, ?, 1)
-    ''', (title, slug, content, icon, max_order))
-    conn.commit()
-    conn.close()
+        cursor.execute('''
+            INSERT INTO pages (title, slug, content, icon, order_num, active)
+            VALUES (?, ?, ?, ?, ?, 1)
+        ''', (title, slug, content, icon, max_order))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding page: {str(e)}")
+        return False
 
 def update_page(page_id, title, slug, content, icon, order_num, active):
     """Update page"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        UPDATE pages SET title = ?, slug = ?, content = ?, icon = ?, order_num = ?, active = ?
-        WHERE id = ?
-    ''', (title, slug, content, icon, order_num, active, page_id))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE pages SET title = ?, slug = ?, content = ?, icon = ?, order_num = ?, active = ?
+            WHERE id = ?
+        ''', (title, slug, content, icon, order_num, active, page_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating page {page_id}: {str(e)}")
+        return False
 
 def delete_page(page_id):
     """Hapus page"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM pages WHERE id = ?', (page_id,))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM pages WHERE id = ?', (page_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting page {page_id}: {str(e)}")
+        return False
 
 def toggle_page_active(page_id):
     """Toggle status aktif page"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('UPDATE pages SET active = CASE WHEN active = 1 THEN 0 ELSE 1 END WHERE id = ?', (page_id,))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE pages SET active = CASE WHEN active = 1 THEN 0 ELSE 1 END WHERE id = ?', (page_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling page {page_id}: {str(e)}")
+        return False
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -700,18 +919,22 @@ def toggle_page_active(page_id):
 
 def get_komentar_by_berita(berita_id):
     """Ambil semua komentar untuk sebuah berita (flat list)"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT k.*, u.nama_lengkap, u.role
-        FROM komentar k
-        LEFT JOIN users u ON k.user_id = u.id
-        WHERE k.berita_id = ?
-        ORDER BY k.created_at ASC
-    ''', (berita_id,))
-    rows = cursor.fetchall()
-    conn.close()
-    return [dict(row) for row in rows]
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT k.*, u.nama_lengkap, u.role
+            FROM komentar k
+            LEFT JOIN users u ON k.user_id = u.id
+            WHERE k.berita_id = ?
+            ORDER BY k.created_at ASC
+        ''', (berita_id,))
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in rows]
+    except Exception as e:
+        logger.error(f"Error getting komentar for berita {berita_id}: {str(e)}")
+        return []
 
 def build_comment_tree(flat_comments):
     """Konversi flat list komentar -> nested tree untuk rendering Reddit-style"""
@@ -731,42 +954,60 @@ def build_comment_tree(flat_comments):
 
 def create_komentar(berita_id, konten, nama_pengirim, parent_id=None, user_id=None):
     """Buat komentar baru"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO komentar (berita_id, parent_id, user_id, nama_pengirim, konten)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (berita_id, parent_id, user_id, nama_pengirim, konten))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO komentar (berita_id, parent_id, user_id, nama_pengirim, konten)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (berita_id, parent_id, user_id, nama_pengirim, konten))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error creating komentar: {str(e)}")
+        return False
 
 def delete_komentar(komentar_id):
     """Hapus komentar beserta semua child-nya (recursive delete via FK cascade)"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # FK cascade ON DELETE CASCADE akan handle child comment otomatis,
-    # tapi kita hapus manual untuk memastikan bersih
-    cursor.execute('DELETE FROM komentar WHERE id = ?', (komentar_id,))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # FK cascade ON DELETE CASCADE akan handle child comment otomatis,
+        # tapi kita hapus manual untuk memastikan bersih
+        cursor.execute('DELETE FROM komentar WHERE id = ?', (komentar_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting komentar {komentar_id}: {str(e)}")
+        return False
 
 def get_komentar_by_id(komentar_id):
     """Ambil satu komentar berdasarkan ID"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM komentar WHERE id = ?', (komentar_id,))
-    row = cursor.fetchone()
-    conn.close()
-    return dict(row) if row else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM komentar WHERE id = ?', (komentar_id,))
+        row = cursor.fetchone()
+        conn.close()
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error(f"Error getting komentar {komentar_id}: {str(e)}")
+        return None
 
 def count_komentar_by_berita(berita_id):
     """Hitung jumlah komentar untuk sebuah berita"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT COUNT(*) as cnt FROM komentar WHERE berita_id = ?', (berita_id,))
-    row = cursor.fetchone()
-    conn.close()
-    return row['cnt'] if row else 0
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) as cnt FROM komentar WHERE berita_id = ?', (berita_id,))
+        row = cursor.fetchone()
+        conn.close()
+        return row['cnt'] if row else 0
+    except Exception as e:
+        logger.error(f"Error counting komentar for berita {berita_id}: {str(e)}")
+        return 0
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -775,65 +1016,92 @@ def count_komentar_by_berita(berita_id):
 
 def get_all_struktur():
     """Ambil semua struktur organisasi"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM struktur_organisasi ORDER BY kategori, no_urut ASC')
-    items = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return items
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM struktur_organisasi ORDER BY kategori, no_urut ASC')
+        items = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return items
+    except Exception as e:
+        logger.error(f"Error getting all struktur: {str(e)}")
+        return []
 
 def get_struktur_by_kategori(kategori):
     """Ambil struktur berdasarkan kategori"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM struktur_organisasi WHERE kategori = ? ORDER BY no_urut ASC', (kategori,))
-    items = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return items
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM struktur_organisasi WHERE kategori = ? ORDER BY no_urut ASC', (kategori,))
+        items = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return items
+    except Exception as e:
+        logger.error(f"Error getting struktur by kategori '{kategori}': {str(e)}")
+        return []
 
 def get_struktur_by_id(struktur_id):
     """Ambil satu struktur berdasarkan ID"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM struktur_organisasi WHERE id = ?', (struktur_id,))
-    item = cursor.fetchone()
-    conn.close()
-    return dict(item) if item else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM struktur_organisasi WHERE id = ?', (struktur_id,))
+        item = cursor.fetchone()
+        conn.close()
+        return dict(item) if item else None
+    except Exception as e:
+        logger.error(f"Error getting struktur by id {struktur_id}: {str(e)}")
+        return None
 
 def add_struktur(kategori, nama, jabatan='', status='', icon=''):
     """Tambah struktur organisasi"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # Get max order in kategori
-    cursor.execute('SELECT MAX(no_urut) as max_order FROM struktur_organisasi WHERE kategori = ?', (kategori,))
-    row = cursor.fetchone()
-    max_order = (row['max_order'] or 0) + 1
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Get max order in kategori
+        cursor.execute('SELECT MAX(no_urut) as max_order FROM struktur_organisasi WHERE kategori = ?', (kategori,))
+        row = cursor.fetchone()
+        max_order = (row['max_order'] or 0) + 1
 
-    cursor.execute('''
-        INSERT INTO struktur_organisasi (kategori, nama, jabatan, status, icon, no_urut)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (kategori, nama, jabatan, status, icon, max_order))
-    conn.commit()
-    conn.close()
+        cursor.execute('''
+            INSERT INTO struktur_organisasi (kategori, nama, jabatan, status, icon, no_urut)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (kategori, nama, jabatan, status, icon, max_order))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding struktur: {str(e)}")
+        return False
 
 def update_struktur(struktur_id, kategori, nama, jabatan, status, icon, no_urut):
     """Update struktur organisasi"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        UPDATE struktur_organisasi SET kategori = ?, nama = ?, jabatan = ?, status = ?, icon = ?, no_urut = ?
-        WHERE id = ?
-    ''', (kategori, nama, jabatan, status, icon, no_urut, struktur_id))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE struktur_organisasi SET kategori = ?, nama = ?, jabatan = ?, status = ?, icon = ?, no_urut = ?
+            WHERE id = ?
+        ''', (kategori, nama, jabatan, status, icon, no_urut, struktur_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating struktur {struktur_id}: {str(e)}")
+        return False
 
 def delete_struktur(struktur_id):
     """Hapus struktur organisasi"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM struktur_organisasi WHERE id = ?', (struktur_id,))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM struktur_organisasi WHERE id = ?', (struktur_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting struktur {struktur_id}: {str(e)}")
+        return False
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -842,62 +1110,90 @@ def delete_struktur(struktur_id):
 
 def get_all_pengumuman(aktif=None):
     """Ambil semua pengumuman"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    if aktif is not None:
-        cursor.execute('SELECT * FROM pengumuman WHERE aktif = ? ORDER BY created_at DESC', (aktif,))
-    else:
-        cursor.execute('SELECT * FROM pengumuman ORDER BY created_at DESC')
-    items = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return items
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if aktif is not None:
+            cursor.execute('SELECT * FROM pengumuman WHERE aktif = ? ORDER BY created_at DESC', (aktif,))
+        else:
+            cursor.execute('SELECT * FROM pengumuman ORDER BY created_at DESC')
+        items = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return items
+    except Exception as e:
+        logger.error(f"Error getting all pengumuman: {str(e)}")
+        return []
 
 def get_pengumuman_by_id(pengumuman_id):
     """Ambil satu pengumuman berdasarkan ID"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM pengumuman WHERE id = ?', (pengumuman_id,))
-    item = cursor.fetchone()
-    conn.close()
-    return dict(item) if item else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM pengumuman WHERE id = ?', (pengumuman_id,))
+        item = cursor.fetchone()
+        conn.close()
+        return dict(item) if item else None
+    except Exception as e:
+        logger.error(f"Error getting pengumuman {pengumuman_id}: {str(e)}")
+        return None
 
 def add_pengumuman(judul, isi, kategori='umum', is_penting=0, lampiran='', author='Pemerintahan Desa'):
     """Tambah pengumuman baru"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO pengumuman (judul, isi, kategori, is_penting, lampiran, author)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (judul, isi, kategori, is_penting, lampiran, author))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO pengumuman (judul, isi, kategori, is_penting, lampiran, author)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (judul, isi, kategori, is_penting, lampiran, author))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding pengumuman: {str(e)}")
+        return False
 
 def update_pengumuman(pengumuman_id, judul, isi, kategori, is_penting, lampiran, author):
     """Update pengumuman"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        UPDATE pengumuman SET judul = ?, isi = ?, kategori = ?, is_penting = ?, lampiran = ?, author = ?
-        WHERE id = ?
-    ''', (judul, isi, kategori, is_penting, lampiran, author, pengumuman_id))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE pengumuman SET judul = ?, isi = ?, kategori = ?, is_penting = ?, lampiran = ?, author = ?
+            WHERE id = ?
+        ''', (judul, isi, kategori, is_penting, lampiran, author, pengumuman_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating pengumuman {pengumuman_id}: {str(e)}")
+        return False
 
 def delete_pengumuman(pengumuman_id):
     """Hapus pengumuman"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM pengumuman WHERE id = ?', (pengumuman_id,))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM pengumuman WHERE id = ?', (pengumuman_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting pengumuman {pengumuman_id}: {str(e)}")
+        return False
 
 def toggle_pengumuman_aktif(pengumuman_id):
     """Toggle status aktif pengumuman"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('UPDATE pengumuman SET aktif = CASE WHEN aktif = 1 THEN 0 ELSE 1 END WHERE id = ?', (pengumuman_id,))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE pengumuman SET aktif = CASE WHEN aktif = 1 THEN 0 ELSE 1 END WHERE id = ?', (pengumuman_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling pengumuman {pengumuman_id}: {str(e)}")
+        return False
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -906,77 +1202,113 @@ def toggle_pengumuman_aktif(pengumuman_id):
 
 def get_apbdes_by_tahun(tahun):
     """Ambil semua data APBDes untuk tahun tertentu"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM apbdes WHERE tahun = ? ORDER BY jenis, id ASC', (tahun,))
-    items = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return items
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM apbdes WHERE tahun = ? ORDER BY jenis, id ASC', (tahun,))
+        items = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return items
+    except Exception as e:
+        logger.error(f"Error getting APBDes for tahun {tahun}: {str(e)}")
+        return []
 
 def get_apbdes_summary(tahun):
     """Ambil summary APBDes untuk tahun tertentu"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM apbdes_summary WHERE tahun = ?', (tahun,))
-    item = cursor.fetchone()
-    conn.close()
-    return dict(item) if item else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM apbdes_summary WHERE tahun = ?', (tahun,))
+        item = cursor.fetchone()
+        conn.close()
+        return dict(item) if item else None
+    except Exception as e:
+        logger.error(f"Error getting APBDes summary for tahun {tahun}: {str(e)}")
+        return None
 
 def get_apbdes_by_id(apbdes_id):
     """Ambil satu item APBDes berdasarkan ID"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM apbdes WHERE id = ?', (apbdes_id,))
-    item = cursor.fetchone()
-    conn.close()
-    return dict(item) if item else None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM apbdes WHERE id = ?', (apbdes_id,))
+        item = cursor.fetchone()
+        conn.close()
+        return dict(item) if item else None
+    except Exception as e:
+        logger.error(f"Error getting APBDes item {apbdes_id}: {str(e)}")
+        return None
 
 def add_apbdes_item(tahun, jenis, nama, jumlah, icon='', deskripsi=''):
     """Tambah item APBDes"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO apbdes (tahun, jenis, nama, jumlah, icon, deskripsi)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (tahun, jenis, nama, jumlah, icon, deskripsi))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO apbdes (tahun, jenis, nama, jumlah, icon, deskripsi)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (tahun, jenis, nama, jumlah, icon, deskripsi))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding APBDes item: {str(e)}")
+        return False
 
 def update_apbdes_item(apbdes_id, tahun, jenis, nama, jumlah, icon, deskripsi):
     """Update item APBDes"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        UPDATE apbdes SET tahun = ?, jenis = ?, nama = ?, jumlah = ?, icon = ?, deskripsi = ?
-        WHERE id = ?
-    ''', (tahun, jenis, nama, jumlah, icon, deskripsi, apbdes_id))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE apbdes SET tahun = ?, jenis = ?, nama = ?, jumlah = ?, icon = ?, deskripsi = ?
+            WHERE id = ?
+        ''', (tahun, jenis, nama, jumlah, icon, deskripsi, apbdes_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating APBDes item {apbdes_id}: {str(e)}")
+        return False
 
 def delete_apbdes_item(apbdes_id):
     """Hapus item APBDes"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM apbdes WHERE id = ?', (apbdes_id,))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM apbdes WHERE id = ?', (apbdes_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting APBDes item {apbdes_id}: {str(e)}")
+        return False
 
 def save_apbdes_summary(tahun, total_pendapatan, total_belanja, pembiayaan_net):
     """Simpan/update summary APBDes"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT OR REPLACE INTO apbdes_summary (tahun, total_pendapatan, total_belanja, pembiayaan_net)
-        VALUES (?, ?, ?, ?)
-    ''', (tahun, total_pendapatan, total_belanja, pembiayaan_net))
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT OR REPLACE INTO apbdes_summary (tahun, total_pendapatan, total_belanja, pembiayaan_net)
+            VALUES (?, ?, ?, ?)
+        ''', (tahun, total_pendapatan, total_belanja, pembiayaan_net))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error saving APBDes summary: {str(e)}")
+        return False
 
 def get_available_tahun():
     """Ambil daftar tahun yang ada di APBDes"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT DISTINCT tahun FROM apbdes ORDER BY tahun DESC')
-    rows = cursor.fetchall()
-    conn.close()
-    return [row['tahun'] for row in rows]
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT DISTINCT tahun FROM apbdes ORDER BY tahun DESC')
+        rows = cursor.fetchall()
+        conn.close()
+        return [row['tahun'] for row in rows]
+    except Exception as e:
+        logger.error(f"Error getting available tahun: {str(e)}")
+        return []

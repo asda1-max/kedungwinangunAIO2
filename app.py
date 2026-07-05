@@ -8,6 +8,7 @@ Struktur Project:
     app.py           - Entry point utama
     config.py        - Konfigurasi dan konstanta
     models.py        - Database models dan helpers
+    errors.py        - Error handling modules
     routes/          - Route handlers
         __init__.py
         public.py    - Route publik (beranda, berita)
@@ -69,12 +70,182 @@ app.register_blueprint(dinas_bp)      # Dinas routes: /dinas/*
 
 @app.errorhandler(404)
 def not_found(e):
-    return {"error": "Halaman tidak ditemukan"}, 404
+    """Handle 404 - Page not found"""
+    if request.is_json:
+        return jsonify({
+            "success": False,
+            "error": "Halaman tidak ditemukan",
+            "status_code": 404
+        }), 404
+
+    # Try to render with error template
+    try:
+        return render_template(
+            "error.html",
+            error_code=404,
+            title="404 - Halaman Tidak Ditemukan",
+            message="Maaf, halaman yang Anda cari tidak ditemukan.",
+            subtitle="Halaman mungkin telah dipindahkan atau dihapus.",
+            back_url="/",
+            back_text="Kembali ke Beranda",
+        ), 404
+    except:
+        return {"error": "Halaman tidak ditemukan"}, 404
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    """Handle 403 - Forbidden access"""
+    if request.is_json:
+        return jsonify({
+            "success": False,
+            "error": "Akses ditolak",
+            "status_code": 403
+        }), 403
+
+    try:
+        return render_template(
+            "error.html",
+            error_code=403,
+            title="403 - Akses Ditolak",
+            message="Anda tidak memiliki akses ke halaman ini.",
+            subtitle="Silakan login terlebih dahulu atau hubungi administrator.",
+            back_url="/",
+            back_text="Kembali ke Beranda",
+        ), 403
+    except:
+        return {"error": "Akses ditolak"}, 403
+
+
+@app.errorhandler(401)
+def unauthorized(e):
+    """Handle 401 - Unauthorized"""
+    if request.is_json:
+        return jsonify({
+            "success": False,
+            "error": "Silakan login terlebih dahulu",
+            "status_code": 401
+        }), 401
+
+    try:
+        return render_template(
+            "error.html",
+            error_code=401,
+            title="401 - Unauthorized",
+            message="Anda harus login untuk mengakses halaman ini.",
+            subtitle="Silakan login terlebih dahulu.",
+            back_url="/login",
+            back_text="Login",
+        ), 401
+    except:
+        return {"error": "Silakan login terlebih dahulu"}, 401
 
 
 @app.errorhandler(500)
 def server_error(e):
-    return {"error": "Terjadi kesalahan server"}, 500
+    """Handle 500 - Internal Server Error"""
+    import logging
+    logging.error(f"Server Error: {str(e)}")
+
+    if request.is_json:
+        return jsonify({
+            "success": False,
+            "error": "Terjadi kesalahan server",
+            "status_code": 500
+        }), 500
+
+    try:
+        return render_template(
+            "error.html",
+            error_code=500,
+            title="500 - Kesalahan Server",
+            message="Maaf, terjadi kesalahan pada server.",
+            subtitle="Silakan coba lagi beberapa saat lagi atau hubungi administrator.",
+            back_url="/",
+            back_text="Kembali ke Beranda",
+        ), 500
+    except:
+        return {"error": "Terjadi kesalahan server"}, 500
+
+
+@app.errorhandler(400)
+def bad_request(e):
+    """Handle 400 - Bad Request"""
+    if request.is_json:
+        return jsonify({
+            "success": False,
+            "error": "Permintaan tidak valid",
+            "status_code": 400
+        }), 400
+
+    try:
+        return render_template(
+            "error.html",
+            error_code=400,
+            title="400 - Permintaan Tidak Valid",
+            message="Maaf, permintaan Anda tidak dapat diproses.",
+            subtitle="Silakan periksa data yang Anda masukkan.",
+            back_url="/",
+            back_text="Kembali ke Beranda",
+        ), 400
+    except:
+        return {"error": "Permintaan tidak valid"}, 400
+
+
+@app.errorhandler(503)
+def service_unavailable(e):
+    """Handle 503 - Service Unavailable"""
+    if request.is_json:
+        return jsonify({
+            "success": False,
+            "error": "Layanan tidak tersedia",
+            "status_code": 503
+        }), 503
+
+    try:
+        return render_template(
+            "error.html",
+            error_code=503,
+            title="503 - Layanan Tidak Tersedia",
+            message="Maaf, layanan sedang tidak tersedia.",
+            subtitle="Silakan coba lagi beberapa saat lagi.",
+            back_url="/",
+            back_text="Kembali ke Beranda",
+        ), 503
+    except:
+        return {"error": "Layanan tidak tersedia"}, 503
+
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Handle all unhandled exceptions"""
+    import logging
+    import traceback
+
+    # Log the error
+    logging.error(f"Unhandled Exception: {str(e)}")
+    logging.error(traceback.format_exc())
+
+    # Return appropriate response based on request type
+    if request.is_json:
+        return jsonify({
+            "success": False,
+            "error": "Terjadi kesalahan tidak terduga",
+            "status_code": 500
+        }), 500
+
+    try:
+        return render_template(
+            "error.html",
+            error_code=500,
+            title="Terjadi Kesalahan",
+            message="Maaf, terjadi kesalahan yang tidak terduga.",
+            subtitle="Silakan hubungi administrator jika masalah berlanjut.",
+            back_url="/",
+            back_text="Kembali ke Beranda",
+        ), 500
+    except:
+        return {"error": "Terjadi kesalahan tidak terduga"}, 500
 
 
 # ── API Routes ────────────────────────────────────────────────────────
