@@ -203,15 +203,29 @@ def init_database():
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
             );
 
-            -- Struktur Organisasi
+            -- Struktur Organisasi (Enhanced)
             CREATE TABLE IF NOT EXISTS struktur_organisasi (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 kategori TEXT NOT NULL,
                 nama TEXT NOT NULL,
                 jabatan TEXT,
-                status TEXT,
+                deskripsi TEXT,
+                nik TEXT,
+                alamat TEXT,
+                dusun TEXT,
+                rt TEXT,
+                rw TEXT,
+                telepon TEXT,
+                email TEXT,
+                foto_url TEXT,
+                sk_url TEXT,
+                no_sk TEXT,
+                tanggal_sk TEXT,
+                masa_jabatan TEXT,
+                status TEXT DEFAULT 'Aktif',
                 icon TEXT,
                 no_urut INTEGER DEFAULT 0,
+                aktif INTEGER DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -1142,12 +1156,15 @@ def count_komentar_by_berita(berita_id):
 # ── STRUKTUR ORGANISASI HELPERS ───────────────────────────────────────
 # ════════════════════════════════════════════════════════════════════════
 
-def get_all_struktur():
+def get_all_struktur(aktif=None):
     """Ambil semua struktur organisasi"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM struktur_organisasi ORDER BY kategori, no_urut ASC')
+        if aktif is not None:
+            cursor.execute('SELECT * FROM struktur_organisasi WHERE aktif = ? ORDER BY kategori, no_urut ASC', (aktif,))
+        else:
+            cursor.execute('SELECT * FROM struktur_organisasi ORDER BY kategori, no_urut ASC')
         items = [dict(row) for row in cursor.fetchall()]
         conn.close()
         return items
@@ -1155,12 +1172,15 @@ def get_all_struktur():
         logger.error(f"Error getting all struktur: {str(e)}")
         return []
 
-def get_struktur_by_kategori(kategori):
+def get_struktur_by_kategori(kategori, aktif=None):
     """Ambil struktur berdasarkan kategori"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM struktur_organisasi WHERE kategori = ? ORDER BY no_urut ASC', (kategori,))
+        if aktif is not None:
+            cursor.execute('SELECT * FROM struktur_organisasi WHERE kategori = ? AND aktif = ? ORDER BY no_urut ASC', (kategori, aktif))
+        else:
+            cursor.execute('SELECT * FROM struktur_organisasi WHERE kategori = ? ORDER BY no_urut ASC', (kategori,))
         items = [dict(row) for row in cursor.fetchall()]
         conn.close()
         return items
@@ -1181,20 +1201,22 @@ def get_struktur_by_id(struktur_id):
         logger.error(f"Error getting struktur by id {struktur_id}: {str(e)}")
         return None
 
-def add_struktur(kategori, nama, jabatan='', status='', icon=''):
-    """Tambah struktur organisasi"""
+def add_struktur(kategori, nama, jabatan='', deskripsi='', nik='', alamat='', dusun='', rt='', rw='',
+                 telepon='', email='', foto_url='', sk_url='', no_sk='', tanggal_sk='', masa_jabatan='', status='Aktif', icon='', aktif=1):
+    """Tambah struktur organisasi dengan detail lengkap"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Get max order in kategori
         cursor.execute('SELECT MAX(no_urut) as max_order FROM struktur_organisasi WHERE kategori = ?', (kategori,))
         row = cursor.fetchone()
         max_order = (row['max_order'] or 0) + 1
 
         cursor.execute('''
-            INSERT INTO struktur_organisasi (kategori, nama, jabatan, status, icon, no_urut)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (kategori, nama, jabatan, status, icon, max_order))
+            INSERT INTO struktur_organisasi (kategori, nama, jabatan, deskripsi, nik, alamat, dusun, rt, rw,
+                telepon, email, foto_url, sk_url, no_sk, tanggal_sk, masa_jabatan, status, icon, no_urut, aktif)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (kategori, nama, jabatan, deskripsi, nik, alamat, dusun, rt, rw,
+              telepon, email, foto_url, sk_url, no_sk, tanggal_sk, masa_jabatan, status, icon, max_order, aktif))
         conn.commit()
         conn.close()
         return True
@@ -1202,15 +1224,22 @@ def add_struktur(kategori, nama, jabatan='', status='', icon=''):
         logger.error(f"Error adding struktur: {str(e)}")
         return False
 
-def update_struktur(struktur_id, kategori, nama, jabatan, status, icon, no_urut):
-    """Update struktur organisasi"""
+def update_struktur(struktur_id, kategori, nama, jabatan='', deskripsi='', nik='', alamat='', dusun='', rt='', rw='',
+                   telepon='', email='', foto_url='', sk_url='', no_sk='', tanggal_sk='', masa_jabatan='',
+                   status='Aktif', icon='', aktif=1, no_urut=0):
+    """Update struktur organisasi dengan detail lengkap"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            UPDATE struktur_organisasi SET kategori = ?, nama = ?, jabatan = ?, status = ?, icon = ?, no_urut = ?
+            UPDATE struktur_organisasi SET kategori = ?, nama = ?, jabatan = ?, deskripsi = ?,
+                nik = ?, alamat = ?, dusun = ?, rt = ?, rw = ?, telepon = ?, email = ?,
+                foto_url = ?, sk_url = ?, no_sk = ?, tanggal_sk = ?, masa_jabatan = ?,
+                status = ?, icon = ?, aktif = ?, no_urut = ?, updated_at = ?
             WHERE id = ?
-        ''', (kategori, nama, jabatan, status, icon, no_urut, struktur_id))
+        ''', (kategori, nama, jabatan, deskripsi, nik, alamat, dusun, rt, rw,
+              telepon, email, foto_url, sk_url, no_sk, tanggal_sk, masa_jabatan,
+              status, icon, aktif, no_urut, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), struktur_id))
         conn.commit()
         conn.close()
         return True
@@ -1229,6 +1258,19 @@ def delete_struktur(struktur_id):
         return True
     except Exception as e:
         logger.error(f"Error deleting struktur {struktur_id}: {str(e)}")
+        return False
+
+def toggle_struktur_aktif(struktur_id):
+    """Toggle aktif status"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE struktur_organisasi SET aktif = NOT aktif WHERE id = ?', (struktur_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling struktur {struktur_id}: {str(e)}")
         return False
 
 

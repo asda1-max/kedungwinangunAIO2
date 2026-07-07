@@ -441,14 +441,24 @@ def struktur():
         from models import get_all_pages, get_all_struktur
         desa_info = get_desa_info_with_maps()
         custom_pages = get_all_pages()
-        struktur_list = get_all_struktur()
+        struktur_list = get_all_struktur(aktif=1)
 
-        # Group by kategori
-        grouped = {'pemerintah': [], 'bpd': [], 'rtrw': [], 'kader': []}
+        # Group by kategori (new categories)
+        grouped = {'perangkat': [], 'bpd': [], 'pkk': [], 'karang_taruna': [], 'rt': [], 'rw': []}
         for item in struktur_list:
             kat = item.get('kategori', '')
             if kat in grouped:
                 grouped[kat].append(item)
+
+        # Kategori labels
+        kategori_labels = {
+            'perangkat': 'Perangkat Desa',
+            'bpd': 'BPD',
+            'pkk': 'PKK',
+            'karang_taruna': 'Karang Taruna',
+            'rt': 'RT',
+            'rw': 'RW',
+        }
 
         return render_template(
             "struktur.html",
@@ -461,11 +471,50 @@ def struktur():
             site_description=desa_info['deskripsi'],
             custom_pages=custom_pages,
             grouped_struktur=grouped,
+            kategori_labels=kategori_labels,
         )
     except Exception as e:
         logger.error(f"Error loading struktur page: {str(e)}")
         flash('Terjadi kesalahan saat memuat halaman struktur', 'error')
         return redirect(url_for('public.index'))
+
+
+@public_bp.route("/struktur/<int:struktur_id>")
+def struktur_detail(struktur_id):
+    """Detail personil struktur organisasi"""
+    from datetime import datetime
+    from models import get_struktur_by_id, get_all_struktur
+
+    try:
+        item = get_struktur_by_id(struktur_id)
+        if not item:
+            flash('Data tidak ditemukan', 'error')
+            return redirect(url_for('public.struktur'))
+
+        # Get related items in same kategori
+        related = get_all_struktur(aktif=1)
+        related = [r for r in related if r['kategori'] == item['kategori'] and r['id'] != struktur_id][:4]
+
+        desa_info = get_desa_info_with_maps()
+        custom_pages = get_all_pages()
+
+        return render_template(
+            "struktur_detail.html",
+            page={"title": item['nama']},
+            item=item,
+            related=related,
+            desa=desa_info,
+            nav_links=NAV_LINKS,
+            tahun=datetime.now().year,
+            site_name=desa_info['nama'],
+            site_tagline=desa_info['tagline'],
+            site_description=desa_info['deskripsi'],
+            custom_pages=custom_pages,
+        )
+    except Exception as e:
+        logger.error(f"Error loading struktur detail {struktur_id}: {str(e)}")
+        flash('Terjadi kesalahan saat memuat halaman', 'error')
+        return redirect(url_for('public.struktur'))
 
 
 # ════════════════════════════════════════════════════════════════════════

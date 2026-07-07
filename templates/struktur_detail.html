@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.nama }} - {{ item.jabatan }} - {{ site_name }}</title>
+    <meta name="description" content="Profil {{ item.nama }}, {{ item.jabatan }} di {{ site_name }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'desa-dark': '#155C1B', 'desa-mid': '#2A6726',
+                        'desa-light': '#73AA0F', 'desa-muted': '#5B8A4E',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    {% include 'partials/navbar.html' %}
+
+    <!-- Back Button & Hero -->
+    <section class="bg-gradient-to-br from-[#155C1B] to-[#228B22] text-white py-8 md:py-12">
+        <div class="max-w-4xl mx-auto px-4">
+            <a href="{{ url_for('public.struktur') }}" class="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Kembali ke Struktur
+            </a>
+
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
+                <div class="w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-gradient-to-br from-[#73AA0F] to-[#9ACD32] flex items-center justify-center text-white font-bold text-4xl md:text-5xl shadow-xl overflow-hidden flex-shrink-0">
+                    {% if item.foto_url %}
+                    <img src="{{ item.foto_url }}" alt="{{ item.nama }}" class="w-full h-full object-cover">
+                    {% else %}
+                    {{ item.nama[:2]|upper }}
+                    {% endif %}
+                </div>
+                <div>
+                    <span class="inline-block px-3 py-1 bg-white/10 rounded-full text-sm mb-2">{{ item.kategori|title|replace('_', ' ') }}</span>
+                    <h1 class="text-3xl md:text-4xl font-bold mb-2">{{ item.nama }}</h1>
+                    <p class="text-[#73AA0F] text-xl font-semibold">{{ item.jabatan or '-' }}</p>
+                    <p class="text-white/70 mt-1">{{ item.status or 'Aktif' }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detail Content -->
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Main Info -->
+                <div class="md:col-span-2 space-y-6">
+                    {% if item.deskripsi %}
+                    <div class="bg-white rounded-xl p-6 shadow-md">
+                        <h2 class="text-lg font-bold text-gray-800 mb-3">Tentang</h2>
+                        <p class="text-gray-600 leading-relaxed">{{ item.deskripsi }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if item.masa_jabatan or item.no_sk %}
+                    <div class="bg-white rounded-xl p-6 shadow-md">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4">Informasi Jabatan</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            {% if item.masa_jabatan %}
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Masa Jabatan</p>
+                                <p class="font-semibold text-gray-800">{{ item.masa_jabatan }}</p>
+                            </div>
+                            {% endif %}
+                            {% if item.no_sk %}
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">No. SK</p>
+                                <p class="font-semibold text-gray-800">{{ item.no_sk }}</p>
+                            </div>
+                            {% endif %}
+                            {% if item.tanggal_sk %}
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Tanggal SK</p>
+                                <p class="font-semibold text-gray-800">{{ item.tanggal_sk }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% if item.sk_url %}
+                        <a href="{{ item.sk_url }}" target="_blank" class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#155C1B] text-white rounded-lg text-sm font-medium hover:bg-[#228B22] transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Download SK
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sidebar Info -->
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6 shadow-md">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4">Data Diri</h2>
+                        <div class="space-y-4">
+                            {% if item.nik %}
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">NIK</p>
+                                <p class="font-medium text-gray-800">{{ item.nik }}</p>
+                            </div>
+                            {% endif %}
+                            {% if item.alamat %}
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Alamat</p>
+                                <p class="font-medium text-gray-800">{{ item.alamat }}</p>
+                            </div>
+                            {% endif %}
+                            {% if item.dusun %}
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Dusun/RT/RW</p>
+                                <p class="font-medium text-gray-800">
+                                    {{ item.dusun }}{% if item.rt %} RT {{ item.rt }}{% endif %}{% if item.rw %} RW {{ item.rw }}{% endif %}
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if item.telepon or item.email %}
+                    <div class="bg-white rounded-xl p-6 shadow-md">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4">Kontak</h2>
+                        <div class="space-y-3">
+                            {% if item.telepon %}
+                            <a href="tel:{{ item.telepon }}" class="flex items-center gap-3 text-gray-700 hover:text-[#155C1B]">
+                                <span class="w-10 h-10 rounded-lg bg-[#155C1B]/10 flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                    </svg>
+                                </span>
+                                {{ item.telepon }}
+                            </a>
+                            {% endif %}
+                            {% if item.email %}
+                            <a href="mailto:{{ item.email }}" class="flex items-center gap-3 text-gray-700 hover:text-[#155C1B]">
+                                <span class="w-10 h-10 rounded-lg bg-[#155C1B]/10 flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </span>
+                                {{ item.email }}
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Related -->
+            {% if related %}
+            <div class="mt-12">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Personil Lainnya</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {% for r in related %}
+                    <a href="{{ url_for('public.struktur_detail', struktur_id=r.id) }}" class="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden">
+                                {% if r.foto_url %}
+                                <img src="{{ r.foto_url }}" alt="{{ r.nama }}" class="w-full h-full object-cover">
+                                {% else %}
+                                {{ r.nama[:2]|upper }}
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="font-bold text-gray-800 truncate group-hover:text-[#155C1B]">{{ r.nama }}</h3>
+                                <p class="text-[#73AA0F] text-sm truncate">{{ r.jabatan or '-' }}</p>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% include 'partials/footer.html' %}
+</body>
+</html>

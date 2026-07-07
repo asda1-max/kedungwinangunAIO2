@@ -1,64 +1,151 @@
 {% extends 'admin/base.html' %}
 
-{% block title %}Tambah Struktur - Admin{% endblock %}
-{% block page_title %}Tambah Struktur Organisasi{% endblock %}
-{% block page_subtitle %}Tambah data baru struktur organisasi{% endblock %}
+{% block title %}Tambah Personil - Admin Panel{% endblock %}
+{% block page_title %}Tambah Personil{% endblock %}
+{% block page_subtitle %}Tambah personil struktur organisasi{% endblock %}
 
 {% block content %}
-<form method="POST">
-    <div class="card-section animate-in">
-        <div class="card-section-header">
-            <span class="icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-            </span>
-            <div>
-                <h2>Data Struktur</h2>
-                <p>Isi form di bawah untuk menambah data</p>
-            </div>
-        </div>
-        <div class="card-section-body">
-            <div class="form-row">
+<div class="form-container animate-in">
+    <form action="{{ url_for('admin.add_struktur_route') }}" method="POST" class="form">
+        <!-- Data Dasar -->
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                👤 Data Dasar
+            </h3>
+            <div class="form-grid">
                 <div class="form-group">
-                    <label for="kategori">Kategori <span class="required">*</span></label>
+                    <label for="kategori">Kategori <span class="text-red-500">*</span></label>
                     <select id="kategori" name="kategori" required>
-                        <option value="">-- Pilih Kategori --</option>
-                        <option value="pemerintah">Pemerintah Desa</option>
-                        <option value="bpd">BPD (Badan Permusyawaratan Desa)</option>
-                        <option value="rtrw">RT & RW</option>
-                        <option value="kader">Kader & Lembaga Desa</option>
+                        <option value="">-- Pilih --</option>
+                        <option value="perangkat">Perangkat Desa</option>
+                        <option value="bpd">BPD</option>
+                        <option value="pkk">PKK</option>
+                        <option value="karang_taruna">Karang Taruna</option>
+                        <option value="rt">RT</option>
+                        <option value="rw">RW</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="nama">Nama Lengkap <span class="required">*</span></label>
-                    <input type="text" id="nama" name="nama" placeholder="Contoh: Drs. H. Ahmad Zainuri" required>
+                    <label for="nama">Nama Lengkap <span class="text-red-500">*</span></label>
+                    <input type="text" id="nama" name="nama" required placeholder="Nama lengkap">
                 </div>
-            </div>
-            <div class="form-row">
                 <div class="form-group">
                     <label for="jabatan">Jabatan</label>
                     <input type="text" id="jabatan" name="jabatan" placeholder="Contoh: Kepala Desa">
                 </div>
                 <div class="form-group">
                     <label for="status">Status</label>
-                    <input type="text" id="status" name="status" placeholder="Contoh: PNS Desa">
+                    <select id="status" name="status">
+                        <option value="Aktif">Aktif</option>
+                        <option value="Nonaktif">Nonaktif</option>
+                        <option value="Mutasi">Mutasi</option>
+                        <option value="Pensiun">Pensiun</option>
+                    </select>
                 </div>
             </div>
             <div class="form-group">
-                <label for="icon">Icon (Emoji)</label>
-                <input type="text" id="icon" name="icon" placeholder="Contoh: 👤" maxlength="10">
-                <p class="hint">Gunakan emoji untuk icon. Contoh: 👨‍💼 👩‍💼 🧑‍⚕️</p>
+                <label for="deskripsi">Deskripsi</label>
+                <textarea id="deskripsi" name="deskripsi" rows="3" placeholder="Deskripsi atau Riwayat singkat"></textarea>
             </div>
         </div>
-    </div>
 
-    <div class="btn-group">
-        <button type="submit" class="btn btn-primary">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
-            </svg>
-            Simpan Data
-        </button>
-        <a href="{{ url_for('admin.struktur') }}" class="btn btn-outline">Batal</a>
-    </div>
-</form>
+        <!-- Data Pribadi -->
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                🪪 Data Pribadi
+            </h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nik">NIK</label>
+                    <input type="text" id="nik" name="nik" placeholder="16 digit NIK">
+                </div>
+                <div class="form-group">
+                    <label for="alamat">Alamat</label>
+                    <input type="text" id="alamat" name="alamat" placeholder="Alamat lengkap">
+                </div>
+                <div class="form-group">
+                    <label for="dusun">Dusun</label>
+                    <input type="text" id="dusun" name="dusun" placeholder="Nama dusun">
+                </div>
+                <div class="form-group">
+                    <label for="rt">RT</label>
+                    <input type="text" id="rt" name="rt" placeholder="Nomor RT" maxlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="rw">RW</label>
+                    <input type="text" id="rw" name="rw" placeholder="Nomor RW" maxlength="3">
+                </div>
+            </div>
+        </div>
+
+        <!-- Kontak -->
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                📞 Kontak
+            </h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="telepon">Telepon/HP</label>
+                    <input type="text" id="telepon" name="telepon" placeholder="08xxxxxxxxxx">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="email@contoh.com">
+                </div>
+            </div>
+        </div>
+
+        <!-- SK / Jabatan -->
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                📄 SK & Masa Jabatan
+            </h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="no_sk">No. SK</label>
+                    <input type="text" id="no_sk" name="no_sk" placeholder="Nomor Surat Keputusan">
+                </div>
+                <div class="form-group">
+                    <label for="tanggal_sk">Tanggal SK</label>
+                    <input type="date" id="tanggal_sk" name="tanggal_sk">
+                </div>
+                <div class="form-group">
+                    <label for="masa_jabatan">Masa Jabatan</label>
+                    <input type="text" id="masa_jabatan" name="masa_jabatan" placeholder="Contoh: 2021-2027">
+                </div>
+            </div>
+        </div>
+
+        <!-- Foto & Dokumen -->
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                📷 Foto & Dokumen
+            </h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="foto_url">URL Foto</label>
+                    <input type="url" id="foto_url" name="foto_url" placeholder="https://contoh.com/foto.jpg">
+                    <small class="hint">Link foto personil</small>
+                </div>
+                <div class="form-group">
+                    <label for="sk_url">URL Dokumen SK</label>
+                    <input type="url" id="sk_url" name="sk_url" placeholder="https://contoh.com/sk.pdf">
+                    <small class="hint">Link PDF scan SK</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin.struktur') }}" class="btn btn-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Simpan
+            </button>
+        </div>
+    </form>
+</div>
 {% endblock %}

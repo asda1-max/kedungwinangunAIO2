@@ -1,115 +1,99 @@
 {% extends 'admin/base.html' %}
 
-{% block title %}Struktur Organisasi - Admin{% endblock %}
+{% block title %}Struktur Organisasi - Admin Panel{% endblock %}
 {% block page_title %}Struktur Organisasi{% endblock %}
-{% block page_subtitle %}Kelola data struktur organisasi Pemerintah Desa{% endblock %}
+{% block page_subtitle %}Kelola struktur organisasi desa{% endblock %}
+
+{% block header_actions %}
+<div class="user-menu">
+    <div class="user-avatar">{{ session.get('user_nama', 'A')[0]|upper }}</div>
+    <div class="user-info">
+        <h4>{{ session.get('user_nama', 'Admin') }}</h4>
+        <span>Administrator</span>
+    </div>
+</div>
+<a href="{{ url_for('admin.add_struktur_route') }}" class="btn btn-primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Tambah Personil
+</a>
+{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="p-4 rounded-xl {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <!-- Actions -->
-    <div class="flex items-center justify-between">
-        <p class="text-gray-600">Total: {{ struktur_list|length }} data</p>
-        <a href="{{ url_for('admin.add_struktur_route') }}" class="btn btn-primary">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Tambah Data
-        </a>
-    </div>
-
-    <!-- List by Kategori -->
-    {% for kategori, items in grouped.items() %}
-    <div class="card-section animate-in">
-        <div class="card-section-header">
-            <span class="icon">
-                {% if kategori == 'pemerintah' %}
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6"/></svg>
-                {% elif kategori == 'bpd' %}
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                {% elif kategori == 'rtrw' %}
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                {% else %}
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-                {% endif %}
-            </span>
-            <div>
-                <h2>{{ kategori|upper }}</h2>
-                <p>{{ items|length }} data</p>
-            </div>
-        </div>
-        <div class="card-section-body">
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Nama</th>
-                            <th>Jabatan</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in items %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>
-                                <div class="flex items-center gap-3">
-                                    <span class="struktur-icon">{{ item.icon or '' }}</span>
-                                    <span class="font-semibold">{{ item.nama }}</span>
-                                </div>
-                            </td>
-                            <td>{{ item.jabatan or '-' }}</td>
-                            <td>{{ item.status or '-' }}</td>
-                            <td>
-                                <div class="flex gap-2">
-                                    <a href="{{ url_for('admin.edit_struktur_route', struktur_id=item.id) }}" class="btn btn-sm btn-outline">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                        Edit
-                                    </a>
-                                    <form method="POST" action="{{ url_for('admin.delete_struktur_route', struktur_id=item.id) }}" onsubmit="return confirm('Hapus data ini?')">
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                                            Hapus
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-
-    {% if not struktur_list %}
-    <div class="card-section animate-in">
-        <div class="p-12 text-center">
-            <div class="empty-icon" style="margin: 0 auto 16px;">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-                </svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-700 mb-2">Belum Ada Data</h3>
-            <p class="text-gray-500">Klik tombol "Tambah Data" untuk menambahkan struktur organisasi.</p>
-        </div>
-    </div>
-    {% endif %}
-
+<div class="mb-6 flex flex-wrap gap-2">
+    <a href="?kategori=all" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">Semua</a>
+    <a href="?kategori=perangkat" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">Perangkat Desa</a>
+    <a href="?kategori=bpd" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">BPD</a>
+    <a href="?kategori=pkk" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">PKK</a>
+    <a href="?kategori=karang_taruna" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">Karang Taruna</a>
+    <a href="?kategori=rt" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">RT</a>
+    <a href="?kategori=rw" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">RW</a>
 </div>
+
+{% if grouped %}
+{% for kategori, items in grouped.items() %}
+<div class="mb-8">
+    <h3 class="text-lg font-bold text-gray-800 mb-4 capitalize flex items-center gap-2">
+        {% if kategori == 'perangkat' %}🏛️{% elif kategori == 'bpd' %}👥{% elif kategori == 'pkk' %}👩{% elif kategori == 'karang_taruna' %}🎉{% elif kategori == 'rt' %}🏠{% elif kategori == 'rw' %}🏘️{% else %}📋{% endif %}
+        {{ kategori|replace('_', ' ')|title }}
+        <span class="text-gray-400 font-normal">({{ items|length }})</span>
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {% for item in items %}
+        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-4 border border-gray-100">
+            <div class="flex items-start gap-3">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center text-white font-bold text-xl flex-shrink-0 overflow-hidden">
+                    {% if item.foto_url %}
+                    <img src="{{ item.foto_url }}" alt="{{ item.nama }}" class="w-full h-full object-cover">
+                    {% else %}
+                    {{ item.nama[:2]|upper }}
+                    {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-gray-800 truncate">{{ item.nama }}</h4>
+                    <p class="text-[#73AA0F] text-sm font-medium truncate">{{ item.jabatan or '-' }}</p>
+                    <span class="inline-block px-2 py-0.5 text-xs rounded-full {% if item.aktif == 1 %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+                        {{ 'Aktif' if item.aktif == 1 else 'Nonaktif' }}
+                    </span>
+                </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-100 flex flex-wrap gap-2">
+                <a href="{{ url_for('admin.edit_struktur_route', struktur_id=item.id) }}" class="btn btn-edit btn-sm flex-1 text-center">Edit</a>
+                <form action="{{ url_for('admin.toggle_struktur_route', struktur_id=item.id) }}" method="POST" class="flex-1">
+                    <button type="submit" class="btn btn-view btn-sm w-full">
+                        {% if item.aktif == 1 %}Hide{% else %}Show{% endif %}
+                    </button>
+                </form>
+                <form action="{{ url_for('admin.delete_struktur_route', struktur_id=item.id) }}" method="POST" class="flex-1" onsubmit="return confirm('Hapus data ini?')">
+                    <button type="submit" class="btn btn-delete btn-sm w-full">Hapus</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="empty animate-in">
+    <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+            <path d="M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+    </div>
+    <h3>Belum ada data struktur organisasi</h3>
+    <p>Tambahkan personil pertama untuk struktur organisasi desa</p>
+    <a href="{{ url_for('admin.add_struktur_route') }}" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Tambah Personil
+    </a>
+</div>
+{% endif %}
 {% endblock %}

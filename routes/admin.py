@@ -57,6 +57,14 @@ from models import (
     update_sejarah,
     delete_sejarah,
     toggle_sejarah_aktif,
+    # Struktur Organisasi
+    get_all_struktur,
+    get_struktur_by_kategori,
+    get_struktur_by_id,
+    add_struktur,
+    update_struktur,
+    delete_struktur,
+    toggle_struktur_aktif,
 )
 from errors import admin_required, flash_error
 from config import Config
@@ -936,23 +944,11 @@ def toggle_page_route(page_id):
 # ── STRUKTUR ORGANISASI MANAGEMENT ────────────────────────────────────
 # ════════════════════════════════════════════════════════════════════════
 
-def import_struktur_models():
-    """Lazy import untuk menghindari circular import"""
-    from models import (
-        get_all_struktur,
-        get_struktur_by_id,
-        add_struktur,
-        update_struktur,
-        delete_struktur,
-    )
-    return get_all_struktur, get_struktur_by_id, add_struktur, update_struktur, delete_struktur
-
 @admin_bp.route("/struktur")
 @admin_required
 def struktur():
     """Halaman manajemen struktur organisasi"""
     try:
-        from models import get_all_struktur
         struktur_list = get_all_struktur()
 
         # Group by kategori
@@ -974,72 +970,105 @@ def struktur():
 @admin_required
 def add_struktur_route():
     """Form tambah struktur organisasi"""
-    try:
-        from models import add_struktur
-
-        if request.method == 'POST':
+    if request.method == 'POST':
+        try:
             kategori = request.form.get('kategori', '').strip()
             nama = request.form.get('nama', '').strip()
             jabatan = request.form.get('jabatan', '').strip()
-            status = request.form.get('status', '').strip()
+            deskripsi = request.form.get('deskripsi', '').strip()
+            nik = request.form.get('nik', '').strip()
+            alamat = request.form.get('alamat', '').strip()
+            dusun = request.form.get('dusun', '').strip()
+            rt = request.form.get('rt', '').strip()
+            rw = request.form.get('rw', '').strip()
+            telepon = request.form.get('telepon', '').strip()
+            email = request.form.get('email', '').strip()
+            foto_url = request.form.get('foto_url', '').strip()
+            sk_url = request.form.get('sk_url', '').strip()
+            no_sk = request.form.get('no_sk', '').strip()
+            tanggal_sk = request.form.get('tanggal_sk', '').strip()
+            masa_jabatan = request.form.get('masa_jabatan', '').strip()
+            status = request.form.get('status', 'Aktif').strip()
             icon = request.form.get('icon', '').strip()
 
             if not kategori or not nama:
                 flash_error('Kategori dan Nama harus diisi!')
                 return redirect(request.url)
 
-            result = add_struktur(kategori, nama, jabatan, status, icon)
+            result = add_struktur(
+                kategori=kategori, nama=nama, jabatan=jabatan, deskripsi=deskripsi,
+                nik=nik, alamat=alamat, dusun=dusun, rt=rt, rw=rw,
+                telepon=telepon, email=email, foto_url=foto_url, sk_url=sk_url,
+                no_sk=no_sk, tanggal_sk=tanggal_sk, masa_jabatan=masa_jabatan,
+                status=status, icon=icon
+            )
             if result:
                 flash('Data struktur berhasil ditambahkan!', 'success')
                 return redirect(url_for('admin.struktur'))
             else:
                 flash_error('Gagal menambahkan data struktur. Silakan coba lagi.')
                 return redirect(request.url)
+        except Exception as e:
+            logger.error(f"Error in add_struktur: {str(e)}")
+            flash_error('Terjadi kesalahan saat menyimpan data')
 
-        return render_template("admin/add_struktur.html")
-    except Exception as e:
-        logger.error(f"Error in add_struktur_route: {str(e)}")
-        flash_error('Terjadi kesalahan saat memuat form struktur')
-        return redirect(url_for('admin.struktur'))
+    return render_template("admin/add_struktur.html")
 
 
 @admin_bp.route("/struktur/edit/<int:struktur_id>", methods=['GET', 'POST'])
 @admin_required
 def edit_struktur_route(struktur_id):
     """Form edit struktur organisasi"""
-    try:
-        from models import get_struktur_by_id, update_struktur
+    item = get_struktur_by_id(struktur_id)
+    if not item:
+        flash_error('Data tidak ditemukan!')
+        return redirect(url_for('admin.struktur'))
 
-        item = get_struktur_by_id(struktur_id)
-        if not item:
-            flash_error('Data tidak ditemukan!')
-            return redirect(url_for('admin.struktur'))
-
-        if request.method == 'POST':
+    if request.method == 'POST':
+        try:
             kategori = request.form.get('kategori', '').strip()
             nama = request.form.get('nama', '').strip()
             jabatan = request.form.get('jabatan', '').strip()
-            status = request.form.get('status', '').strip()
+            deskripsi = request.form.get('deskripsi', '').strip()
+            nik = request.form.get('nik', '').strip()
+            alamat = request.form.get('alamat', '').strip()
+            dusun = request.form.get('dusun', '').strip()
+            rt = request.form.get('rt', '').strip()
+            rw = request.form.get('rw', '').strip()
+            telepon = request.form.get('telepon', '').strip()
+            email = request.form.get('email', '').strip()
+            foto_url = request.form.get('foto_url', '').strip()
+            sk_url = request.form.get('sk_url', '').strip()
+            no_sk = request.form.get('no_sk', '').strip()
+            tanggal_sk = request.form.get('tanggal_sk', '').strip()
+            masa_jabatan = request.form.get('masa_jabatan', '').strip()
+            status = request.form.get('status', 'Aktif').strip()
             icon = request.form.get('icon', '').strip()
-            no_urut = request.form.get('no_urut', '0').strip()
+            aktif = 1 if request.form.get('aktif') else 0
+            no_urut = int(request.form.get('no_urut', '0').strip())
 
             if not kategori or not nama:
                 flash_error('Kategori dan Nama harus diisi!')
                 return redirect(request.url)
 
-            result = update_struktur(struktur_id, kategori, nama, jabatan, status, icon, int(no_urut))
+            result = update_struktur(
+                struktur_id=struktur_id, kategori=kategori, nama=nama, jabatan=jabatan,
+                deskripsi=deskripsi, nik=nik, alamat=alamat, dusun=dusun, rt=rt, rw=rw,
+                telepon=telepon, email=email, foto_url=foto_url, sk_url=sk_url,
+                no_sk=no_sk, tanggal_sk=tanggal_sk, masa_jabatan=masa_jabatan,
+                status=status, icon=icon, aktif=aktif, no_urut=no_urut
+            )
             if result:
                 flash('Data struktur berhasil diperbarui!', 'success')
                 return redirect(url_for('admin.struktur'))
             else:
                 flash_error('Gagal memperbarui data struktur. Silakan coba lagi.')
                 return redirect(request.url)
+        except Exception as e:
+            logger.error(f"Error in edit_struktur: {str(e)}")
+            flash_error('Terjadi kesalahan saat menyimpan data')
 
-        return render_template("admin/edit_struktur.html", item=item)
-    except Exception as e:
-        logger.error(f"Error in edit_struktur_route {struktur_id}: {str(e)}")
-        flash_error('Terjadi kesalahan saat memuat form struktur')
-        return redirect(url_for('admin.struktur'))
+    return render_template("admin/edit_struktur.html", item=item)
 
 
 @admin_bp.route("/struktur/delete/<int:struktur_id>", methods=['POST'])
@@ -1047,7 +1076,6 @@ def edit_struktur_route(struktur_id):
 def delete_struktur_route(struktur_id):
     """Hapus struktur organisasi"""
     try:
-        from models import delete_struktur
         result = delete_struktur(struktur_id)
         if result:
             flash('Data berhasil dihapus!', 'success')
@@ -1056,6 +1084,22 @@ def delete_struktur_route(struktur_id):
     except Exception as e:
         logger.error(f"Error deleting struktur {struktur_id}: {str(e)}")
         flash_error('Terjadi kesalahan saat menghapus data')
+    return redirect(url_for('admin.struktur'))
+
+
+@admin_bp.route("/struktur/toggle/<int:struktur_id>", methods=['POST'])
+@admin_required
+def toggle_struktur_route(struktur_id):
+    """Toggle aktif/nonaktif struktur"""
+    try:
+        result = toggle_struktur_aktif(struktur_id)
+        if result:
+            flash('Status berhasil diubah!', 'success')
+        else:
+            flash_error('Gagal mengubah status!')
+    except Exception as e:
+        logger.error(f"Error toggling struktur {struktur_id}: {str(e)}")
+        flash_error('Terjadi kesalahan saat mengubah status')
     return redirect(url_for('admin.struktur'))
 
 

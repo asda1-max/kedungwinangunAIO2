@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struktur Organisasi — {{ site_name or desa.nama }}</title>
-    <meta name="description" content="Struktur organisasi Pemerintah Desa {{ desa.nama }}">
+    <title>Struktur Organisasi - {{ site_name }}</title>
+    <meta name="description" content="Struktur organisasi Pemerintah Desa {{ site_name }}">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -14,8 +13,7 @@
                     colors: {
                         'desa-dark': '#155C1B', 'desa-mid': '#2A6726',
                         'desa-light': '#73AA0F', 'desa-muted': '#5B8A4E',
-                    },
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    }
                 }
             }
         }
@@ -25,104 +23,97 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f4f7f2; }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
 <body>
-    <!-- NAVBAR -->
     {% include 'partials/navbar.html' %}
 
-    <!-- HERO -->
-    <div class="bg-[#0F5B21] px-6 py-10 md:px-[5%] md:py-16 text-white">
-        <p class="text-xs md:text-sm text-green-300 mb-2">
-            <a href="{{ url_for('public.index') }}" class="hover:underline">Beranda</a> / Struktur Organisasi
-        </p>
-        <h1 class="text-2xl md:text-4xl font-extrabold">Struktur Organisasi</h1>
-        <p class="text-sm md:text-base text-green-200 mt-1">Susunan Organisasi Pemerintah Desa {{ desa.nama }}</p>
-    </div>
+    <!-- Hero -->
+    <section class="bg-gradient-to-br from-[#155C1B] to-[#228B22] text-white py-16 md:py-24">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <span class="inline-block px-4 py-1 bg-white/10 rounded-full text-sm mb-4">👥 Struktur Organisasi</span>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Struktur Organisasi</h1>
+            <p class="text-white/80 text-lg max-w-2xl mx-auto">Susunan organisasi Pemerintah Desa {{ site_name }} untuk melayani masyarakat</p>
+        </div>
+    </section>
 
-    <!-- CONTENT -->
-    <div class="px-6 py-10 md:px-[5%] md:py-14 max-w-6xl mx-auto">
+    <!-- Content -->
+    <section class="py-12 md:py-16 bg-gray-50">
+        <div class="max-w-6xl mx-auto px-4">
 
-        <!-- PEMERINTAH DESA -->
-        <section class="mb-12">
-            <h2 class="text-[#155C1B] text-xl md:text-2xl font-extrabold mb-6 flex items-center gap-3">
-                <span class="w-10 h-10 rounded-xl bg-[#155C1B] flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                    </svg>
-                </span>
-                Pemerintah Desa
-            </h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for item in grouped_struktur.pemerintah %}
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-[rgba(21,92,27,0.08)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#155C1B] to-[#2A6726] flex items-center justify-center text-white text-2xl font-bold">
-                        {{ (item.icon or '👤') if item.icon else item.nama[0]|upper }}
-                    </div>
-                    <h3 class="text-[#155C1B] font-bold text-lg text-center mb-1">{{ item.nama }}</h3>
-                    <p class="text-[#73AA0F] font-semibold text-sm text-center mb-3">{{ item.jabatan or '' }}</p>
-                    <div class="flex items-center justify-center gap-2 text-gray-500 text-xs">
-                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                        {{ item.status or '' }}
-                    </div>
-                </div>
+            <!-- Kategori Tabs -->
+            <div class="flex flex-wrap gap-2 mb-8 justify-center">
+                {% for kat, label in kategori_labels.items() %}
+                <a href="#{{ kat }}" class="px-4 py-2 bg-white rounded-lg text-sm font-medium hover:bg-[#155C1B] hover:text-white transition-all shadow-sm">
+                    {{ label }}
+                </a>
                 {% endfor %}
             </div>
-        </section>
 
-        <!-- BPD / LEGISLATIF -->
-        <section class="mb-12">
-            <h2 class="text-[#155C1B] text-xl md:text-2xl font-extrabold mb-6 flex items-center gap-3">
-                <span class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                    </svg>
-                </span>
-                BPD (Badan Permusyawaratan Desa)
-            </h2>
+            {% for kat, label in kategori_labels.items() %}
+            {% if grouped_struktur[kat] %}
+            <div id="{{ kat }}" class="mb-12 scroll-mt-20">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                    {% if kat == 'perangkat' %}🏛️{% elif kat == 'bpd' %}👥{% elif kat == 'pkk' %}👩{% elif kat == 'karang_taruna' %}🎉{% elif kat == 'rt' %}🏠{% elif kat == 'rw' %}🏘️{% endif %}
+                    {{ label }}
+                    <span class="text-gray-400 font-normal text-base">({{ grouped_struktur[kat]|length }})</span>
+                </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {% for item in grouped_struktur.bpd %}
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-[rgba(21,92,27,0.08)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-xl font-bold">
-                        {{ (item.icon or '👤') if item.icon else item.nama[0]|upper }}
-                    </div>
-                    <h3 class="text-[#155C1B] font-bold text-base mb-1">{{ item.nama }}</h3>
-                    <p class="text-blue-600 font-semibold text-sm">{{ item.jabatan or '' }}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {% for item in grouped_struktur[kat] %}
+                    <a href="{{ url_for('public.struktur_detail', struktur_id=item.id) }}" class="bg-white rounded-xl p-5 shadow-md hover:shadow-xl transition-all group">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center text-white font-bold text-xl flex-shrink-0 overflow-hidden">
+                                {% if item.foto_url %}
+                                <img src="{{ item.foto_url }}" alt="{{ item.nama }}" class="w-full h-full object-cover">
+                                {% else %}
+                                {{ item.nama[:2]|upper }}
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="font-bold text-gray-800 truncate group-hover:text-[#155C1B] transition-colors">{{ item.nama }}</h3>
+                                <p class="text-[#73AA0F] text-sm truncate">{{ item.jabatan or '-' }}</p>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            {% if item.dusun %}
+                            <div class="flex items-center gap-1">📍 {{ item.dusun }}{% if item.rt %} RT {{ item.rt }}{% endif %}</div>
+                            {% endif %}
+                            {% if item.telepon %}
+                            <div class="flex items-center gap-1">📞 {{ item.telepon }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100">
+                            <span class="text-xs text-[#155C1B] font-medium flex items-center gap-1">
+                                Lihat Detail
+                                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </a>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
-        </section>
+            {% endif %}
+            {% endfor %}
 
-        <!-- KADER & LEMBAGA DESA -->
-        <section>
-            <h2 class="text-[#155C1B] text-xl md:text-2xl font-extrabold mb-6 flex items-center gap-3">
-                <span class="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            {% if not grouped_struktur['perangkat'] and not grouped_struktur['bpd'] and not grouped_struktur['pkk'] and not grouped_struktur['karang_taruna'] %}
+            <div class="text-center py-16">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
                     </svg>
-                </span>
-                Kader & Lembaga Desa
-            </h2>
-
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {% for item in grouped_struktur.kader %}
-                <div class="bg-white rounded-xl p-5 shadow-sm border border-[rgba(21,92,27,0.08)] hover:shadow-md transition-all duration-300 text-center">
-                    <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-purple-100 flex items-center justify-center text-2xl">
-                        {{ item.icon or '👥' }}
-                    </div>
-                    <h3 class="text-[#155C1B] font-bold text-sm mb-1">{{ item.nama }}</h3>
-                    <p class="text-purple-600 font-medium text-xs">{{ item.jabatan or '' }}</p>
                 </div>
-                {% endfor %}
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Belum Ada Data</h3>
+                <p class="text-gray-500">Data struktur organisasi sedang dalam proses pembaruan.</p>
             </div>
-        </section>
+            {% endif %}
+        </div>
+    </section>
 
-    </div>
-
-    <!-- FOOTER -->
     {% include 'partials/footer.html' %}
 </body>
 </html>

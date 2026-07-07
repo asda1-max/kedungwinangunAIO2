@@ -1,68 +1,164 @@
 {% extends 'admin/base.html' %}
 
-{% block title %}Edit Struktur - Admin{% endblock %}
-{% block page_title %}Edit Struktur Organisasi{% endblock %}
-{% block page_subtitle %}Perbarui data struktur organisasi{% endblock %}
+{% block title %}Edit Personil - Admin Panel{% endblock %}
+{% block page_title %}Edit Personil{% endblock %}
+{% block page_subtitle %}Edit: {{ item.nama }}{% endblock %}
 
 {% block content %}
-<form method="POST">
-    <div class="card-section animate-in">
-        <div class="card-section-header">
-            <span class="icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-            </span>
-            <div>
-                <h2>Data Struktur</h2>
-                <p>Perbarui form di bawah</p>
-            </div>
-        </div>
-        <div class="card-section-body">
-            <div class="form-row">
+<div class="form-container animate-in">
+    <form action="{{ url_for('admin.edit_struktur_route', struktur_id=item.id) }}" method="POST" class="form">
+        <!-- Data Dasar -->
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                👤 Data Dasar
+            </h3>
+            <div class="form-grid">
                 <div class="form-group">
-                    <label for="kategori">Kategori <span class="required">*</span></label>
+                    <label for="kategori">Kategori <span class="text-red-500">*</span></label>
                     <select id="kategori" name="kategori" required>
-                        <option value="pemerintah" {% if item.kategori == 'pemerintah' %}selected{% endif %}>Pemerintah Desa</option>
-                        <option value="bpd" {% if item.kategori == 'bpd' %}selected{% endif %}>BPD (Badan Permusyawaratan Desa)</option>
-                        <option value="rtrw" {% if item.kategori == 'rtrw' %}selected{% endif %}>RT & RW</option>
-                        <option value="kader" {% if item.kategori == 'kader' %}selected{% endif %}>Kader & Lembaga Desa</option>
+                        <option value="perangkat" {% if item.kategori == 'perangkat' %}selected{% endif %}>Perangkat Desa</option>
+                        <option value="bpd" {% if item.kategori == 'bpd' %}selected{% endif %}>BPD</option>
+                        <option value="pkk" {% if item.kategori == 'pkk' %}selected{% endif %}>PKK</option>
+                        <option value="karang_taruna" {% if item.kategori == 'karang_taruna' %}selected{% endif %}>Karang Taruna</option>
+                        <option value="rt" {% if item.kategori == 'rt' %}selected{% endif %}>RT</option>
+                        <option value="rw" {% if item.kategori == 'rw' %}selected{% endif %}>RW</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="nama">Nama Lengkap <span class="required">*</span></label>
-                    <input type="text" id="nama" name="nama" value="{{ item.nama }}" placeholder="Contoh: Drs. H. Ahmad Zainuri" required>
+                    <label for="nama">Nama Lengkap <span class="text-red-500">*</span></label>
+                    <input type="text" id="nama" name="nama" required value="{{ item.nama }}">
                 </div>
-            </div>
-            <div class="form-row">
                 <div class="form-group">
                     <label for="jabatan">Jabatan</label>
-                    <input type="text" id="jabatan" name="jabatan" value="{{ item.jabatan or '' }}" placeholder="Contoh: Kepala Desa">
+                    <input type="text" id="jabatan" name="jabatan" value="{{ item.jabatan or '' }}">
                 </div>
                 <div class="form-group">
                     <label for="status">Status</label>
-                    <input type="text" id="status" name="status" value="{{ item.status or '' }}" placeholder="Contoh: PNS Desa">
+                    <select id="status" name="status">
+                        <option value="Aktif" {% if item.status == 'Aktif' %}selected{% endif %}>Aktif</option>
+                        <option value="Nonaktif" {% if item.status == 'Nonaktif' %}selected{% endif %}>Nonaktif</option>
+                        <option value="Mutasi" {% if item.status == 'Mutasi' %}selected{% endif %}>Mutasi</option>
+                        <option value="Pensiun" {% if item.status == 'Pensiun' %}selected{% endif %}>Pensiun</option>
+                    </select>
                 </div>
-            </div>
-            <div class="form-row">
                 <div class="form-group">
-                    <label for="icon">Icon (Emoji)</label>
-                    <input type="text" id="icon" name="icon" value="{{ item.icon or '' }}" placeholder="Contoh: 👤" maxlength="10">
+                    <label for="aktif">Tampilkan?</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="aktif" name="aktif" value="1" {% if item.aktif == 1 %}checked{% endif %}>
+                        <label for="aktif">Aktif / Tampilkan di website</label>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="no_urut">No. Urut</label>
+                    <label for="no_urut">Urutan</label>
                     <input type="number" id="no_urut" name="no_urut" value="{{ item.no_urut or 0 }}" min="0">
                 </div>
             </div>
+            <div class="form-group">
+                <label for="deskripsi">Deskripsi</label>
+                <textarea id="deskripsi" name="deskripsi" rows="3">{{ item.deskripsi or '' }}</textarea>
+            </div>
         </div>
-    </div>
 
-    <div class="btn-group">
-        <button type="submit" class="btn btn-primary">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
-            </svg>
-            Simpan Perubahan
-        </button>
-        <a href="{{ url_for('admin.struktur') }}" class="btn btn-outline">Batal</a>
-    </div>
-</form>
+        <!-- Data Pribadi -->
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                🪪 Data Pribadi
+            </h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nik">NIK</label>
+                    <input type="text" id="nik" name="nik" value="{{ item.nik or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="alamat">Alamat</label>
+                    <input type="text" id="alamat" name="alamat" value="{{ item.alamat or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="dusun">Dusun</label>
+                    <input type="text" id="dusun" name="dusun" value="{{ item.dusun or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="rt">RT</label>
+                    <input type="text" id="rt" name="rt" value="{{ item.rt or '' }}" maxlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="rw">RW</label>
+                    <input type="text" id="rw" name="rw" value="{{ item.rw or '' }}" maxlength="3">
+                </div>
+            </div>
+        </div>
+
+        <!-- Kontak -->
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                📞 Kontak
+            </h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="telepon">Telepon/HP</label>
+                    <input type="text" id="telepon" name="telepon" value="{{ item.telepon or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ item.email or '' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- SK / Jabatan -->
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                📄 SK & Masa Jabatan
+            </h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="no_sk">No. SK</label>
+                    <input type="text" id="no_sk" name="no_sk" value="{{ item.no_sk or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="tanggal_sk">Tanggal SK</label>
+                    <input type="date" id="tanggal_sk" name="tanggal_sk" value="{{ item.tanggal_sk or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="masa_jabatan">Masa Jabatan</label>
+                    <input type="text" id="masa_jabatan" name="masa_jabatan" value="{{ item.masa_jabatan or '' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Foto & Dokumen -->
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                📷 Foto & Dokumen
+            </h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="foto_url">URL Foto</label>
+                    <input type="url" id="foto_url" name="foto_url" value="{{ item.foto_url or '' }}">
+                    {% if item.foto_url %}
+                    <div class="mt-2">
+                        <img src="{{ item.foto_url }}" alt="Preview" class="w-20 h-20 object-cover rounded-lg">
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="sk_url">URL Dokumen SK</label>
+                    <input type="url" id="sk_url" name="sk_url" value="{{ item.sk_url or '' }}">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin.struktur') }}" class="btn btn-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Update
+            </button>
+        </div>
+    </form>
+</div>
 {% endblock %}
