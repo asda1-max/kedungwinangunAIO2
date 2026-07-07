@@ -29,6 +29,7 @@ from models import (
     count_komentar_by_berita,
     get_all_potensi,
     get_all_pengumuman,
+    get_all_sejarah,
 )
 from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
 from errors import safe_handler, flash_error, ValidationError, NotFoundError, json_success_response
@@ -480,35 +481,58 @@ def sejarah():
         desa_info = get_desa_info_with_maps()
         custom_pages = get_all_pages()
 
-        # TODO: Get from database in FASE 2
-        # For now, use placeholder data
-        sejarah_items = [
-            {
-                'tahun': '1900-an',
-                'judul': 'Awal Mula Desa',
-                'konten': 'Desa Kedungwinangun telah berdiri sejak awal abad ke-20, menjadi salah satu desa tertua di Kecamatan Klirong.'
-            },
-            {
-                'tahun': '1950-an',
-                'judul': 'Masa Kemerdekaan',
-                'konten': 'Setelah kemerdekaan Indonesia, desa ini mulai berkembang dengan pendidikan dan pertanian.'
-            },
-            {
-                'tahun': '1980-an',
-                'judul': 'Era Modernisasi',
-                'konten': 'Pembangunan infrastruktur mulai merata, jalan desa diaspal, dan listrik masuk ke seluruh dusun.'
-            },
-            {
-                'tahun': '2000-an',
-                'judul': 'Desa Digital',
-                'konten': 'Mulai memasuki era digital dengan website resmi desa dan sistem informasi pemerintahan.'
-            },
-            {
-                'tahun': '2026',
-                'judul': 'Kedungwinangun Sekarang',
-                'konten': 'Desa Kedungwinangun terus berkembang dengan potensi pertanian, UMKM, dan pelayanan digital untuk warga.'
-            }
-        ]
+        # Get sejarah entries from database (aktif only)
+        sejarah_items = get_all_sejarah(aktif=1)
+
+        # If no entries, show default placeholder
+        if not sejarah_items:
+            sejarah_items = [
+                {
+                    'tahun_dari': 1900,
+                    'tahun_sampai': 1945,
+                    'judul': 'Awal Mula Desa',
+                    'sub_judul': 'Lahirnya Sebuah Komunitas',
+                    'konten': 'Desa Kedungwinangun telah berdiri sejak awal abad ke-20, menjadi salah satu desa tertua di Kecamatan Klirong, Kabupaten Kebumen.',
+                    'gambar_url': '',
+                    'video_url': ''
+                },
+                {
+                    'tahun_dari': 1945,
+                    'tahun_sampai': 1970,
+                    'judul': 'Masa Kemerdekaan',
+                    'sub_judul': 'Periode Perjuangan',
+                    'konten': 'Setelah kemerdekaan Indonesia, desa ini mulai berkembang dengan pendidikan dan pertanian. Masyarakat bersatu membangun desa dari keterpurukan.',
+                    'gambar_url': '',
+                    'video_url': ''
+                },
+                {
+                    'tahun_dari': 1970,
+                    'tahun_sampai': 2000,
+                    'judul': 'Era Modernisasi',
+                    'sub_judul': 'Transformasi Desa',
+                    'konten': 'Pembangunan infrastruktur mulai merata, jalan desa diaspal, listrik masuk ke seluruh dusun, dan akses pendidikan semakin terbuka.',
+                    'gambar_url': '',
+                    'video_url': ''
+                },
+                {
+                    'tahun_dari': 2000,
+                    'tahun_sampai': 2020,
+                    'judul': 'Era Digital',
+                    'sub_judul': 'Desa Menyongsong Teknologi',
+                    'konten': 'Mulai memasuki era digital dengan website resmi desa dan sistem informasi pemerintahan. Generasi muda mulai kembali ke desa membawa inovasi.',
+                    'gambar_url': '',
+                    'video_url': ''
+                },
+                {
+                    'tahun_dari': 2020,
+                    'tahun_sampai': None,
+                    'judul': 'Kedungwinangun Sekarang',
+                    'sub_judul': 'Melangkah ke Masa Depan',
+                    'konten': 'Desa Kedungwinangun terus berkembang dengan potensi pertanian, UMKM, dan pelayanan digital untuk warga. Visi masa depan yang cerah telah dimulai.',
+                    'gambar_url': '',
+                    'video_url': ''
+                }
+            ]
 
         return render_template(
             "sejarah.html",

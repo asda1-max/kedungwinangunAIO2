@@ -566,6 +566,14 @@
                     Galeri
                 </a>
 
+                <a href="{{ url_for('admin.sejarah') }}"
+                   class="nav-item {% if request.endpoint and 'sejarah' in request.endpoint %}active{% endif %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Sejarah
+                </a>
+
                 <a href="{{ url_for('admin.pages') }}"
                    class="nav-item {% if request.endpoint and 'page' in request.endpoint %}active{% endif %}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

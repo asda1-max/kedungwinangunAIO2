@@ -1,0 +1,86 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Tambah Sejarah - Admin Panel{% endblock %}
+{% block page_title %}Tambah Sejarah{% endblock %}
+{% block page_subtitle %}Tambah entry baru untuk halaman sejarah desa{% endblock %}
+
+{% block content %}
+<div class="form-container animate-in">
+    <form action="{{ url_for('admin.add_sejarah_route') }}" method="POST" class="form">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="judul">Judul <span class="text-red-500">*</span></label>
+                <input type="text" id="judul" name="judul" required placeholder="Contoh: Masa Kemerdekaan">
+            </div>
+
+            <div class="form-group">
+                <label for="sub_judul">Sub Judul</label>
+                <input type="text" id="sub_judul" name="sub_judul" placeholder="Sub judul atau tagline">
+            </div>
+
+            <div class="form-group">
+                <label for="kategori">Kategori</label>
+                <select id="kategori" name="kategori">
+                    <option value="sejarah">Sejarah</option>
+                    <option value="politik">Politik</option>
+                    <option value="ekonomi">Ekonomi</option>
+                    <option value="pendidikan">Pendidikan</option>
+                    <option value="budaya">Budaya</option>
+                    <option value="pembangunan">Pembangunan</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tahun_dari">Tahun Dari</label>
+                <input type="number" id="tahun_dari" name="tahun_dari" placeholder="Contoh: 1945" min="1800" max="2100">
+            </div>
+
+            <div class="form-group">
+                <label for="tahun_sampai">Tahun Sampai</label>
+                <input type="number" id="tahun_sampai" name="tahun_sampai" placeholder="Kosongkan jika sama" min="1800" max="2100">
+            </div>
+
+            <div class="form-group">
+                <label for="urutan">Urutan Tampilan</label>
+                <input type="number" id="urutan" name="urutan" value="0" min="0">
+                <small class="hint">Angka kecil akan tampil lebih dulu</small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="konten">Konten <span class="text-red-500">*</span></label>
+            <textarea id="konten" name="konten" rows="8" required placeholder="Tuliskan cerita atau deskripsi tentang periode ini..."></textarea>
+            <small class="hint">Gunakan HTML untuk formatting sederhana: &lt;b&gt;, &lt;i&gt;, &lt;br&gt;</small>
+        </div>
+
+        <div class="form-group">
+            <label for="gambar_url">URL Gambar</label>
+            <input type="url" id="gambar_url" name="gambar_url" placeholder="https://contoh.com/gambar.jpg">
+            <small class="hint">Link gambar untuk背景 atau ilustrasi (opsional)</small>
+        </div>
+
+        <div class="form-group">
+            <label for="gambar_alt">Alt Text Gambar</label>
+            <input type="text" id="gambar_alt" name="gambar_alt" placeholder="Deskripsi singkat gambar">
+        </div>
+
+        <div class="form-group">
+            <label for="video_url">URL Video</label>
+            <input type="url" id="video_url" name="video_url" placeholder="https://youtube.com/watch?v=...">
+            <small class="hint">YouTube atau Vimeo link (opsional)</small>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin.sejarah') }}" class="btn btn-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Simpan Entry
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

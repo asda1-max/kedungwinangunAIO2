@@ -133,9 +133,29 @@ def init_database():
                 views TEXT DEFAULT '0',
                 gambar_url TEXT,
                 gambar_alt TEXT,
+                video_url TEXT,
                 penulis TEXT DEFAULT 'Admin Desa Kedungwinangun',
                 unggulan INTEGER DEFAULT 0,
+                facebook_auto_post INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            -- Sejarah Desa
+            CREATE TABLE IF NOT EXISTS sejarah_desa (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                judul TEXT NOT NULL,
+                sub_judul TEXT,
+                konten TEXT,
+                kategori TEXT DEFAULT 'sejarah',
+                tahun_dari INTEGER,
+                tahun_sampai INTEGER,
+                gambar_url TEXT,
+                gambar_alt TEXT,
+                video_url TEXT,
+                aktif INTEGER DEFAULT 1,
+                urutan INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
             -- Config
@@ -706,6 +726,106 @@ def delete_berita(berita_id):
         return True
     except Exception as e:
         logger.error(f"Error deleting berita {berita_id}: {str(e)}")
+        return False
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── SEJARAH DESA HELPERS ──────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_all_sejarah(aktif=None):
+    """Ambil semua entries sejarah desa"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if aktif is not None:
+            cursor.execute('SELECT * FROM sejarah_desa WHERE aktif = ? ORDER BY urutan ASC, tahun_dari ASC', (aktif,))
+        else:
+            cursor.execute('SELECT * FROM sejarah_desa ORDER BY urutan ASC, tahun_dari ASC')
+        sejarah = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return sejarah
+    except Exception as e:
+        logger.error(f"Error getting all sejarah: {str(e)}")
+        return []
+
+def get_sejarah_by_id(sejarah_id):
+    """Ambil satu entry sejarah berdasarkan ID"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM sejarah_desa WHERE id = ?', (sejarah_id,))
+        sejarah = cursor.fetchone()
+        conn.close()
+        return dict(sejarah) if sejarah else None
+    except Exception as e:
+        logger.error(f"Error getting sejarah {sejarah_id}: {str(e)}")
+        return None
+
+def add_sejarah(judul, konten, kategori='sejarah', tahun_dari=None, tahun_sampai=None,
+                gambar_url='', gambar_alt='', video_url='', sub_judul='', urutan=0):
+    """Tambah entry sejarah baru"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO sejarah_desa (judul, sub_judul, konten, kategori, tahun_dari, tahun_sampai,
+                                    gambar_url, gambar_alt, video_url, aktif, urutan, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
+        ''', (judul, sub_judul, konten, kategori, tahun_dari, tahun_sampai, gambar_url, gambar_alt,
+              video_url, urutan, datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+              datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding sejarah: {str(e)}")
+        return False
+
+def update_sejarah(sejarah_id, judul, konten, kategori='sejarah', tahun_dari=None, tahun_sampai=None,
+                   gambar_url='', gambar_alt='', video_url='', sub_judul='', aktif=1, urutan=0):
+    """Update entry sejarah"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE sejarah_desa
+            SET judul = ?, sub_judul = ?, konten = ?, kategori = ?, tahun_dari = ?, tahun_sampai = ?,
+                gambar_url = ?, gambar_alt = ?, video_url = ?, aktif = ?, urutan = ?, updated_at = ?
+            WHERE id = ?
+        ''', (judul, sub_judul, konten, kategori, tahun_dari, tahun_sampai, gambar_url, gambar_alt,
+              video_url, aktif, urutan, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), sejarah_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating sejarah {sejarah_id}: {str(e)}")
+        return False
+
+def delete_sejarah(sejarah_id):
+    """Hapus entry sejarah"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM sejarah_desa WHERE id = ?', (sejarah_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting sejarah {sejarah_id}: {str(e)}")
+        return False
+
+def toggle_sejarah_aktif(sejarah_id):
+    """Toggle aktif status"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE sejarah_desa SET aktif = NOT aktif WHERE id = ?', (sejarah_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling sejarah {sejarah_id}: {str(e)}")
         return False
 
 

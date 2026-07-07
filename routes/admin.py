@@ -50,6 +50,13 @@ from models import (
     update_potensi,
     delete_potensi,
     toggle_potensi_aktif,
+    # Sejarah Desa
+    get_all_sejarah,
+    get_sejarah_by_id,
+    add_sejarah,
+    update_sejarah,
+    delete_sejarah,
+    toggle_sejarah_aktif,
 )
 from errors import admin_required, flash_error
 from config import Config
@@ -637,6 +644,162 @@ def toggle_galeri_route(galeri_id):
         logger.error(f"Error toggling galeri {galeri_id}: {str(e)}")
         flash_error('Terjadi kesalahan saat mengubah status galeri')
     return redirect(url_for('admin.galeri'))
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── SEJARAH DESA MANAGEMENT ──────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+@admin_bp.route("/sejarah")
+@admin_required
+def sejarah():
+    """Halaman list sejarah desa"""
+    try:
+        all_sejarah = get_all_sejarah()
+        return render_template("admin/sejarah.html", sejarah_list=all_sejarah)
+    except Exception as e:
+        logger.error(f"Error loading sejarah page: {str(e)}")
+        flash_error('Terjadi kesalahan saat memuat halaman sejarah')
+        return redirect(url_for('admin.dashboard'))
+
+
+@admin_bp.route("/sejarah/add", methods=['GET', 'POST'])
+@admin_required
+def add_sejarah_route():
+    """Form tambah sejarah"""
+    if request.method == 'POST':
+        try:
+            judul = request.form.get('judul', '').strip()
+            sub_judul = request.form.get('sub_judul', '').strip()
+            konten = request.form.get('konten', '').strip()
+            kategori = request.form.get('kategori', 'sejarah').strip()
+            tahun_dari = request.form.get('tahun_dari', '')
+            tahun_sampai = request.form.get('tahun_sampai', '')
+            gambar_url = request.form.get('gambar_url', '').strip()
+            gambar_alt = request.form.get('gambar_alt', '').strip()
+            video_url = request.form.get('video_url', '').strip()
+            urutan = int(request.form.get('urutan', 0))
+
+            if not judul:
+                flash_error('Judul wajib diisi!')
+                return redirect(request.url)
+
+            # Parse tahun
+            tahun_dari_int = int(tahun_dari) if tahun_dari else None
+            tahun_sampai_int = int(tahun_sampai) if tahun_sampai else None
+
+            result = add_sejarah(
+                judul=judul,
+                sub_judul=sub_judul,
+                konten=konten,
+                kategori=kategori,
+                tahun_dari=tahun_dari_int,
+                tahun_sampai=tahun_sampai_int,
+                gambar_url=gambar_url,
+                gambar_alt=gambar_alt,
+                video_url=video_url,
+                urutan=urutan
+            )
+
+            if result:
+                flash('Entry sejarah berhasil ditambahkan!', 'success')
+                return redirect(url_for('admin.sejarah'))
+            else:
+                flash_error('Gagal menambahkan sejarah!')
+        except Exception as e:
+            logger.error(f"Error adding sejarah: {str(e)}")
+            flash_error('Terjadi kesalahan saat menambahkan sejarah')
+
+    return render_template("admin/add_sejarah.html")
+
+
+@admin_bp.route("/sejarah/edit/<int:sejarah_id>", methods=['GET', 'POST'])
+@admin_required
+def edit_sejarah_route(sejarah_id):
+    """Form edit sejarah"""
+    sejarah = get_sejarah_by_id(sejarah_id)
+    if not sejarah:
+        flash_error('Sejarah tidak ditemukan!')
+        return redirect(url_for('admin.sejarah'))
+
+    if request.method == 'POST':
+        try:
+            judul = request.form.get('judul', '').strip()
+            sub_judul = request.form.get('sub_judul', '').strip()
+            konten = request.form.get('konten', '').strip()
+            kategori = request.form.get('kategori', 'sejarah').strip()
+            tahun_dari = request.form.get('tahun_dari', '')
+            tahun_sampai = request.form.get('tahun_sampai', '')
+            gambar_url = request.form.get('gambar_url', '').strip()
+            gambar_alt = request.form.get('gambar_alt', '').strip()
+            video_url = request.form.get('video_url', '').strip()
+            aktif = 1 if request.form.get('aktif') else 0
+            urutan = int(request.form.get('urutan', 0))
+
+            if not judul:
+                flash_error('Judul wajib diisi!')
+                return redirect(request.url)
+
+            tahun_dari_int = int(tahun_dari) if tahun_dari else None
+            tahun_sampai_int = int(tahun_sampai) if tahun_sampai else None
+
+            result = update_sejarah(
+                sejarah_id=sejarah_id,
+                judul=judul,
+                sub_judul=sub_judul,
+                konten=konten,
+                kategori=kategori,
+                tahun_dari=tahun_dari_int,
+                tahun_sampai=tahun_sampai_int,
+                gambar_url=gambar_url,
+                gambar_alt=gambar_alt,
+                video_url=video_url,
+                aktif=aktif,
+                urutan=urutan
+            )
+
+            if result:
+                flash('Sejarah berhasil diupdate!', 'success')
+                return redirect(url_for('admin.sejarah'))
+            else:
+                flash_error('Gagal update sejarah!')
+        except Exception as e:
+            logger.error(f"Error updating sejarah {sejarah_id}: {str(e)}")
+            flash_error('Terjadi kesalahan saat update sejarah')
+
+    return render_template("admin/edit_sejarah.html", sejarah=sejarah)
+
+
+@admin_bp.route("/sejarah/delete/<int:sejarah_id>", methods=['POST'])
+@admin_required
+def delete_sejarah_route(sejarah_id):
+    """Hapus sejarah"""
+    try:
+        result = delete_sejarah(sejarah_id)
+        if result:
+            flash('Sejarah berhasil dihapus!', 'success')
+        else:
+            flash_error('Gagal menghapus sejarah!')
+    except Exception as e:
+        logger.error(f"Error deleting sejarah {sejarah_id}: {str(e)}")
+        flash_error('Terjadi kesalahan saat menghapus sejarah')
+    return redirect(url_for('admin.sejarah'))
+
+
+@admin_bp.route("/sejarah/toggle/<int:sejarah_id>", methods=['POST'])
+@admin_required
+def toggle_sejarah_route(sejarah_id):
+    """Toggle status aktif/nonaktif sejarah"""
+    try:
+        result = toggle_sejarah_aktif(sejarah_id)
+        if result:
+            flash('Status sejarah berhasil diubah!', 'success')
+        else:
+            flash_error('Gagal mengubah status sejarah!')
+    except Exception as e:
+        logger.error(f"Error toggling sejarah {sejarah_id}: {str(e)}")
+        flash_error('Terjadi kesalahan saat mengubah status sejarah')
+    return redirect(url_for('admin.sejarah'))
 
 
 # ════════════════════════════════════════════════════════════════════════

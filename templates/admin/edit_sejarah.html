@@ -1,0 +1,101 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Edit Sejarah - Admin Panel{% endblock %}
+{% block page_title %}Edit Sejarah{% endblock %}
+{% block page_subtitle %}Edit entry sejarah: {{ sejarah.judul }}{% endblock %}
+
+{% block content %}
+<div class="form-container animate-in">
+    <form action="{{ url_for('admin.edit_sejarah_route', sejarah_id=sejarah.id) }}" method="POST" class="form">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="judul">Judul <span class="text-red-500">*</span></label>
+                <input type="text" id="judul" name="judul" required value="{{ sejarah.judul }}">
+            </div>
+
+            <div class="form-group">
+                <label for="sub_judul">Sub Judul</label>
+                <input type="text" id="sub_judul" name="sub_judul" value="{{ sejarah.sub_judul or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="kategori">Kategori</label>
+                <select id="kategori" name="kategori">
+                    <option value="sejarah" {% if sejarah.kategori == 'sejarah' %}selected{% endif %}>Sejarah</option>
+                    <option value="politik" {% if sejarah.kategori == 'politik' %}selected{% endif %}>Politik</option>
+                    <option value="ekonomi" {% if sejarah.kategori == 'ekonomi' %}selected{% endif %}>Ekonomi</option>
+                    <option value="pendidikan" {% if sejarah.kategori == 'pendidikan' %}selected{% endif %}>Pendidikan</option>
+                    <option value="budaya" {% if sejarah.kategori == 'budaya' %}selected{% endif %}>Budaya</option>
+                    <option value="pembangunan" {% if sejarah.kategori == 'pembangunan' %}selected{% endif %}>Pembangunan</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tahun_dari">Tahun Dari</label>
+                <input type="number" id="tahun_dari" name="tahun_dari" value="{{ sejarah.tahun_dari or '' }}" min="1800" max="2100">
+            </div>
+
+            <div class="form-group">
+                <label for="tahun_sampai">Tahun Sampai</label>
+                <input type="number" id="tahun_sampai" name="tahun_sampai" value="{{ sejarah.tahun_sampai or '' }}" min="1800" max="2100">
+            </div>
+
+            <div class="form-group">
+                <label for="urutan">Urutan Tampilan</label>
+                <input type="number" id="urutan" name="urutan" value="{{ sejarah.urutan or 0 }}" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="aktif">Status</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="aktif" name="aktif" value="1" {% if sejarah.aktif == 1 %}checked{% endif %}>
+                    <label for="aktif">Aktif / Tampilkan di website</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="konten">Konten <span class="text-red-500">*</span></label>
+            <textarea id="konten" name="konten" rows="10" required>{{ sejarah.konten }}</textarea>
+            <small class="hint">Gunakan HTML untuk formatting sederhana: &lt;b&gt;, &lt;i&gt;, &lt;br&gt;</small>
+        </div>
+
+        <div class="form-group">
+            <label for="gambar_url">URL Gambar</label>
+            <input type="url" id="gambar_url" name="gambar_url" value="{{ sejarah.gambar_url or '' }}" placeholder="https://contoh.com/gambar.jpg">
+            {% if sejarah.gambar_url %}
+            <div class="mt-2">
+                <img src="{{ sejarah.gambar_url }}" alt="Preview" class="w-32 h-32 object-cover rounded-lg">
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="gambar_alt">Alt Text Gambar</label>
+            <input type="text" id="gambar_alt" name="gambar_alt" value="{{ sejarah.gambar_alt or '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="video_url">URL Video</label>
+            <input type="url" id="video_url" name="video_url" value="{{ sejarah.video_url or '' }}" placeholder="https://youtube.com/watch?v=...">
+            {% if sejarah.video_url %}
+            <div class="mt-2 text-sm text-gray-500">
+                Video URL: {{ sejarah.video_url }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin.sejarah') }}" class="btn btn-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Update Entry
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
