@@ -11,10 +11,10 @@ Penggunaan:
         flash_error, json_error_response, json_success_response,
 
         # Route Decorators
-        admin_required, dinas_required, warga_required, login_required, require_role,
+        admin_required, dinas_required, login_required, require_role,
 
         # Validation Helpers
-        validate_required, validate_nik, validate_email, validate_password,
+        validate_required, validate_email, validate_password,
 
         # Error Page Rendering
         render_error_page,
@@ -404,31 +404,6 @@ def dinas_required(func):
     return wrapper
 
 
-def warga_required(func):
-    """
-    Decorator untuk proteksi route warga/penduduk.
-
-    Usage:
-        @warga_required
-        def submit_permohonan():
-            pass
-    """
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        from flask import session
-
-        if not session.get('user_logged_in'):
-            flash_error('Silakan login terlebih dahulu.', 'error')
-            return redirect(url_for('public.login') + '#warga')
-
-        if session.get('user_role') != 'penduduk':
-            flash_error('Halaman ini hanya untuk warga.', 'error')
-            return redirect(url_for('public.index'))
-
-        return func(*args, **kwargs)
-    return wrapper
-
-
 def login_required(func):
     """
     Decorator untuk proteksi route - user harus login (semua role).
@@ -477,28 +452,6 @@ def validate_required(data: dict, required_fields: list, prefix: str = "") -> tu
         if prefix:
             return False, f"{prefix}: {field_names} wajib diisi."
         return False, f"Field berikut wajib diisi: {field_names}"
-
-    return True, ""
-
-
-def validate_nik(nik: str) -> tuple:
-    """
-    Validasi NIK (16 digit angka).
-
-    Args:
-        nik: NIK string
-
-    Returns:
-        Tuple (is_valid: bool, error_message: str)
-    """
-    if not nik:
-        return False, "NIK tidak boleh kosong."
-
-    if not nik.isdigit():
-        return False, "NIK harus berisi angka saja."
-
-    if len(nik) != 16:
-        return False, "NIK harus 16 digit."
 
     return True, ""
 

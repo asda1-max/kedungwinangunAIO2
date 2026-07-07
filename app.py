@@ -13,8 +13,7 @@ Struktur Project:
         __init__.py
         public.py    - Route publik (beranda, berita)
         admin.py    - Route admin (kelola berita, config)
-        user.py     - Route warga (register, login, permohonan)
-        dinas.py    - Route dinas (verifikasi, approve surat)
+        user.py     - Route warga (register, login)
     templates/       - Template HTML
     static/          - Asset statis
 
@@ -58,12 +57,10 @@ def inject_custom_pages():
     return {'custom_pages_nav': get_all_pages()}
 
 # ── Register Blueprints ───────────────────────────────────────────────
-from routes import public_bp, admin_bp, user_bp, dinas_bp
+from routes import public_bp, admin_bp
 
 app.register_blueprint(public_bp)    # Public routes: /, /berita, /berita/<id>
 app.register_blueprint(admin_bp)      # Admin routes: /admin/*
-app.register_blueprint(user_bp)       # User routes: /register, /login, /dashboard, /surat/*
-app.register_blueprint(dinas_bp)      # Dinas routes: /dinas/*
 
 
 # ── Error Handlers ────────────────────────────────────────────────────

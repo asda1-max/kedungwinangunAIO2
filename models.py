@@ -11,7 +11,7 @@ import sqlite3
 import logging
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from config import Config, DEFAULT_CONFIG, DEFAULT_JENIS_SURAT, DEFAULT_USERS
+from config import Config, DEFAULT_CONFIG, DEFAULT_USERS
 from database import (
     DatabaseError,
     db_fetch_one,
@@ -119,46 +119,6 @@ def init_database():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 approved_by INTEGER,
                 approved_at TIMESTAMP
-            );
-
-            -- Permohonan ACC
-            CREATE TABLE IF NOT EXISTS permohonan_acc (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                status TEXT DEFAULT 'pending',
-                catatan TEXT,
-                processed_by INTEGER,
-                processed_at TIMESTAMP,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            );
-
-            -- Jenis Surat
-            CREATE TABLE IF NOT EXISTS jenis_surat (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                kode TEXT UNIQUE NOT NULL,
-                nama TEXT NOT NULL,
-                deskripsi TEXT,
-                required_docs TEXT,
-                active INTEGER DEFAULT 1,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-
-            -- Permohonan Surat
-            CREATE TABLE IF NOT EXISTS permohonan_surat (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                jenis_surat_id INTEGER NOT NULL,
-                nomor_surat TEXT,
-                data_json TEXT,
-                status TEXT DEFAULT 'pending',
-                catatan TEXT,
-                file_surat TEXT,
-                approved_by INTEGER,
-                approved_at TIMESTAMP,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id),
-                FOREIGN KEY (jenis_surat_id) REFERENCES jenis_surat (id)
             );
 
             -- Berita
@@ -308,15 +268,6 @@ def init_database():
                         VALUES (?, ?, ?, ?, ?, ?, ?)
                     ''', (login_id, nama, hashed, role, 'approved', 1, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
-        # Insert default jenis surat
-        for kode, nama, desc, docs, active in DEFAULT_JENIS_SURAT:
-            cursor.execute('SELECT * FROM jenis_surat WHERE kode = ?', (kode,))
-            if not cursor.fetchone():
-                cursor.execute('''
-                    INSERT INTO jenis_surat (kode, nama, deskripsi, required_docs, active)
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (kode, nama, desc, docs, active))
-
         conn.commit()
         conn.close()
         logger.info("Database initialized successfully")
@@ -426,19 +377,6 @@ def get_user_by_nip(nip):
         logger.error(f"Error getting user by NIP: {str(e)}")
         return None
 
-def get_user_by_nik(nik):
-    """Ambil user berdasarkan NIK"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE nik = ?', (nik,))
-        user = cursor.fetchone()
-        conn.close()
-        return dict(user) if user else None
-    except Exception as e:
-        logger.error(f"Error getting user by NIK: {str(e)}")
-        return None
-
 def get_user_by_id(user_id):
     """Ambil user berdasarkan ID"""
     try:
@@ -532,40 +470,6 @@ def get_all_warga_approved():
     except Exception as e:
         logger.error(f"Error getting approved warga: {str(e)}")
         return []
-
-def approve_user(user_id, processed_by):
-    """Setujui pendaftaran user"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            UPDATE users SET status = ?, approved_by = ?, approved_at = ? WHERE id = ?
-        ''', ('approved', processed_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
-        cursor.execute('''
-            UPDATE permohonan_acc SET status = ?, processed_by = ?, processed_at = ? WHERE user_id = ?
-        ''', ('approved', processed_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
-        conn.commit()
-        conn.close()
-        return True
-    except Exception as e:
-        logger.error(f"Error approving user {user_id}: {str(e)}")
-        return False
-
-def reject_user(user_id, processed_by, catatan=''):
-    """Tolak pendaftaran user"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('UPDATE users SET status = ? WHERE id = ?', ('rejected', user_id))
-        cursor.execute('''
-            UPDATE permohonan_acc SET status = ?, processed_by = ?, catatan = ?, processed_at = ? WHERE user_id = ?
-        ''', ('rejected', processed_by, catatan, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user_id))
-        conn.commit()
-        conn.close()
-        return True
-    except Exception as e:
-        logger.error(f"Error rejecting user {user_id}: {str(e)}")
-        return False
 
 # ════════════════════════════════════════════════════════════════════════
 # ── ACCOUNT CENTER HELPERS ─────────────────────────────────────────────
@@ -802,163 +706,6 @@ def delete_berita(berita_id):
         return True
     except Exception as e:
         logger.error(f"Error deleting berita {berita_id}: {str(e)}")
-        return False
-
-
-# ════════════════════════════════════════════════════════════════════════
-# ── SURAT HELPERS ───────────────────────────────────────────────────────
-# ════════════════════════════════════════════════════════════════════════
-
-def get_all_jenis_surat():
-    """Ambil semua jenis surat aktif"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM jenis_surat WHERE active = 1 ORDER BY nama')
-        surats = [dict(row) for row in cursor.fetchall()]
-        conn.close()
-        return surats
-    except Exception as e:
-        logger.error(f"Error getting all jenis surat: {str(e)}")
-        return []
-
-def get_jenis_surat_by_id(jenis_id):
-    """Ambil jenis surat berdasarkan ID"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM jenis_surat WHERE id = ?', (jenis_id,))
-        surat = cursor.fetchone()
-        conn.close()
-        return dict(surat) if surat else None
-    except Exception as e:
-        logger.error(f"Error getting jenis surat {jenis_id}: {str(e)}")
-        return None
-
-def create_permohonan_surat(user_id, jenis_surat_id, data_json):
-    """Buat permohonan surat baru"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO permohonan_surat (user_id, jenis_surat_id, data_json, status, created_at)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (user_id, jenis_surat_id, data_json, 'pending', datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-        conn.commit()
-        conn.close()
-        return True
-    except Exception as e:
-        logger.error(f"Error creating permohonan surat: {str(e)}")
-        return False
-
-def get_permohonan_surat_by_user(user_id):
-    """Ambil permohonan surat berdasarkan user"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode
-            FROM permohonan_surat ps
-            JOIN jenis_surat js ON ps.jenis_surat_id = js.id
-            WHERE ps.user_id = ?
-            ORDER BY ps.created_at DESC
-        ''', (user_id,))
-        permits = [dict(row) for row in cursor.fetchall()]
-        conn.close()
-        return permits
-    except Exception as e:
-        logger.error(f"Error getting permohonan by user {user_id}: {str(e)}")
-        return []
-
-def get_all_permohonan_surat():
-    """Ambil semua permohonan surat"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode, u.nama_lengkap, u.nik, u.alamat
-            FROM permohonan_surat ps
-            JOIN jenis_surat js ON ps.jenis_surat_id = js.id
-            JOIN users u ON ps.user_id = u.id
-            ORDER BY ps.created_at DESC
-        ''')
-        permits = [dict(row) for row in cursor.fetchall()]
-        conn.close()
-        return permits
-    except Exception as e:
-        logger.error(f"Error getting all permohonan surat: {str(e)}")
-        return []
-
-def get_pending_permohonan_surat():
-    """Ambil permohonan surat pending"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode, u.nama_lengkap, u.nik
-            FROM permohonan_surat ps
-            JOIN jenis_surat js ON ps.jenis_surat_id = js.id
-            JOIN users u ON ps.user_id = u.id
-            WHERE ps.status = ?
-            ORDER BY ps.created_at DESC
-        ''', ('pending',))
-        permits = [dict(row) for row in cursor.fetchall()]
-        conn.close()
-        return permits
-    except Exception as e:
-        logger.error(f"Error getting pending permohonan: {str(e)}")
-        return []
-
-def get_permohonan_detail(permit_id):
-    """Ambil detail permohonan surat"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT ps.*, js.nama as jenis_nama, js.kode as jenis_kode, js.required_docs,
-                   u.nama_lengkap, u.nik, u.alamat, u.no_telepon, u.email
-            FROM permohonan_surat ps
-            JOIN jenis_surat js ON ps.jenis_surat_id = js.id
-            JOIN users u ON ps.user_id = u.id
-            WHERE ps.id = ?
-        ''', (permit_id,))
-        permit = cursor.fetchone()
-        conn.close()
-        return dict(permit) if permit else None
-    except Exception as e:
-        logger.error(f"Error getting permohonan detail {permit_id}: {str(e)}")
-        return None
-
-def approve_permohonan_surat(permit_id, approved_by, nomor_surat, catatan=''):
-    """Setujui permohonan surat"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            UPDATE permohonan_surat
-            SET status = ?, approved_by = ?, approved_at = ?, nomor_surat = ?, catatan = ?
-            WHERE id = ?
-        ''', ('approved', approved_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), nomor_surat, catatan, permit_id))
-        conn.commit()
-        conn.close()
-        return True
-    except Exception as e:
-        logger.error(f"Error approving permohonan {permit_id}: {str(e)}")
-        return False
-
-def reject_permohonan_surat(permit_id, processed_by, catatan=''):
-    """Tolak permohonan surat"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('''
-            UPDATE permohonan_surat SET status = ?, catatan = ? WHERE id = ?
-        ''', ('rejected', catatan, permit_id))
-        conn.commit()
-        conn.close()
-        return True
-    except Exception as e:
-        logger.error(f"Error rejecting permohonan {permit_id}: {str(e)}")
         return False
 
 

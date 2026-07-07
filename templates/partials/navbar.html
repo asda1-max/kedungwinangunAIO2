@@ -124,17 +124,17 @@
                                 Panel Dinas
                             </a>
                             {% elif session.user_role == 'dinas' %}
-                            <a href="{{ url_for('dinas.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 text-sm">
+                            <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 text-sm">
                                 <span class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-sm">📊</span>
                                 Dashboard Dinas
                             </a>
                             {% endif %}
-                            <a href="{{ url_for('user.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 text-sm">
+                            <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 text-sm">
                                 <span class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center text-sm">📋</span>
                                 Dashboard Saya
                             </a>
                             <div class="my-2 border-t border-gray-100"></div>
-                            <a href="{{ url_for('user.logout') }}" class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 text-sm">
+                            <a href="{{ url_for('public.logout') }}" class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 text-sm">
                                 <span class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-sm">🚪</span>
                                 Keluar
                             </a>
@@ -146,17 +146,11 @@
                 {# ── Desktop: Guest Buttons ── #}
                 {% if not session.user_logged_in %}
                 <div class="hidden md:flex items-center gap-2">
-                    <a href="{{ url_for('user.login') }}" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/20 transition-all">
+                    <a href="{{ url_for('public.login') }}" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/20 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                         </svg>
                         Masuk
-                    </a>
-                    <a href="{{ url_for('user.register') }}" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[#155C1B] text-sm font-semibold bg-[#73AA0F] hover:bg-[#63930b] shadow-md transition-all">
-                        Daftar
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                        </svg>
                     </a>
                 </div>
                 {% endif %}
@@ -227,21 +221,21 @@
                         <span class="w-7 h-7 rounded-lg bg-[#155C1B]/30 flex items-center justify-center text-xs">⚙️</span>
                         Dashboard Admin
                     </a>
-                    <a href="{{ url_for('dinas.dashboard') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                    <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
                         <span class="w-7 h-7 rounded-lg bg-blue-500/30 flex items-center justify-center text-xs">📊</span>
-                        Panel Dinas
+                        Dashboard Dinas
                     </a>
                     {% elif session.user_role == 'dinas' %}
-                    <a href="{{ url_for('dinas.dashboard') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                    <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
                         <span class="w-7 h-7 rounded-lg bg-blue-500/30 flex items-center justify-center text-xs">📊</span>
                         Dashboard Dinas
                     </a>
                     {% endif %}
-                    <a href="{{ url_for('user.dashboard') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                    <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
                         <span class="w-7 h-7 rounded-lg bg-green-500/30 flex items-center justify-center text-xs">📋</span>
                         Dashboard Saya
                     </a>
-                    <a href="{{ url_for('user.logout') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-red-300 hover:bg-red-500/20 transition-colors">
+                    <a href="{{ url_for('public.logout') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-red-300 hover:bg-red-500/20 transition-colors">
                         <span class="w-7 h-7 rounded-lg bg-red-500/30 flex items-center justify-center text-xs">🚪</span>
                         Keluar / Logout
                     </a>
@@ -250,8 +244,7 @@
 
                 {% if not session.user_logged_in %}
                 <div class="flex gap-2">
-                    <a href="{{ url_for('user.login') }}" class="flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition-colors">Masuk</a>
-                    <a href="{{ url_for('user.register') }}" class="flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-[#73AA0F] text-white hover:bg-[#63930b] transition-colors">Daftar</a>
+                    <a href="{{ url_for('public.login') }}" class="flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition-colors">Masuk</a>
                 </div>
                 {% endif %}
 

@@ -23,7 +23,6 @@ from models import (
     delete_berita,
     get_all_config,
     update_config,
-    get_user_by_nik,
     get_user_by_id,
     get_all_galeri,
     get_galeri_by_id,

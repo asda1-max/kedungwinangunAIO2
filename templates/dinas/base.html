@@ -431,15 +431,6 @@
                     Pendaftaran
                 </a>
 
-                <a href="{{ url_for('dinas.permohonan_list') }}" class="sidebar-item {% if request.endpoint in ['dinas.permohonan_list', 'dinas.permohonan_detail'] %}active{% endif %}">
-                    <div class="sidebar-icon">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                    Permohonan Surat
-                </a>
-
                 <a href="{{ url_for('dinas.all_users') }}" class="sidebar-item {% if request.endpoint == 'dinas.all_users' %}active{% endif %}">
                     <div class="sidebar-icon">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -484,7 +475,7 @@
                         </button>
                         <div>
                             <h2 class="text-lg font-bold text-slate-900">{% block page_title %}Dashboard{% endblock %}</h2>
-                            <p class="text-sm text-slate-500">{% block page_subtitle %}Kelola pendaftaran dan permohonan surat warga{% endblock %}</p>
+                            <p class="text-sm text-slate-500">{% block page_subtitle %}Kelola pendaftaran dan data warga{% endblock %}</p>
                         </div>
                     </div>
                     <div class="user-menu">

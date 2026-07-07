@@ -428,13 +428,6 @@
                 </svg>
                 Dinas
             </button>
-            <button type="button" class="role-tab" onclick="switchTab('warga')" id="tab-warga">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                </svg>
-                Warga
-            </button>
         </div>
 
         <!-- Admin Login Form -->
@@ -477,30 +470,6 @@
             </button>
         </form>
 
-        <!-- Warga Login Form -->
-        <form method="POST" action="{{ url_for('public.login') }}" class="login-form" id="form-warga">
-            <input type="hidden" name="login_type" value="warga">
-            <div class="form-group">
-                <label for="warga_nik">NIK (Nomor Induk Kependudukan)</label>
-                <input type="text" id="warga_nik" name="nik" placeholder="Ketik 16 digit NIK..." required autocomplete="username" maxlength="16" pattern="[0-9]{16}">
-                <p class="hint">NIK ada di KTP Anda</p>
-            </div>
-            <div class="form-group">
-                <label for="warga_password">Password</label>
-                <input type="password" id="warga_password" name="password" placeholder="Ketik password..." required autocomplete="current-password">
-            </div>
-            <button type="submit" class="btn">
-                Masuk sebagai Warga
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                    <polyline points="12 5 19 12 12 19"/>
-                </svg>
-            </button>
-            <div class="register-link">
-                Belum punya akun? <a href="{{ url_for('user.register') }}">Daftar di sini</a>
-            </div>
-        </form>
-
         <a href="{{ url_for('public.index') }}" class="back">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"/>
@@ -515,19 +484,15 @@
             // Update tabs
             document.getElementById('tab-admin').classList.toggle('active', tab === 'admin');
             document.getElementById('tab-dinas').classList.toggle('active', tab === 'dinas');
-            document.getElementById('tab-warga').classList.toggle('active', tab === 'warga');
 
             // Update forms
             document.getElementById('form-admin').classList.toggle('active', tab === 'admin');
             document.getElementById('form-dinas').classList.toggle('active', tab === 'dinas');
-            document.getElementById('form-warga').classList.toggle('active', tab === 'warga');
         }
 
         // Check URL hash for default tab
         if (window.location.hash === '#dinas') {
             switchTab('dinas');
-        } else if (window.location.hash === '#warga') {
-            switchTab('warga');
         }
     </script>
 </body>

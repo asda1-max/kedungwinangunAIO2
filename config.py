@@ -59,9 +59,10 @@ DEFAULT_CONFIG = {
 # ── Nav Links (Static) ─────────────────────────────────────────────────
 NAV_LINKS = [
     {"label": "Beranda", "href": "/", "active": True},
-    {"label": "Layanan Surat", "href": "/layanan", "active": False},
+    {"label": "Sejarah", "href": "/sejarah", "active": False},
     {"label": "Pengumuman", "href": "/pengumuman", "active": False},
-    {"label": "Potensi", "href": "#potensi", "active": False},
+    {"label": "Berita", "href": "/berita", "active": False},
+    {"label": "Galeri", "href": "/galeri", "active": False},
     {"label": "Kontak", "href": "/kontak", "active": False},
 ]
 
@@ -86,17 +87,6 @@ ROLES = {
     'dinas': 'Petugas Dinas',
     'penduduk': 'Penduduk'
 }
-
-# ── Surat Katalog Default ──────────────────────────────────────────────
-DEFAULT_JENIS_SURAT = [
-    ('SKU', 'Surat Keterangan Usaha', 'Surat keterangan untuk pelaku usaha mikro dan kecil', 'ktp,kk', 1),
-    ('SKTM', 'Surat Keterangan Tidak Mampu', 'Surat keterangan untuk keluarga kurang mampu', 'ktp,kk,surat_keterangan_rt', 1),
-    ('SKCK', 'Surat Pengantar SKCK', 'Surat pengantar untuk membuat SKCK', 'ktp', 1),
-    ('DOMISILI', 'Surat Keterangan Domisili', 'Surat keterangan tempat tinggal', 'ktp,kk', 1),
-    ('BELUM_NIKAH', 'Surat Keterangan Belum Menikah', 'Surat keterangan belum pernah menikah', 'ktp,kk,surat_keterangan_rt', 1),
-    ('LAHIR', 'Surat Keterangan Kelahiran', 'Surat keterangan bayi yang lahir', 'ktp_ayah,ktp_ibu,kk,surat_keterangan_bidan', 1),
-    ('MATI', 'Surat Keterangan Kematian', 'Surat keterangan seseorang telah meninggal', 'ktp_almarhum,kk,surat_keterangan_kades', 1),
-]
 
 # ── Default Users ───────────────────────────────────────────────────────
 # Format: (login_id, nama_lengkap, password, role)
@@ -126,46 +116,6 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     approved_by INTEGER,
     approved_at TIMESTAMP
-);
-
--- Permohonan ACC (Registration Approvals)
-CREATE TABLE IF NOT EXISTS permohonan_acc (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    status TEXT DEFAULT 'pending',
-    catatan TEXT,
-    processed_by INTEGER,
-    processed_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-);
-
--- Jenis Surat
-CREATE TABLE IF NOT EXISTS jenis_surat (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    kode TEXT UNIQUE NOT NULL,
-    nama TEXT NOT NULL,
-    deskripsi TEXT,
-    required_docs TEXT,
-    active INTEGER DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Permohonan Surat
-CREATE TABLE IF NOT EXISTS permohonan_surat (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    jenis_surat_id INTEGER NOT NULL,
-    nomor_surat TEXT,
-    data_json TEXT,
-    status TEXT DEFAULT 'pending',
-    catatan TEXT,
-    file_surat TEXT,
-    approved_by INTEGER,
-    approved_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (jenis_surat_id) REFERENCES jenis_surat (id)
 );
 
 -- Berita

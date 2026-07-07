@@ -17,10 +17,8 @@ from models import (
     get_berita_by_id,
     get_config,
     get_all_galeri,
-    get_user_by_nik,
     get_user_by_username,
     get_user_by_nip,
-    verify_user,
     get_all_pages,
     get_page_by_slug,
     get_komentar_by_berita,
@@ -63,9 +61,7 @@ def login():
         if role == 'admin':
             return redirect(url_for('admin.dashboard'))
         elif role == 'dinas':
-            return redirect(url_for('dinas.dashboard'))
-        else:
-            return redirect(url_for('user.dashboard'))
+            return redirect(url_for('admin.dashboard'))
 
     if request.method == 'POST':
         login_type = request.form.get('login_type', 'admin')
@@ -108,31 +104,9 @@ def login():
                 session['user_nik'] = user.get('nik', '')
                 session['user_role'] = user['role']
                 flash(f'Selamat datang, {user["nama_lengkap"]}!', 'success')
-                return redirect(url_for('dinas.dashboard'))
+                return redirect(url_for('admin.dashboard'))
             else:
                 flash('NIP atau password salah!', 'error')
-
-        elif login_type == 'warga':
-            # Warga Login
-            nik = request.form.get('nik', '').strip()
-            password = request.form.get('password', '')
-
-            if not nik or not password:
-                flash('NIK dan password wajib diisi!', 'error')
-                return redirect(request.url)
-
-            user = verify_user(nik, password)
-            if user:
-                session['user_logged_in'] = True
-                session['user_id'] = user['id']
-                session['user_nama'] = user['nama_lengkap']
-                session['user_nik'] = user['nik']
-                session['user_role'] = user['role']
-
-                flash(f'Selamat datang, {user["nama_lengkap"]}!', 'success')
-                return redirect(url_for('user.dashboard'))
-            else:
-                flash('NIK atau password salah!', 'error')
 
     # Render login page
     try:
@@ -149,6 +123,14 @@ def login():
         logger.error(f"Error rendering login page: {str(e)}")
         flash('Terjadi kesalahan saat memuat halaman. Silakan coba lagi.', 'error')
         return redirect(url_for('public.index'))
+
+
+@public_bp.route("/logout")
+def logout():
+    """Logout route - clears session"""
+    session.clear()
+    flash('Anda telah keluar dari sistem.', 'info')
+    return redirect(url_for('public.index'))
 
 
 @public_bp.route("/")
@@ -309,63 +291,6 @@ def detail_berita(berita_id):
         logger.error(f"Error loading berita {berita_id}: {str(e)}")
         flash('Terjadi kesalahan saat memuat berita', 'error')
         return redirect(url_for('public.berita'))
-
-
-@public_bp.route("/surat")
-def surat_info():
-    """Redirect /surat ke /layanan"""
-    return redirect(url_for('public.layanan'))
-
-
-@public_bp.route("/layanan")
-def layanan():
-    """Halaman daftar layanan - redirect guest ke register"""
-    # Cek apakah user sudah login
-    if 'user_logged_in' not in session:
-        return redirect(url_for('user.register', next=url_for('public.layanan')))
-
-    # User sudah login, tampilkan form permohonan surat
-    from models import get_all_jenis_surat, create_permohonan_surat
-    import json
-
-    try:
-        custom_pages = get_all_pages()
-        jenis_surat = get_all_jenis_surat()
-        desa_info = get_desa_info_with_maps()
-
-        # Handle form submission
-        if request.method == 'POST':
-            jenis_id = request.form.get('jenis_surat_id', '')
-            data = {}
-            for key, value in request.form.items():
-                if key not in ['jenis_surat_id']:
-                    data[key] = value
-
-            if not jenis_id:
-                flash('Pilih jenis surat terlebih dahulu', 'error')
-                return redirect(request.url)
-
-            success = create_permohonan_surat(session.get('user_id'), jenis_id, json.dumps(data))
-            if success:
-                flash('Permohonan surat berhasil diajukan! Mohon tunggu persetujuan.', 'success')
-            else:
-                flash('Terjadi kesalahan saat mengajukan permohonan. Silakan coba lagi.', 'error')
-            return redirect(url_for('user.dashboard'))
-
-        return render_template(
-            "/user/surat_permohonan.html",
-            desa=desa_info,
-            nav_links=[{**n, "active": n["label"] == "Layanan"} for n in NAV_LINKS],
-            jenis_surat=jenis_surat,
-            site_name=desa_info['nama'],
-            site_tagline=desa_info['tagline'],
-            site_description=desa_info['deskripsi'],
-            custom_pages=custom_pages,
-        )
-    except Exception as e:
-        logger.error(f"Error in layanan: {str(e)}")
-        flash('Terjadi kesalahan saat memuat halaman layanan', 'error')
-        return redirect(url_for('public.index'))
 
 
 @public_bp.route("/kontak")
@@ -539,6 +464,67 @@ def struktur():
     except Exception as e:
         logger.error(f"Error loading struktur page: {str(e)}")
         flash('Terjadi kesalahan saat memuat halaman struktur', 'error')
+        return redirect(url_for('public.index'))
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── SEJARAH DESA ──────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+@public_bp.route("/sejarah")
+def sejarah():
+    """Halaman Sejarah Desa - immersive timeline"""
+    from datetime import datetime
+
+    try:
+        desa_info = get_desa_info_with_maps()
+        custom_pages = get_all_pages()
+
+        # TODO: Get from database in FASE 2
+        # For now, use placeholder data
+        sejarah_items = [
+            {
+                'tahun': '1900-an',
+                'judul': 'Awal Mula Desa',
+                'konten': 'Desa Kedungwinangun telah berdiri sejak awal abad ke-20, menjadi salah satu desa tertua di Kecamatan Klirong.'
+            },
+            {
+                'tahun': '1950-an',
+                'judul': 'Masa Kemerdekaan',
+                'konten': 'Setelah kemerdekaan Indonesia, desa ini mulai berkembang dengan pendidikan dan pertanian.'
+            },
+            {
+                'tahun': '1980-an',
+                'judul': 'Era Modernisasi',
+                'konten': 'Pembangunan infrastruktur mulai merata, jalan desa diaspal, dan listrik masuk ke seluruh dusun.'
+            },
+            {
+                'tahun': '2000-an',
+                'judul': 'Desa Digital',
+                'konten': 'Mulai memasuki era digital dengan website resmi desa dan sistem informasi pemerintahan.'
+            },
+            {
+                'tahun': '2026',
+                'judul': 'Kedungwinangun Sekarang',
+                'konten': 'Desa Kedungwinangun terus berkembang dengan potensi pertanian, UMKM, dan pelayanan digital untuk warga.'
+            }
+        ]
+
+        return render_template(
+            "sejarah.html",
+            page={"title": "Sejarah Desa"},
+            desa=desa_info,
+            nav_links=NAV_LINKS,
+            tahun=datetime.now().year,
+            site_name=desa_info['nama'],
+            site_tagline=desa_info['tagline'],
+            site_description=desa_info['deskripsi'],
+            custom_pages=custom_pages,
+            sejarah_items=sejarah_items,
+        )
+    except Exception as e:
+        logger.error(f"Error loading sejarah page: {str(e)}")
+        flash('Terjadi kesalahan saat memuat halaman sejarah', 'error')
         return redirect(url_for('public.index'))
 
 
