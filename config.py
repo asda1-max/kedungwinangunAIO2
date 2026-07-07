@@ -61,7 +61,7 @@ NAV_LINKS = [
     {"label": "Beranda", "href": "/", "active": True},
     {"label": "Layanan Surat", "href": "/layanan", "active": False},
     {"label": "Pengumuman", "href": "/pengumuman", "active": False},
-    {"label": "Berita", "href": "/berita", "active": False},
+    {"label": "Potensi", "href": "#potensi", "active": False},
     {"label": "Kontak", "href": "/kontak", "active": False},
 ]
 

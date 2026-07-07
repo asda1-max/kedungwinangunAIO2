@@ -29,6 +29,8 @@ from models import (
     delete_komentar,
     get_komentar_by_id,
     count_komentar_by_berita,
+    get_all_potensi,
+    get_all_pengumuman,
 )
 from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
 from errors import safe_handler, flash_error, ValidationError, NotFoundError, json_success_response
@@ -177,6 +179,22 @@ def index():
         # Galeri aktif
         galeri_list = get_all_galeri(aktif=1)[:8]
 
+        # Potensi desa aktif
+        potensi_list = get_all_potensi()
+        potensi_aktif = [p for p in potensi_list if p.get('aktif') == 1]
+
+        # Group potensi by kategori
+        potensi_grouped = {}
+        for p in potensi_aktif:
+            kat = p.get('kategori', 'Lainnya')
+            if kat not in potensi_grouped:
+                potensi_grouped[kat] = []
+            potensi_grouped[kat].append(p)
+
+        # Pengumuman aktif
+        pengumuman_list = get_all_pengumuman()
+        pengumuman_aktif = [p for p in pengumuman_list if p.get('aktif') == 1][:5]
+
         # Config untuk template
         show_maps = get_config("tampilkan_maps", "1") == "1"
         show_stats = get_config("tampilkan_statistik", "1") == "1"
@@ -203,6 +221,8 @@ def index():
             featured_list=featured_list,
             berita_list=grid_berita,
             galeri_list=galeri_list,
+            potensi_grouped=potensi_grouped,
+            pengumuman_list=pengumuman_aktif,
             config=config_data,
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
@@ -532,7 +552,6 @@ def pengumuman():
     from datetime import datetime
 
     try:
-        from models import get_all_pages, get_all_pengumuman
         desa_info = get_desa_info_with_maps()
         custom_pages = get_all_pages()
         pengumuman_list = get_all_pengumuman(aktif=1)
@@ -546,14 +565,22 @@ def pengumuman():
                 'bantuan': '💰 Bantuan',
                 'umum': '📢 Umum'
             }
+            raw_created_at = p.get('created_at')
+            tanggal = '-'
+            if raw_created_at:
+                try:
+                    tanggal = datetime.strptime(str(raw_created_at)[:10], '%Y-%m-%d').strftime('%d %B %Y')
+                except Exception:
+                    tanggal = str(raw_created_at)
+
             pengumuman.append({
-                'id': p['id'],
-                'judul': p['judul'],
-                'isi': p['isi'],
-                'kategori': p['kategori'],
-                'kategori_label': kategori_labels.get(p['kategori'], '📢 Umum'),
-                'is_penting': bool(p['is_penting']),
-                'tanggal': datetime.strptime(p['created_at'][:10], '%Y-%m-%d').strftime('%d %B %Y') if p.get('created_at') else '-',
+                'id': p.get('id'),
+                'judul': p.get('judul', ''),
+                'isi': p.get('isi', ''),
+                'kategori': p.get('kategori', 'umum'),
+                'kategori_label': kategori_labels.get(p.get('kategori', 'umum'), '📢 Umum'),
+                'is_penting': 1 if p.get('is_penting') else 0,
+                'tanggal': tanggal,
                 'author': p.get('author', 'Pemerintahan Desa'),
                 'lampiran': p.get('lampiran') or None,
             })
@@ -569,6 +596,7 @@ def pengumuman():
             site_description=desa_info['deskripsi'],
             custom_pages=custom_pages,
             pengumuman=pengumuman,
+            pengumuman_list=pengumuman,
         )
     except Exception as e:
         logger.error(f"Error loading pengumuman page: {str(e)}")

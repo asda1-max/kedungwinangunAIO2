@@ -23,84 +23,115 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f4f7f2; }
-
-        /* Penting Badge Animation */
-        @keyframes pulse-ring {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.5); opacity: 0; }
-        }
-        .pulse-badge::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 9999px;
-            background: #ef4444;
-            animation: pulse-ring 2s ease-out infinite;
-            z-index: -1;
-        }
-    </style>
 </head>
 <body>
     <!-- NAVBAR -->
     {% include 'partials/navbar.html' %}
 
     <!-- HERO -->
-    <div class="bg-[#0F5B21] px-6 py-10 md:px-[5%] md:py-16 text-white">
-        <p class="text-xs md:text-sm text-green-300 mb-2">
-            <a href="{{ url_for('public.index') }}" class="hover:underline">Beranda</a> / Pengumuman
-        </p>
-        <h1 class="text-2xl md:text-4xl font-extrabold">📢 Pengumuman</h1>
-        <p class="text-sm md:text-base text-green-200 mt-1">Pengumuman penting dan informasi terkini dari Pemerintah Desa</p>
+    <div class="bg-gradient-to-r from-[#155C1B] to-[#2A6726] px-6 py-12 md:px-[5%] md:py-16 text-white">
+        <div class="max-w-5xl mx-auto">
+            <p class="text-xs md:text-sm text-green-300 mb-3">
+                <a href="{{ url_for('public.index') }}" class="hover:underline">Beranda</a>
+                <span class="mx-2">/</span>
+                <span class="text-white">Pengumuman</span>
+            </p>
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-4xl font-extrabold">Pengumuman</h1>
+                    <p class="text-sm md:text-base text-green-200 mt-1">Informasi penting dari Pemerintah Desa</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- CONTENT -->
-    <div class="px-6 py-10 md:px-[5%] md:py-14 max-w-5xl mx-auto">
+    <div class="px-6 py-10 md:px-[5%] md:py-14" x-data="pengumumanPage()">
+        <div class="max-w-5xl mx-auto">
 
-        <!-- Filter Tabs -->
-        <div class="flex flex-wrap gap-2 mb-8">
-            <button @click="filter = 'all'" :class="filter === 'all' ? 'bg-[#155C1B] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
-                    class="px-4 py-2 rounded-full text-sm font-semibold transition-all border border-gray-200">
-                Semua
-            </button>
-            <button @click="filter = 'penting'" :class="filter === 'penting' ? 'bg-red-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
-                    class="px-4 py-2 rounded-full text-sm font-semibold transition-all border border-gray-200">
-                🔴 Penting
-            </button>
-            <button @click="filter = 'kegiatan'" :class="filter === 'kegiatan' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
-                    class="px-4 py-2 rounded-full text-sm font-semibold transition-all border border-gray-200">
-                📅 Kegiatan
-            </button>
-            <button @click="filter = 'bantuan'" :class="filter === 'bantuan' ? 'bg-yellow-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
-                    class="px-4 py-2 rounded-full text-sm font-semibold transition-all border border-gray-200">
-                💰 Bantuan
-            </button>
-        </div>
+            <!-- Filter Tabs -->
+            <div class="flex flex-wrap gap-2 mb-8">
+                <button @click="filter = 'all'" :class="filter === 'all' ? 'bg-[#155C1B] text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-gray-200">
+                    Semua
+                </button>
+                <button @click="filter = 'penting'" :class="filter === 'penting' ? 'bg-red-500 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-gray-200 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    Penting
+                </button>
+                <button @click="filter = 'kegiatan'" :class="filter === 'kegiatan' ? 'bg-blue-500 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-gray-200 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Kegiatan
+                </button>
+                <button @click="filter = 'bantuan'" :class="filter === 'bantuan' ? 'bg-amber-500 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50'"
+                        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-gray-200 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 3s1.343 3 3 3 3 .895 3 3-1.343 3-3 3m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Bantuan
+                </button>
+            </div>
 
-        <!-- Announcements List -->
-        <div x-data="{ filter: 'all', pengumuman: {{ pengumuman|tojson }} }" class="space-y-6">
-            <template x-for="ann in pengumuman.filter(a => filter === 'all' || a.kategori === filter)" :key="ann.id">
-                <div class="bg-white rounded-2xl shadow-sm border border-[rgba(21,92,27,0.08)] overflow-hidden hover:shadow-lg transition-all duration-300"
-                     :class="{ 'border-l-4 border-l-red-500': ann.is_penting }">
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                <div class="bg-white rounded-xl p-4 border border-gray-100">
+                    <div class="text-2xl font-bold text-[#155C1B]" x-text="pengumuman.length">0</div>
+                    <div class="text-sm text-gray-500">Total</div>
+                </div>
+                <div class="bg-white rounded-xl p-4 border border-gray-100">
+                    <div class="text-2xl font-bold text-red-500" x-text="pengumuman.filter(p => p.is_penting == 1).length">0</div>
+                    <div class="text-sm text-gray-500">Penting</div>
+                </div>
+                <div class="bg-white rounded-xl p-4 border border-gray-100">
+                    <div class="text-2xl font-bold text-blue-500" x-text="pengumuman.filter(p => p.kategori === 'kegiatan').length">0</div>
+                    <div class="text-sm text-gray-500">Kegiatan</div>
+                </div>
+                <div class="bg-white rounded-xl p-4 border border-gray-100">
+                    <div class="text-2xl font-bold text-amber-500" x-text="pengumuman.filter(p => p.kategori === 'bantuan').length">0</div>
+                    <div class="text-sm text-gray-500">Bantuan</div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <template x-if="pengumuman.length === 0">
+                <div class="bg-white rounded-2xl p-16 text-center border border-gray-100">
+                    <div class="w-20 h-20 rounded-full bg-gray-100 mx-auto mb-4 flex items-center justify-center">
+                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">Belum Ada Pengumuman</h3>
+                    <p class="text-gray-500">Pengumuman akan muncul di sini ketika sudah ditambahkan.</p>
+                </div>
+            </template>
+
+            <!-- Announcement Cards -->
+            <template x-for="ann in pengumuman.filter(a => filter === 'all' || a.kategori === filter || (filter === 'penting' && a.is_penting == 1))" :key="ann.id">
+                <div class="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-[#155C1B]/20 hover:shadow-lg transition-all duration-300"
+                     :class="{ 'border-l-4 border-l-red-500 bg-red-50/30': ann.is_penting == 1 }">
                     <div class="p-6">
                         <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
                             <div class="flex flex-wrap items-center gap-2">
                                 <!-- Category Badge -->
-                                <span class="px-3 py-1 rounded-full text-xs font-bold"
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold"
                                       :class="{
-                                          'bg-red-100 text-red-600': ann.kategori === 'penting',
+                                          'bg-red-100 text-red-600': ann.is_penting == 1 || ann.kategori === 'penting',
                                           'bg-blue-100 text-blue-600': ann.kategori === 'kegiatan',
-                                          'bg-yellow-100 text-yellow-600': ann.kategori === 'bantuan',
-                                          'bg-gray-100 text-gray-600': ann.kategori === 'umum'
+                                          'bg-amber-100 text-amber-600': ann.kategori === 'bantuan',
+                                          'bg-gray-100 text-gray-600': !ann.kategori || ann.kategori === 'umum'
                                       }"
-                                      x-text="ann.kategori_label">
+                                      x-text="ann.kategori ? ann.kategori.charAt(0).toUpperCase() + ann.kategori.slice(1) : 'Umum'">
                                 </span>
                                 <!-- Important Badge -->
-                                <span x-show="ann.is_penting"
-                                      class="relative pulse-badge inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-red-500 text-white">
-                                    ⭐ Penting
+                                <span x-show="ann.is_penting == 1"
+                                      class="px-3 py-1 rounded-full text-xs font-bold bg-red-500 text-white flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                                    Penting
                                 </span>
                             </div>
                             <!-- Date -->
@@ -113,16 +144,16 @@
                         </div>
 
                         <!-- Title -->
-                        <h3 class="text-[#155C1B] font-bold text-lg md:text-xl mb-3" x-text="ann.judul"></h3>
+                        <h3 class="text-[#155C1B] font-bold text-lg md:text-xl mb-3 group-hover:text-[#2A6726] transition-colors" x-text="ann.judul"></h3>
 
                         <!-- Content -->
                         <p class="text-gray-600 leading-relaxed mb-4" x-text="ann.isi"></p>
 
                         <!-- Footer -->
                         <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-100">
-                            <div class="flex items-center gap-2 text-gray-500 text-sm">
-                                <div class="w-8 h-8 rounded-full bg-[#155C1B]/10 flex items-center justify-center text-[#155C1B] text-xs font-bold">KD</div>
-                                <span x-text="ann.author"></span>
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-[#155C1B] flex items-center justify-center text-white text-xs font-bold" x-text="ann.author ? ann.author.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase() : 'PD'"></div>
+                                <span class="text-sm text-gray-500" x-text="ann.author || 'Pemerintah Desa'"></span>
                             </div>
                             <div x-show="ann.lampiran" class="flex items-center gap-2 text-[#155C1B] text-sm font-medium">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,17 +166,40 @@
                 </div>
             </template>
 
-            <!-- Empty State -->
-            <div x-show="pengumuman.length === 0" class="bg-white rounded-2xl p-12 text-center">
-                <div class="text-6xl mb-4">📭</div>
-                <h3 class="text-xl font-bold text-gray-700 mb-2">Belum Ada Pengumuman</h3>
-                <p class="text-gray-500">Pengumuman akan muncul di sini ketika sudah ditambahkan.</p>
-            </div>
+            <!-- No Results State -->
+            <template x-if="pengumuman.length > 0 && pengumuman.filter(a => filter === 'all' || a.kategori === filter || (filter === 'penting' && a.is_penting == 1)).length === 0">
+                <div class="bg-white rounded-2xl p-12 text-center border border-gray-100">
+                    <div class="w-16 h-16 rounded-full bg-gray-100 mx-auto mb-4 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-700 mb-2">Tidak ada pengumuman</h3>
+                    <p class="text-gray-500">Tidak ada pengumuman dalam kategori ini.</p>
+                </div>
+            </template>
         </div>
-
     </div>
 
     <!-- FOOTER -->
     {% include 'partials/footer.html' %}
+
+    <script id="pengumuman-data" type="application/json">{{ pengumuman|tojson }}</script>
+    <script>
+        function pengumumanPage() {
+            let pengumumanData = [];
+            try {
+                const raw = document.getElementById('pengumuman-data')?.textContent || '[]';
+                pengumumanData = JSON.parse(raw);
+            } catch (_) {
+                pengumumanData = [];
+            }
+
+            return {
+                filter: 'all',
+                pengumuman: pengumumanData
+            }
+        }
+    </script>
 </body>
 </html>
