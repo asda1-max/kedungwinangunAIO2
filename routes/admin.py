@@ -65,6 +65,13 @@ from models import (
     update_struktur,
     delete_struktur,
     toggle_struktur_aktif,
+    # UMKM
+    get_all_umkm,
+    get_umkm_by_id,
+    add_umkm,
+    update_umkm,
+    delete_umkm,
+    toggle_umkm_aktif,
 )
 from errors import admin_required, flash_error
 from config import Config
@@ -154,6 +161,8 @@ def add_berita_route():
             badge_class = request.form.get('badge_class', 'badge-green')
             kategori_icon = request.form.get('kategori_icon', '')
             gambar_alt = request.form.get('gambar_alt', '').strip()
+            video_url = request.form.get('video_url', '').strip()
+            facebook_auto_post = 1 if request.form.get('facebook_auto_post') else 0
             unggulan = 1 if request.form.get('unggulan') else 0
 
             # Handle image upload (file or URL)
@@ -168,7 +177,7 @@ def add_berita_route():
                 flash_error('Judul berita harus diisi!')
                 return redirect(request.url)
 
-            result = add_berita(judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, unggulan)
+            result = add_berita(judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, video_url, facebook_auto_post, unggulan)
             if result:
                 flash('Berita berhasil ditambahkan!', 'success')
                 return redirect(url_for('admin.dashboard'))
@@ -200,6 +209,8 @@ def edit_berita_route(berita_id):
             badge_class = request.form.get('badge_class', 'badge-green')
             kategori_icon = request.form.get('kategori_icon', '')
             gambar_alt = request.form.get('gambar_alt', '').strip()
+            video_url = request.form.get('video_url', '').strip()
+            facebook_auto_post = 1 if request.form.get('facebook_auto_post') else 0
             unggulan = 1 if request.form.get('unggulan') else 0
 
             # Handle image upload (file or URL)
@@ -214,7 +225,7 @@ def edit_berita_route(berita_id):
                 flash_error('Judul berita harus diisi!')
                 return redirect(request.url)
 
-            result = update_berita(berita_id, judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, unggulan)
+            result = update_berita(berita_id, judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, video_url, facebook_auto_post, unggulan)
             if result:
                 flash('Berita berhasil diperbarui!', 'success')
                 return redirect(url_for('admin.dashboard'))
@@ -1101,6 +1112,160 @@ def toggle_struktur_route(struktur_id):
         logger.error(f"Error toggling struktur {struktur_id}: {str(e)}")
         flash_error('Terjadi kesalahan saat mengubah status')
     return redirect(url_for('admin.struktur'))
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── UMKM MANAGEMENT ─────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+@admin_bp.route("/umkm")
+@admin_required
+def umkm():
+    """Halaman manajemen UMKM"""
+    try:
+        umkm_list = get_all_umkm()
+        return render_template("admin/umkm.html", umkm_list=umkm_list)
+    except Exception as e:
+        logger.error(f"Error loading umkm page: {str(e)}")
+        flash_error('Terjadi kesalahan saat memuat halaman')
+        return redirect(url_for('admin.dashboard'))
+
+
+@admin_bp.route("/umkm/add", methods=['GET', 'POST'])
+@admin_required
+def add_umkm_route():
+    """Form tambah UMKM"""
+    if request.method == 'POST':
+        try:
+            nama = request.form.get('nama', '').strip()
+            kategori = request.form.get('kategori', 'umum').strip()
+            deskripsi = request.form.get('deskripsi', '').strip()
+            pemiliki_nama = request.form.get('pemiliki_nama', '').strip()
+            pemiliki_kontak = request.form.get('pemiliki_kontak', '').strip()
+            alamat = request.form.get('alamat', '').strip()
+            dusun = request.form.get('dusun', '').strip()
+            rt = request.form.get('rt', '').strip()
+            rw = request.form.get('rw', '').strip()
+            lat = request.form.get('latitude', '').strip()
+            lng = request.form.get('longitude', '').strip()
+            foto_url = request.form.get('foto_url', '').strip()
+            produk_jasa = request.form.get('produk_jasa', '').strip()
+            harga_range = request.form.get('harga_range', '').strip()
+            jam_operasional = request.form.get('jam_operasional', '').strip()
+
+            latitude = float(lat) if lat else None
+            longitude = float(lng) if lng else None
+
+            if not nama:
+                flash_error('Nama UMKM wajib diisi!')
+                return redirect(request.url)
+
+            result = add_umkm(
+                nama=nama, kategori=kategori, deskripsi=deskripsi,
+                pemiliki_nama=pemiliki_nama, pemiliki_kontak=pemiliki_kontak,
+                alamat=alamat, dusun=dusun, rt=rt, rw=rw,
+                latitude=latitude, longitude=longitude,
+                foto_url=foto_url, produk_jasa=produk_jasa,
+                harga_range=harga_range, jam_operasional=jam_operasional
+            )
+            if result:
+                flash('Data UMKM berhasil ditambahkan!', 'success')
+                return redirect(url_for('admin.umkm'))
+            else:
+                flash_error('Gagal menambahkan data!')
+        except Exception as e:
+            logger.error(f"Error adding umkm: {str(e)}")
+            flash_error('Terjadi kesalahan saat menyimpan data')
+    return render_template("admin/add_umkm.html")
+
+
+@admin_bp.route("/umkm/edit/<int:umkm_id>", methods=['GET', 'POST'])
+@admin_required
+def edit_umkm_route(umkm_id):
+    """Form edit UMKM"""
+    item = get_umkm_by_id(umkm_id)
+    if not item:
+        flash_error('Data tidak ditemukan!')
+        return redirect(url_for('admin.umkm'))
+
+    if request.method == 'POST':
+        try:
+            nama = request.form.get('nama', '').strip()
+            kategori = request.form.get('kategori', 'umum').strip()
+            deskripsi = request.form.get('deskripsi', '').strip()
+            pemiliki_nama = request.form.get('pemiliki_nama', '').strip()
+            pemiliki_kontak = request.form.get('pemiliki_kontak', '').strip()
+            alamat = request.form.get('alamat', '').strip()
+            dusun = request.form.get('dusun', '').strip()
+            rt = request.form.get('rt', '').strip()
+            rw = request.form.get('rw', '').strip()
+            lat = request.form.get('latitude', '').strip()
+            lng = request.form.get('longitude', '').strip()
+            foto_url = request.form.get('foto_url', '').strip()
+            produk_jasa = request.form.get('produk_jasa', '').strip()
+            harga_range = request.form.get('harga_range', '').strip()
+            jam_operasional = request.form.get('jam_operasional', '').strip()
+            aktif = 1 if request.form.get('aktif') else 0
+            urutan = int(request.form.get('urutan', 0))
+
+            latitude = float(lat) if lat else None
+            longitude = float(lng) if lng else None
+
+            if not nama:
+                flash_error('Nama wajib diisi!')
+                return redirect(request.url)
+
+            result = update_umkm(
+                umkm_id=umkm_id, nama=nama, kategori=kategori, deskripsi=deskripsi,
+                pemiliki_nama=pemiliki_nama, pemiliki_kontak=pemiliki_kontak,
+                alamat=alamat, dusun=dusun, rt=rt, rw=rw,
+                latitude=latitude, longitude=longitude,
+                foto_url=foto_url, produk_jasa=produk_jasa,
+                harga_range=harga_range, jam_operasional=jam_operasional,
+                aktif=aktif, urutan=urutan
+            )
+            if result:
+                flash('Data berhasil diperbarui!', 'success')
+                return redirect(url_for('admin.umkm'))
+            else:
+                flash_error('Gagal memperbarui data!')
+        except Exception as e:
+            logger.error(f"Error updating umkm: {str(e)}")
+            flash_error('Terjadi kesalahan saat menyimpan')
+
+    return render_template("admin/edit_umkm.html", item=item)
+
+
+@admin_bp.route("/umkm/delete/<int:umkm_id>", methods=['POST'])
+@admin_required
+def delete_umkm_route(umkm_id):
+    """Hapus UMKM"""
+    try:
+        result = delete_umkm(umkm_id)
+        if result:
+            flash('Data berhasil dihapus!', 'success')
+        else:
+            flash_error('Gagal menghapus!')
+    except Exception as e:
+        logger.error(f"Error deleting umkm: {str(e)}")
+        flash_error('Terjadi kesalahan')
+    return redirect(url_for('admin.umkm'))
+
+
+@admin_bp.route("/umkm/toggle/<int:umkm_id>", methods=['POST'])
+@admin_required
+def toggle_umkm_route(umkm_id):
+    """Toggle aktif/nonaktif"""
+    try:
+        result = toggle_umkm_aktif(umkm_id)
+        if result:
+            flash('Status berhasil diubah!', 'success')
+        else:
+            flash_error('Gagal mengubah status!')
+    except Exception as e:
+        logger.error(f"Error toggling umkm: {str(e)}")
+        flash_error('Terjadi kesalahan')
+    return redirect(url_for('admin.umkm'))
 
 
 # ════════════════════════════════════════════════════════════════════════

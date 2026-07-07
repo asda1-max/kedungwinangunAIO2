@@ -230,6 +230,30 @@ def init_database():
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
+            -- UMKM (Usaha Mikro Kecil Menengah)
+            CREATE TABLE IF NOT EXISTS umkm (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nama TEXT NOT NULL,
+                deskripsi TEXT,
+                kategori TEXT DEFAULT 'umum',
+                pemiliki_nama TEXT,
+                pemiliki_kontak TEXT,
+                alamat TEXT,
+                dusun TEXT,
+                rt TEXT,
+                rw TEXT,
+                latitude REAL,
+                longitude REAL,
+                foto_url TEXT,
+                produk_jasa TEXT,
+                harga_range TEXT,
+                jam_operasional TEXT,
+                aktif INTEGER DEFAULT 1,
+                urutan INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
             -- Pengumuman
             CREATE TABLE IF NOT EXISTS pengumuman (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -696,16 +720,16 @@ def get_berita_by_id(berita_id):
         logger.error(f"Error getting berita {berita_id}: {str(e)}")
         return None
 
-def add_berita(judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, unggulan):
+def add_berita(judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, video_url='', facebook_auto_post=0, unggulan=0):
     """Tambah berita baru"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         tanggal = datetime.now().strftime("%d %b %Y")
         cursor.execute('''
-            INSERT INTO berita (judul, excerpt, kategori, badge_class, kategori_icon, tanggal, views, gambar_url, gambar_alt, unggulan)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (judul, excerpt, kategori, badge_class, kategori_icon, tanggal, "0", gambar_url, gambar_alt, unggulan))
+            INSERT INTO berita (judul, excerpt, kategori, badge_class, kategori_icon, tanggal, views, gambar_url, gambar_alt, video_url, facebook_auto_post, unggulan)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (judul, excerpt, kategori, badge_class, kategori_icon, tanggal, "0", gambar_url, gambar_alt, video_url, facebook_auto_post, unggulan))
         conn.commit()
         conn.close()
         return True
@@ -713,15 +737,15 @@ def add_berita(judul, excerpt, kategori, badge_class, kategori_icon, gambar_url,
         logger.error(f"Error adding berita: {str(e)}")
         return False
 
-def update_berita(berita_id, judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, unggulan):
+def update_berita(berita_id, judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, video_url='', facebook_auto_post=0, unggulan=0):
     """Update berita"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            UPDATE berita SET judul = ?, excerpt = ?, kategori = ?, badge_class = ?, kategori_icon = ?, gambar_url = ?, gambar_alt = ?, unggulan = ?
+            UPDATE berita SET judul = ?, excerpt = ?, kategori = ?, badge_class = ?, kategori_icon = ?, gambar_url = ?, gambar_alt = ?, video_url = ?, facebook_auto_post = ?, unggulan = ?
             WHERE id = ?
-        ''', (judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, unggulan, berita_id))
+        ''', (judul, excerpt, kategori, badge_class, kategori_icon, gambar_url, gambar_alt, video_url, facebook_auto_post, unggulan, berita_id))
         conn.commit()
         conn.close()
         return True
@@ -1272,6 +1296,155 @@ def toggle_struktur_aktif(struktur_id):
     except Exception as e:
         logger.error(f"Error toggling struktur {struktur_id}: {str(e)}")
         return False
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── UMKM HELPERS ──────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_all_umkm(aktif=None, kategori=None):
+    """Ambil semua data UMKM"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = 'SELECT * FROM umkm WHERE 1=1'
+        params = []
+        if aktif is not None:
+            query += ' AND aktif = ?'
+            params.append(aktif)
+        if kategori:
+            query += ' AND kategori = ?'
+            params.append(kategori)
+        query += ' ORDER BY urutan ASC, nama ASC'
+        cursor.execute(query, params)
+        items = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return items
+    except Exception as e:
+        logger.error(f"Error getting all umkm: {str(e)}")
+        return []
+
+def get_umkm_by_id(umkm_id):
+    """Ambil satu UMKM berdasarkan ID"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM umkm WHERE id = ?', (umkm_id,))
+        item = cursor.fetchone()
+        conn.close()
+        return dict(item) if item else None
+    except Exception as e:
+        logger.error(f"Error getting umkm {umkm_id}: {str(e)}")
+        return None
+
+def add_umkm(nama, kategori='umum', deskripsi='', pemiliki_nama='', pemiliki_kontak='',
+              alamat='', dusun='', rt='', rw='', latitude=None, longitude=None,
+              foto_url='', produk_jasa='', harga_range='', jam_operasional=''):
+    """Tambah data UMKM baru"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT MAX(urutan) as max_order FROM umkm')
+        row = cursor.fetchone()
+        max_order = (row['max_order'] or 0) + 1
+        cursor.execute('''
+            INSERT INTO umkm (nama, kategori, deskripsi, pemiliki_nama, pemiliki_kontak,
+                alamat, dusun, rt, rw, latitude, longitude, foto_url, produk_jasa,
+                harga_range, jam_operasional, aktif, urutan)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+        ''', (nama, kategori, deskripsi, pemiliki_nama, pemiliki_kontak,
+              alamat, dusun, rt, rw, latitude, longitude, foto_url, produk_jasa,
+              harga_range, jam_operasional, max_order))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding umkm: {str(e)}")
+        return False
+
+def update_umkm(umkm_id, nama, kategori='umum', deskripsi='', pemiliki_nama='', pemiliki_kontak='',
+                alamat='', dusun='', rt='', rw='', latitude=None, longitude=None,
+                foto_url='', produk_jasa='', harga_range='', jam_operasional='',
+                aktif=1, urutan=0):
+    """Update data UMKM"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE umkm SET nama = ?, kategori = ?, deskripsi = ?, pemiliki_nama = ?,
+                pemiliki_kontak = ?, alamat = ?, dusun = ?, rt = ?, rw = ?,
+                latitude = ?, longitude = ?, foto_url = ?, produk_jasa = ?,
+                harga_range = ?, jam_operasional = ?, aktif = ?, urutan = ?,
+                updated_at = ?
+            WHERE id = ?
+        ''', (nama, kategori, deskripsi, pemiliki_nama, pemiliki_kontak,
+              alamat, dusun, rt, rw, latitude, longitude, foto_url, produk_jasa,
+              harga_range, jam_operasional, aktif, urutan,
+              datetime.now().strftime("%Y-%m-%d %H:%M:%S"), umkm_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating umkm {umkm_id}: {str(e)}")
+        return False
+
+def delete_umkm(umkm_id):
+    """Hapus data UMKM"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM umkm WHERE id = ?', (umkm_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting umkm {umkm_id}: {str(e)}")
+        return False
+
+def toggle_umkm_aktif(umkm_id):
+    """Toggle aktif status"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE umkm SET aktif = NOT aktif WHERE id = ?', (umkm_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling umkm {umkm_id}: {str(e)}")
+        return False
+
+def get_umkm_for_geojson(aktif=1):
+    """Get UMKM data formatted as GeoJSON features"""
+    try:
+        items = get_all_umkm(aktif=aktif)
+        features = []
+        for item in items:
+            if item.get('latitude') and item.get('longitude'):
+                features.append({
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [item['longitude'], item['latitude']]
+                    },
+                    'properties': {
+                        'id': item['id'],
+                        'nama': item['nama'],
+                        'kategori': item['kategori'],
+                        'deskripsi': item['deskripsi'] or '',
+                        'pemiliki': item['pemiliki_nama'] or '',
+                        'alamat': item['alamat'] or '',
+                        'dusun': item['dusun'] or '',
+                        'kontak': item['pemiliki_kontak'] or '',
+                        'foto': item['foto_url'] or '',
+                        'harga': item['harga_range'] or '',
+                    }
+                })
+        return {'type': 'FeatureCollection', 'features': features}
+    except Exception as e:
+        logger.error(f"Error getting geojson: {str(e)}")
+        return {'type': 'FeatureCollection', 'features': []}
+
 
 
 # ════════════════════════════════════════════════════════════════════════

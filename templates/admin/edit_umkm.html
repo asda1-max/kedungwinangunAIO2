@@ -1,0 +1,129 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Edit UMKM - Admin Panel{% endblock %}
+{% block page_title %}Edit UMKM{% endblock %}
+{% block page_subtitle %}{{ item.nama }}{% endblock %}
+
+{% block content %}
+<div class="form-container animate-in">
+    <form action="{{ url_for('admin.edit_umkm_route', umkm_id=item.id) }}" method="POST" class="form">
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📋 Data Dasar</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nama">Nama UMKM <span class="text-red-500">*</span></label>
+                    <input type="text" id="nama" name="nama" required value="{{ item.nama }}">
+                </div>
+                <div class="form-group">
+                    <label for="kategori">Kategori</label>
+                    <select id="kategori" name="kategori">
+                        <option value="makanan" {% if item.kategori=='makanan' %}selected{% endif %}>Makanan</option>
+                        <option value="minuman" {% if item.kategori=='minuman' %}selected{% endif %}>Minuman</option>
+                        <option value="kerajinan" {% if item.kategori=='kerajinan' %}selected{% endif %}>Kerajinan</option>
+                        <option value="jasa" {% if item.kategori=='jasa' %}selected{% endif %}>Jasa</option>
+                        <option value="pertanian" {% if item.kategori=='pertanian' %}selected{% endif %}>Pertanian</option>
+                        <option value="peternakan" {% if item.kategori=='peternakan' %}selected{% endif %}>Peternakan</option>
+                        <option value="perikanan" {% if item.kategori=='perikanan' %}selected{% endif %}>Perikanan</option>
+                        <option value="umum" {% if item.kategori=='umum' %}selected{% endif %}>Umum/Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="aktif">Status</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="aktif" name="aktif" value="1" {% if item.aktif==1 %}checked{% endif %}>
+                        <label for="aktif">Aktif / Tampilkan di Peta</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="urutan">Urutan Tampilan</label>
+                    <input type="number" id="urutan" name="urutan" value="{{ item.urutan or 0 }}" min="0">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="deskripsi">Deskripsi</label>
+                <textarea id="deskripsi" name="deskripsi" rows="3">{{ item.deskripsi or '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="produk_jasa">Produk/Jasa yang Ditawarkan</label>
+                <textarea id="produk_jasa" name="produk_jasa" rows="2">{{ item.produk_jasa or '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="harga_range">Kisaran Harga</label>
+                <input type="text" id="harga_range" name="harga_range" value="{{ item.harga_range or '' }}">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">👤 Data Pemilik</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="pemiliki_nama">Nama Pemilik</label>
+                    <input type="text" id="pemiliki_nama" name="pemiliki_nama" value="{{ item.pemiliki_nama or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="pemiliki_kontak">Kontak (WhatsApp)</label>
+                    <input type="text" id="pemiliki_kontak" name="pemiliki_kontak" value="{{ item.pemiliki_kontak or '' }}">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📍 Lokasi</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="alamat">Alamat Lengkap</label>
+                    <input type="text" id="alamat" name="alamat" value="{{ item.alamat or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="dusun">Dusun</label>
+                    <input type="text" id="dusun" name="dusun" value="{{ item.dusun or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="rt">RT</label>
+                    <input type="text" id="rt" name="rt" value="{{ item.rt or '' }}" maxlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="rw">RW</label>
+                    <input type="text" id="rw" name="rw" value="{{ item.rw or '' }}" maxlength="3">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="jam_operasional">Jam Operasional</label>
+                <input type="text" id="jam_operasional" name="jam_operasional" value="{{ item.jam_operasional or '' }}">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">🗺️ Koordinat (untuk Peta)</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="latitude">Latitude</label>
+                    <input type="text" id="latitude" name="latitude" value="{{ item.latitude or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude</label>
+                    <input type="text" id="longitude" name="longitude" value="{{ item.longitude or '' }}">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📷 Foto</h3>
+            <div class="form-group">
+                <label for="foto_url">URL Foto</label>
+                <input type="url" id="foto_url" name="foto_url" value="{{ item.foto_url or '' }}">
+                {% if item.foto_url %}
+                <div class="mt-2">
+                    <img src="{{ item.foto_url }}" alt="Preview" class="w-32 h-32 object-cover rounded-lg">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin.umkm') }}" class="btn btn-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
