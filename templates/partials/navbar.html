@@ -114,21 +114,10 @@
                             </div>
                         </div>
                         <div class="py-2">
-                            {% if session.user_role == 'admin' %}
                             <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 text-sm">
                                 <span class="w-8 h-8 rounded-lg bg-[#155C1B]/10 flex items-center justify-center text-sm">⚙️</span>
-                                Dashboard Admin
+                                Dashboard
                             </a>
-                            <a href="{{ url_for('dinas.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 text-sm">
-                                <span class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-sm">📊</span>
-                                Panel Dinas
-                            </a>
-                            {% elif session.user_role == 'dinas' %}
-                            <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 text-sm">
-                                <span class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-sm">📊</span>
-                                Dashboard Dinas
-                            </a>
-                            {% endif %}
                             <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 text-sm">
                                 <span class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center text-sm">📋</span>
                                 Dashboard Saya
