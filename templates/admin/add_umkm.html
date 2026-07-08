@@ -58,6 +58,19 @@
 
         <div class="form-section">
             <h3 class="text-lg font-bold text-gray-800 mb-4">📍 Lokasi</h3>
+            
+            <!-- Google Maps URL Input -->
+            <div class="form-group">
+                <label for="maps_url">🔗 Link Google Maps</label>
+                <div class="flex gap-2">
+                    <input type="url" id="maps_url" name="maps_url" placeholder="https://maps.google.com/... atau https://maps.app.goo.gl/..." class="flex-1">
+                    <button type="button" onclick="parseMapsUrl()" class="btn bg-blue-600 text-white hover:bg-blue-700 whitespace-nowrap">
+                        📥 Ambil Data
+                    </button>
+                </div>
+                <small class="hint">Tempelkan link Google Maps, data lokasi akan terisi otomatis</small>
+            </div>
+            
             <div class="form-grid">
                 <div class="form-group">
                     <label for="alamat">Alamat Lengkap</label>
@@ -113,4 +126,56 @@
         </div>
     </form>
 </div>
+
+<script>
+async function parseMapsUrl() {
+    const mapsUrl = document.getElementById('maps_url').value.trim();
+    const btn = event.target;
+    
+    if (!mapsUrl) {
+        alert('Tempelkan link Google Maps terlebih dahulu!');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.textContent = '⏳ Memproses...';
+    
+    try {
+        const response = await fetch('{{ url_for("admin.parse_umkm_location") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ maps_url: mapsUrl })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Auto-fill latitude & longitude
+            if (result.latitude) {
+                document.getElementById('latitude').value = result.latitude;
+            }
+            if (result.longitude) {
+                document.getElementById('longitude').value = result.longitude;
+            }
+            // Auto-fill nama if extracted
+            if (result.nama && !document.getElementById('nama').value) {
+                document.getElementById('nama').value = result.nama;
+            }
+            // Auto-fill alamat if extracted
+            if (result.alamat && !document.getElementById('alamat').value) {
+                document.getElementById('alamat').value = result.alamat;
+            }
+            
+            alert('✅ Berhasil! Data lokasi terisi otomatis.\n\nLatitude: ' + result.latitude + '\nLongitude: ' + result.longitude + (result.nama ? '\nNama: ' + result.nama : ''));
+        } else {
+            alert('❌ Gagal: ' + (result.error || 'Koordinat tidak ditemukan'));
+        }
+    } catch (error) {
+        alert('❌ Error: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '📥 Ambil Data';
+    }
+}
+</script>
 {% endblock %}

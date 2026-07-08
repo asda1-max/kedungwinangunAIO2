@@ -12,13 +12,24 @@
         <span>Administrator</span>
     </div>
 </div>
-<a href="{{ url_for('admin.add_struktur_route') }}" class="btn btn-primary">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
-    </svg>
-    Tambah Personil
-</a>
+<div class="flex gap-2">
+    <a href="{{ url_for('admin.download_struktur_template') }}" class="btn btn-outline text-sm">
+        📥 Download Template CSV
+    </a>
+    <button onclick="document.getElementById('importModal').classList.remove('hidden')" class="btn btn-outline text-sm">
+        📤 Import CSV
+    </button>
+    <a href="{{ url_for('admin.export_struktur') }}" class="btn btn-outline text-sm">
+        📤 Export CSV
+    </a>
+    <a href="{{ url_for('admin.add_struktur_route') }}" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Tambah Personil
+    </a>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -96,4 +107,37 @@
     </a>
 </div>
 {% endif %}
+
+<!-- Import Modal -->
+<div id="importModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4 shadow-2xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold">📤 Import dari CSV</h3>
+            <button onclick="document.getElementById('importModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <p class="text-sm text-gray-600 mb-4">
+            Upload file CSV dengan format yang benar. 
+            <a href="{{ url_for('admin.download_struktur_template') }}" class="text-blue-600 hover:underline">Download template</a> untuk参考.
+        </p>
+        <form action="{{ url_for('admin.import_struktur') }}" method="POST" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">File CSV</label>
+                <input type="file" name="csv_file" accept=".csv" required class="w-full border border-gray-300 rounded-lg p-2">
+            </div>
+            <div class="bg-blue-50 rounded-lg p-3 mb-4 text-sm">
+                <p class="font-semibold text-blue-800 mb-1">Format Kolom:</p>
+                <code class="text-xs text-blue-600">kategori, nama, jabatan, nik, alamat, dusun, rt, rw, telepon, email, status, aktif</code>
+                <p class="text-xs text-blue-600 mt-1">Kategori: perangkat, bpd, pkk, karang_taruna, rt, rw</p>
+            </div>
+            <div class="flex gap-2 justify-end">
+                <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Batal</button>
+                <button type="submit" class="px-4 py-2 bg-[#155C1B] text-white rounded-lg hover:bg-[#2A6726]">Import</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

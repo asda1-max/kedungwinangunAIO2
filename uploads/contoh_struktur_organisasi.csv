@@ -1,0 +1,32 @@
+kategori,nama,jabatan,nik,alamat,dusun,rt,rw,telepon,email,status,aktif
+perangkat,Budi Santoso,Kepala Desa,3201010101010001,Jl. Raya Desa No 1,Kedungwaru,001,001,081234567890,budi@kedungwinangun.desa.id,Aktif,1
+perangkat,Siti Aminah,Sekretaris Desa,3201010101010002,Jl. Raya Desa No 2,Kedungwaru,001,001,081234567891,siti@kedungwinangun.desa.id,Aktif,1
+perangkat,Joko Prasetyo,Kasi Pemerintahan,3201010101010003,Jl. Desa No 3,Kedungwaru,001,001,081234567892,joko@kedungwinangun.desa.id,Aktif,1
+perangkat,Maria Goretti,Kasi Kesejahteraan,3201010101010004,Jl. Desa No 4,Kedungwaru,001,001,081234567893,maria@kedungwinangun.desa.id,Aktif,1
+perangkat,Herman Syah,Kasi Pembangunan,3201010101010005,Jl. Desa No 5,Kedungwaru,001,001,081234567894,herman@kedungwinangun.desa.id,Aktif,1
+perangkat,Supriyanto,Kaur Umum,3201010101010006,Jl. Desa No 6,Kedungwaru,001,001,081234567895,supri@kedungwinangun.desa.id,Aktif,1
+perangkat,Ratna Sari,Kaur Keuangan,3201010101010007,Jl. Desa No 7,Kedungwaru,001,001,081234567896,ratna@kedungwinangun.desa.id,Aktif,1
+perangkat,Ahmad Dahlan,Kaur Perencanaan,3201010101010008,Jl. Desa No 8,Kedungwaru,001,001,081234567897,ahmad@kedungwinangun.desa.id,Aktif,1
+bpd,Sugeng Harianto,Ketua BPD,3201010101010009,Jl. BPD No 1,Kedungwaru,001,001,081234567898,sugeng@kedungwinangun.desa.id,Aktif,1
+bpd,Warsiti,Wakil Ketua BPD,3201010101010010,Jl. BPD No 2,Kedungwaru,001,001,,warsiti@email.com,Aktif,1
+bpd,Dewi Lestari,Sekretaris BPD,3201010101010011,Jl. BPD No 3,Kedungwaru,001,001,,dewi@email.com,Aktif,1
+bpd,Slamet Wijaya,Anggota BPD,3201010101010012,Jl. BPD No 4,Kedungwaru,001,001,,slamet@email.com,Aktif,1
+bpd,Hari Santoso,Anggota BPD,3201010101010013,Jl. BPD No 5,Kedungwaru,001,001,,hari@email.com,Aktif,1
+bpd,Nur Hasanah,Anggota BPD,3201010101010014,Jl. BPD No 6,Kedungwaru,001,001,,nur@email.com,Aktif,1
+pkk,Siti Rahayu,Ketua PKK,3201010101010015,Jl. PKK No 1,Kedungwaru,001,001,081234567899,sitirahayu@email.com,Aktif,1
+pkk,Wati Susilowati,Sekretaris PKK,3201010101010016,Jl. PKK No 2,Kedungwaru,001,001,,wati@email.com,Aktif,1
+pkk,Sri Wahyuni,Bendahara PKK,3201010101010017,Jl. PKK No 3,Kedungwaru,001,001,,sri@email.com,Aktif,1
+pkk,Lina Marlina,Anggota PKK,3201010101010018,Jl. PKK No 4,Kedungwaru,001,001,,lina@email.com,Aktif,1
+pkk,Mini Sumarni,Anggota PKK,3201010101010019,Jl. PKK No 5,Kedungwaru,001,001,,mini@email.com,Aktif,1
+karang_taruna,Dimas Pratama,Ketua Karang Taruna,3201010101010020,Jl. KT No 1,Kedungwaru,001,001,081234567900,dimas@email.com,Aktif,1
+karang_taruna,Rizki Ramadhan,Sekretaris KT,3201010101010021,Jl. KT No 2,Kedungwaru,001,001,,rizki@email.com,Aktif,1
+karang_taruna,Fajar Nugroho,Bendahara KT,3201010101010022,Jl. KT No 3,Kedungwaru,001,001,,fajar@email.com,Aktif,1
+karang_taruna,Bayu Setiawan,Anggota KT,3201010101010023,Jl. KT No 4,Kedungwaru,001,001,,bayu@email.com,Aktif,1
+rt,Sumarno,Ketua RT 01 RW 01,3201010101010024,Jl. Rt 01 No 1,Kedungwaru,001,001,081234567901,sumarno@email.com,Aktif,1
+rt,Sukarno,Ketua RT 02 RW 01,3201010101010025,Jl. Rt 02 No 1,Kedungwaru,001,001,081234567902,sukarno@email.com,Aktif,1
+rt,Hasan Basri,Ketua RT 03 RW 01,3201010101010026,Jl. Rt 03 No 1,Kedungwaru,001,001,081234567903,hasan@email.com,Aktif,1
+rt,Mohammad Idris,Ketua RT 01 RW 02,3201010101010027,Jl. Rt 01 No 1,Perna,002,002,081234567904,idris@email.com,Aktif,1
+rt,Abdul Rahman,Ketua RT 02 RW 02,3201010101010028,Jl. Rt 02 No 1,Perna,002,002,081234567905,rahman@email.com,Aktif,1
+rw,Tarmizi,Ketua RW 01,3201010101010029,Jl. Rw 01 No 1,Kedungwaru,001,001,081234567906,tarmizi@email.com,Aktif,1
+rw,Johannes Pinto,Ketua RW 02,3201010101010030,Jl. Rw 02 No 1,Perna,002,002,081234567907,johannes@email.com,Aktif,1
+rw,Patris Suhendar,Ketua RW 03,3201010101010031,Jl. Rw 03 No 1,Sasak,003,003,081234567908,patris@email.com,Aktif,1

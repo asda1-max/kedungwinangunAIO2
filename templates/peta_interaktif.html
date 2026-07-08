@@ -184,7 +184,7 @@
 
     <script>
         // Initialize map
-        const map = L.map('map').setView([-7.6333, 109.5250], 14);
+        const map = L.map('map').setView([-7.7004775, 109.6432848], 15);
 
         // Base layers
         const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -296,7 +296,7 @@
 
         // If no umkm data, show default village center
         {% if not umkm_geojson.features %}
-        map.setView([-7.6333, 109.5250], 14);
+        map.setView([-7.7004775, 109.6432848], 15);
         {% endif %}
     </script>
 </body>

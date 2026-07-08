@@ -16,19 +16,19 @@
 <!-- Quick Stats Cards -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
     <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#155C1B] text-center">
-        <div class="text-2xl font-bold text-[#155C1B]">{{ stats.total_penduduk.jumlah|default(0)|int|format(",") }}</div>
+        <div class="text-2xl font-bold text-[#155C1B]">{{ "{:,}".format(stats.total_penduduk|default(0)) }}</div>
         <div class="text-xs text-gray-500">Total Penduduk</div>
     </div>
     <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500 text-center">
-        <div class="text-2xl font-bold text-blue-600">{{ stats.jumlah_kk.jumlah|default(0)|int|format(",") }}</div>
+        <div class="text-2xl font-bold text-blue-600">{{ "{:,}".format(stats.jumlah_kk|default(0)) }}</div>
         <div class="text-xs text-gray-500">Kartu Keluarga</div>
     </div>
     <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#155C1B] text-center">
-        <div class="text-2xl font-bold text-[#155C1B]">{{ stats.laki_laki.jumlah|default(0)|int|format(",") }}</div>
+        <div class="text-2xl font-bold text-[#155C1B]">{{ "{:,}".format(stats.laki_laki|default(0)) }}</div>
         <div class="text-xs text-gray-500">Laki-laki</div>
     </div>
     <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-pink-500 text-center">
-        <div class="text-2xl font-bold text-pink-600">{{ stats.perempuan.jumlah|default(0)|int|format(",") }}</div>
+        <div class="text-2xl font-bold text-pink-600">{{ "{:,}".format(stats.perempuan|default(0)) }}</div>
         <div class="text-xs text-gray-500">Perempuan</div>
     </div>
 </div>
@@ -46,19 +46,19 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Total Penduduk</label>
-                            <input type="number" name="total_penduduk" value="{{ stats.total_penduduk.jumlah|default(0) }}" min="0">
+                            <input type="number" name="total_penduduk" value="{{ stats.total_penduduk|default(0) }}" min="0">
                         </div>
                         <div class="form-group">
                             <label>Laki-laki</label>
-                            <input type="number" name="laki_laki" value="{{ stats.laki_laki.jumlah|default(0) }}" min="0">
+                            <input type="number" name="laki_laki" value="{{ stats.laki_laki|default(0) }}" min="0">
                         </div>
                         <div class="form-group">
                             <label>Perempuan</label>
-                            <input type="number" name="perempuan" value="{{ stats.perempuan.jumlah|default(0) }}" min="0">
+                            <input type="number" name="perempuan" value="{{ stats.perempuan|default(0) }}" min="0">
                         </div>
                         <div class="form-group">
                             <label>Kartu Keluarga</label>
-                            <input type="number" name="jumlah_kk" value="{{ stats.jumlah_kk.jumlah|default(0) }}" min="0">
+                            <input type="number" name="jumlah_kk" value="{{ stats.jumlah_kk|default(0) }}" min="0">
                         </div>
                     </div>
                 </div>
@@ -73,19 +73,19 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Total Usia Produktif</label>
-                            <input type="number" name="usia_produktif_total" value="{{ stats.usia_produktif_total.jumlah|default(0) }}" min="0">
+                            <input type="number" name="usia_produktif_total" value="{{ stats.usia_produktif_total|default(0) }}" min="0">
                         </div>
                         <div class="form-group">
                             <label>Bekerja</label>
-                            <input type="number" name="pekerja" value="{{ stats.pekerja.jumlah|default(0) }}" min="0">
+                            <input type="number" name="pekerja" value="{{ stats.pekerja|default(0) }}" min="0">
                         </div>
                         <div class="form-group">
                             <label>Pelajar/Mahasiswa</label>
-                            <input type="number" name="pelajar" value="{{ stats.pelajar.jumlah|default(0) }}" min="0">
+                            <input type="number" name="pelajar" value="{{ stats.pelajar|default(0) }}" min="0">
                         </div>
                         <div class="form-group">
                             <label>Ibu Rumah Tangga</label>
-                            <input type="number" name="irt" value="{{ stats.irt.jumlah|default(0) }}" min="0">
+                            <input type="number" name="irt" value="{{ stats.irt|default(0) }}" min="0">
                         </div>
                     </div>
                 </div>
@@ -100,11 +100,11 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Usia 0-14 tahun</label>
-                            <input type="number" name="usia_0_14" value="{{ stats.usia_0_14.jumlah|default(0) }}" min="0">
+                            <input type="number" name="usia_0_14" value="{{ stats.usia_0_14|default(0) }}" min="0">
                         </div>
                         <div class="form-group">
                             <label>Usia 65+ tahun</label>
-                            <input type="number" name="usia_65_plus" value="{{ stats.usia_65_plus.jumlah|default(0) }}" min="0">
+                            <input type="number" name="usia_65_plus" value="{{ stats.usia_65_plus|default(0) }}" min="0">
                         </div>
                     </div>
                 </div>
@@ -123,13 +123,13 @@
                 <h3>📊 Rasio JK</h3>
             </div>
             <div class="card-body">
-                {% set lk = stats.laki_laki.jumlah|default(0)|int %}
-                {% set pr = stats.perempuan.jumlah|default(0)|int %}
+                {% set lk = stats.laki_laki|default(0)|int %}
+                {% set pr = stats.perempuan|default(0)|int %}
                 {% set total_jk = lk + pr %}
                 <div class="text-center mb-4">
                     <div class="text-3xl font-bold">
                         {% if total_jk > 0 %}
-                            {{ "%.1f"|format((lk / total_jk * 100)) }}% : {{ "%.1f"|format((pr / total_jk * 100)) }}%
+                            {{ "{:.1f}".format(lk / total_jk * 100) }}% : {{ "{:.1f}".format(pr / total_jk * 100) }}%
                         {% else %}
                             50% : 50%
                         {% endif %}
@@ -137,8 +137,8 @@
                     <div class="text-sm text-gray-500">Lk : Pr</div>
                 </div>
                 <div class="flex justify-center gap-4 text-sm">
-                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-[#155C1B]"></span> Lk {{ lk|format(",") }}</span>
-                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-pink-500"></span> Pr {{ pr|format(",") }}</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-[#155C1B]"></span> Lk {{ "{:,}".format(lk) }}</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-pink-500"></span> Pr {{ "{:,}".format(pr) }}</span>
                 </div>
             </div>
         </div>
@@ -151,30 +151,30 @@
                 <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
                     <span class="text-sm">Rata-rata KK</span>
                     <span class="font-semibold text-sm">
-                        {% set tot = stats.total_penduduk.jumlah|default(0)|int %}
-                        {% set kk = stats.jumlah_kk.jumlah|default(0)|int %}
-                        {{ "%.1f"|format((tot / kk)) if kk > 0 else 0 }} org
+                        {% set tot = stats.total_penduduk|default(0)|int %}
+                        {% set kk = stats.jumlah_kk|default(0)|int %}
+                        {{ "{:.1f}".format(tot / kk) if kk > 0 else 0 }} org
                     </span>
                 </div>
                 <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
                     <span class="text-sm">% Usia Produktif</span>
                     <span class="font-semibold text-sm text-green-600">
-                        {% set prod = stats.usia_produktif_total.jumlah|default(0)|int %}
-                        {{ "%.1f"|format((prod / tot * 100)) if tot > 0 else 0 }}%
+                        {% set prod = stats.usia_produktif_total|default(0)|int %}
+                        {{ "{:.1f}".format(prod / tot * 100) if tot > 0 else 0 }}%
                     </span>
                 </div>
                 <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
                     <span class="text-sm">% Anak-anak</span>
                     <span class="font-semibold text-sm text-amber-600">
-                        {% set anak = stats.usia_0_14.jumlah|default(0)|int %}
-                        {{ "%.1f"|format((anak / tot * 100)) if tot > 0 else 0 }}%
+                        {% set anak = stats.usia_0_14|default(0)|int %}
+                        {{ "{:.1f}".format(anak / tot * 100) if tot > 0 else 0 }}%
                     </span>
                 </div>
                 <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
                     <span class="text-sm">% Lansia</span>
                     <span class="font-semibold text-sm text-gray-600">
-                        {% set lansia = stats.usia_65_plus.jumlah|default(0)|int %}
-                        {{ "%.1f"|format((lansia / tot * 100)) if tot > 0 else 0 }}%
+                        {% set lansia = stats.usia_65_plus|default(0)|int %}
+                        {{ "{:.1f}".format(lansia / tot * 100) if tot > 0 else 0 }}%
                     </span>
                 </div>
             </div>
@@ -207,9 +207,9 @@
             new Chart(document.getElementById('jkChart'), {
                 type: 'pie',
                 data: {
-                    labels: ['Laki-laki ({{ stats.laki_laki.jumlah|default(0)|int|format(",") }})', 'Perempuan ({{ stats.perempuan.jumlah|default(0)|int|format(",") }})'],
+                    labels: ['Laki-laki ({{ "{:,}".format(stats.laki_laki|default(0)) }})', 'Perempuan ({{ "{:,}".format(stats.perempuan|default(0)) }})'],
                     datasets: [{
-                        data: [{{ stats.laki_laki.jumlah|default(0) }}, {{ stats.perempuan.jumlah|default(0) }}],
+                        data: [{{ stats.laki_laki|default(0) }}, {{ stats.perempuan|default(0) }}],
                         backgroundColor: ['#155C1B', '#ec4899']
                     }]
                 },
@@ -236,15 +236,15 @@
                 type: 'doughnut',
                 data: {
                     labels: [
-                        'Produktif ({{ stats.usia_produktif_total.jumlah|default(0)|int|format(",") }})',
-                        '0-14 th ({{ stats.usia_0_14.jumlah|default(0)|int|format(",") }})',
-                        '65+ th ({{ stats.usia_65_plus.jumlah|default(0)|int|format(",") }})'
+                        'Produktif ({{ "{:,}".format(stats.usia_produktif_total|default(0)) }})',
+                        '0-14 th ({{ "{:,}".format(stats.usia_0_14|default(0)) }})',
+                        '65+ th ({{ "{:,}".format(stats.usia_65_plus|default(0)) }})'
                     ],
                     datasets: [{
                         data: [
-                            {{ stats.usia_produktif_total.jumlah|default(0) }},
-                            {{ stats.usia_0_14.jumlah|default(0) }},
-                            {{ stats.usia_65_plus.jumlah|default(0) }}
+                            {{ stats.usia_produktif_total|default(0) }},
+                            {{ stats.usia_0_14|default(0) }},
+                            {{ stats.usia_65_plus|default(0) }}
                         ],
                         backgroundColor: ['#155C1B', '#f59e0b', '#6b7280']
                     }]
@@ -276,9 +276,9 @@
                 datasets: [{
                     label: 'Jumlah Penduduk',
                     data: [
-                        {{ stats.usia_produktif_total.jumlah|default(0) }},
-                        {{ stats.usia_0_14.jumlah|default(0) }},
-                        {{ stats.usia_65_plus.jumlah|default(0) }}
+                        {{ stats.usia_produktif_total|default(0) }},
+                        {{ stats.usia_0_14|default(0) }},
+                        {{ stats.usia_65_plus|default(0) }}
                     ],
                     backgroundColor: ['#155C1B', '#f59e0b', '#6b7280'],
                     borderRadius: 6,

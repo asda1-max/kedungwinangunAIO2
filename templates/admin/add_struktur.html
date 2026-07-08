@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="form-container animate-in">
-    <form action="{{ url_for('admin.add_struktur_route') }}" method="POST" class="form">
+    <form action="{{ url_for('admin.add_struktur_route') }}" method="POST" enctype="multipart/form-data" class="form">
         <!-- Data Dasar -->
         <div class="form-section">
             <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -121,17 +121,20 @@
             <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                 📷 Foto & Dokumen
             </h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="foto_url">URL Foto</label>
-                    <input type="url" id="foto_url" name="foto_url" placeholder="https://contoh.com/foto.jpg">
-                    <small class="hint">Link foto personil</small>
-                </div>
-                <div class="form-group">
-                    <label for="sk_url">URL Dokumen SK</label>
-                    <input type="url" id="sk_url" name="sk_url" placeholder="https://contoh.com/sk.pdf">
-                    <small class="hint">Link PDF scan SK</small>
-                </div>
+            <div class="form-group">
+                <label for="foto_file">Upload Foto</label>
+                <input type="file" id="foto_file" name="foto_file" accept="image/*" class="w-full border border-gray-300 rounded-lg p-2">
+                <small class="hint">Format: JPG, PNG, WEBP. Maks 2MB</small>
+            </div>
+            <div class="form-group">
+                <label for="foto_url">Atau URL Foto</label>
+                <input type="url" id="foto_url" name="foto_url" placeholder="https://contoh.com/foto.jpg">
+                <small class="hint">Isi salah satu: upload file atau URL</small>
+            </div>
+            <div class="form-group">
+                <label for="sk_url">URL Dokumen SK</label>
+                <input type="url" id="sk_url" name="sk_url" placeholder="https://contoh.com/sk.pdf">
+                <small class="hint">Link PDF scan SK</small>
             </div>
         </div>
 

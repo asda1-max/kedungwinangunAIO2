@@ -17,6 +17,7 @@ from models import (
     get_berita_by_id,
     get_config,
     get_all_galeri,
+    get_all_struktur,
     get_user_by_username,
     get_user_by_nip,
     get_all_pages,
@@ -182,6 +183,10 @@ def index():
         pengumuman_list = get_all_pengumuman()
         pengumuman_aktif = [p for p in pengumuman_list if p.get('aktif') == 1][:5]
 
+        # Perangkat Desa aktif
+        struktur_list = get_all_struktur(aktif=1)
+        perangkat_desa = [s for s in struktur_list if s.get('kategori') == 'perangkat'][:6]
+
         # Config untuk template
         show_maps = get_config("tampilkan_maps", "1") == "1"
         show_stats = get_config("tampilkan_statistik", "1") == "1"
@@ -210,6 +215,7 @@ def index():
             galeri_list=galeri_list,
             potensi_grouped=potensi_grouped,
             pengumuman_list=pengumuman_aktif,
+            perangkat_desa=perangkat_desa,
             config=config_data,
             tahun=datetime.now().year,
             site_name=desa_info['nama'],

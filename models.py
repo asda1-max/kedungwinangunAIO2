@@ -1319,6 +1319,68 @@ def delete_struktur(struktur_id):
         logger.error(f"Error deleting struktur {struktur_id}: {str(e)}")
         return False
 
+def batch_import_struktur(csv_data):
+    """Batch import struktur organisasi dari CSV string"""
+    import csv
+    import io
+    results = {'success': 0, 'errors': [], 'total': 0}
+    
+    try:
+        reader = csv.DictReader(io.StringIO(csv_data))
+        rows = list(reader)
+        results['total'] = len(rows)
+        
+        for i, row in enumerate(rows):
+            try:
+                # Required fields
+                kategori = row.get('kategori', '').strip().lower()
+                nama = row.get('nama', '').strip()
+                
+                if not nama:
+                    results['errors'].append(f"Baris {i+2}: Nama wajib diisi")
+                    continue
+                
+                if kategori not in ['perangkat', 'bpd', 'pkk', 'karang_taruna', 'rt', 'rw']:
+                    results['errors'].append(f"Baris {i+2}: Kategori '{kategori}' tidak valid")
+                    continue
+                
+                # Optional fields
+                jabatan = row.get('jabatan', '').strip()
+                nik = row.get('nik', '').strip()
+                alamat = row.get('alamat', '').strip()
+                dusun = row.get('dusun', '').strip()
+                rt = row.get('rt', '').strip()
+                rw = row.get('rw', '').strip()
+                telepon = row.get('telepon', '').strip()
+                email = row.get('email', '').strip()
+                status = row.get('status', 'Aktif').strip()
+                aktif = 1 if row.get('aktif', '1').strip() in ['1', 'true', 'yes', 'aktif'] else 0
+                
+                add_struktur(
+                    kategori=kategori,
+                    nama=nama,
+                    jabatan=jabatan,
+                    nik=nik,
+                    alamat=alamat,
+                    dusun=dusun,
+                    rt=rt,
+                    rw=rw,
+                    telepon=telepon,
+                    email=email,
+                    status=status,
+                    aktif=aktif
+                )
+                results['success'] += 1
+                
+            except Exception as e:
+                results['errors'].append(f"Baris {i+2}: {str(e)}")
+        
+        return results
+        
+    except Exception as e:
+        results['errors'].append(f"Error parsing CSV: {str(e)}")
+        return results
+
 def toggle_struktur_aktif(struktur_id):
     """Toggle aktif status"""
     try:

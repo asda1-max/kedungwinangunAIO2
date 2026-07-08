@@ -392,6 +392,46 @@
         </div>
     </section>
 
+    <!-- PERANGKAT DESA SECTION -->
+    {% if perangkat_desa %}
+    <section id="perangkat" class="bg-gradient-to-br from-[#f0fdf4] to-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-[#155C1B] animated-underline reveal">Perangkat Desa</h2>
+                <p class="text-gray-500 mt-3 max-w-2xl mx-auto reveal stagger-1">Pengurus Pemerintahan Desa {{ desa.nama }}</p>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                {% for item in perangkat_desa %}
+                <div class="bg-white rounded-xl p-4 text-center shadow-md hover:shadow-xl transition-all duration-300 reveal stagger-{{ loop.index }}">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center text-white font-bold text-2xl mx-auto mb-3 overflow-hidden">
+                        {% if item.foto_url %}
+                        <img src="{{ item.foto_url }}" alt="{{ item.nama }}" class="w-full h-full object-cover">
+                        {% else %}
+                        {{ item.nama[:2]|upper }}
+                        {% endif %}
+                    </div>
+                    <h3 class="font-bold text-[#155C1B] text-sm truncate">{{ item.nama }}</h3>
+                    <p class="text-[#73AA0F] text-xs mt-1 truncate">{{ item.jabatan or '-' }}</p>
+                    {% if item.dusun %}
+                    <p class="text-gray-400 text-xs mt-1 truncate">{{ item.dusun }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="text-center mt-8">
+                <a href="{{ url_for('public.struktur') }}" class="inline-flex items-center gap-2 text-[#155C1B] font-semibold">
+                    Lihat Semua Struktur
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
         <!-- TENTANG KAMI SECTION -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div class="flex items-center justify-between mb-10">

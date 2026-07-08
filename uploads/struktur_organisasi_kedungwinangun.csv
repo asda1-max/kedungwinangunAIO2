@@ -1,0 +1,43 @@
+kategori,nama,jabatan,nik,alamat,dusun,rt,rw,telepon,email,status,aktif
+perangkat,Moh. Baequni S.Pt,Kepala Desa,,,,,001,001,,,Aktif,1
+perangkat,Siti Sangidah,Sekretaris Desa,,,,,001,001,,,Aktif,1
+perangkat,Nuryati,Kaur Keuangan,,,,,001,001,,,Aktif,1
+perangkat,Sri Rahayu,Kaur TU & Umum,,,,,001,001,,,Aktif,1
+perangkat,Aris Subaryanto,Kaur Perencanaan,,,,,001,001,,,Aktif,1
+perangkat,Setyawan Prabowo,Kasi Pemerintahan,,,,,001,001,,,Aktif,1
+perangkat,,Kasi Kesejahteraan,,,,,001,001,,,Aktif,1
+perangkat,,Kasi Pelayanan,,,,,001,001,,,Aktif,1
+perangkat,Lukman Rizky,Kadus Karangmiri,,,,,001,001,,,Aktif,1
+perangkat,,Kadus Kedungwaru,,,,,001,001,,,Aktif,1
+perangkat,,Kadus Perna & Sasak,,,,,002,002,,,Aktif,1
+perangkat,Syaeful Arifin,Kadus Entak,,,,,003,003,,,Aktif,1
+perangkat,Amin Nashiruddin,Kadus Grewing,,,,,004,004,,,Aktif,1
+perangkat,Neni Apriyani,Kadus Pedana & Pagak,,,,,005,005,,,Aktif,1
+rw,Wawan Setiawan,Ketua RW 01,,Jl. Rw 01,Kedungwaru,001,001,,,Aktif,1
+rw,Syarif Toyib,Ketua RW 02,,Jl. Rw 02,Kedungwaru,001,002,,,Aktif,1
+rw,Mafudin,Ketua RW 03,,Jl. Rw 03,Sasak,001,003,,,Aktif,1
+rw,Sudibyo,Ketua RW 04,,Jl. Rw 04,Entak,001,004,,,Aktif,1
+rw,Ahmad Mu'alim,Ketua RW 05,,Jl. Rw 05,Grewing,001,005,,,Aktif,1
+rw,Zahid Nur Mubarok,Ketua RW 06,,Jl. Rw 06,Grewing,001,006,,,Aktif,1
+rw,Tusiran,Ketua RW 07,,Jl. Rw 07,Pedana,001,007,,,Aktif,1
+rw,,Ketua RW 08,,Jl. Rw 08,Pedana,001,008,,,Aktif,1
+rt,Joko Pranowo,Ketua RT 01 RW 01,,Jl. Rt 01 Rw 01,Kedungwaru,001,001,,,Aktif,1
+rt,Slamet Hartadi,Ketua RT 02 RW 01,,Jl. Rt 02 Rw 01,Kedungwaru,002,001,,,Aktif,1
+rt,Tokhani,Ketua RT 03 RW 01,,Jl. Rt 03 Rw 01,Kedungwaru,003,001,,,Aktif,1
+rt,Tamsir,Ketua RT 01 RW 02,,Jl. Rt 01 Rw 02,Kedungwaru,001,002,,,Aktif,1
+rt,Agus Widodo,Ketua RT 02 RW 02,,Jl. Rt 02 Rw 02,Kedungwaru,002,002,,,Aktif,1
+rt,Naimun,Ketua RT 01 RW 03,,Jl. Rt 01 Rw 03,Sasak,001,003,,,Aktif,1
+rt,Angga,Ketua RT 02 RW 03,,Jl. Rt 02 Rw 03,Sasak,002,003,,,Aktif,1
+rt,Ahmad Nasrullah,Ketua RT 01 RW 04,,Jl. Rt 01 Rw 04,Entak,001,004,,,Aktif,1
+rt,Agus Styawan,Ketua RT 02 RW 04,,Jl. Rt 02 Rw 04,Entak,002,004,,,Aktif,1
+rt,M. Idris,Ketua RT 01 RW 05,,Jl. Rt 01 Rw 05,Grewing,001,005,,,Aktif,1
+rt,Muhaimin,Ketua RT 02 RW 05,,Jl. Rt 02 Rw 05,Grewing,002,005,,,Aktif,1
+rt,Rasban,Ketua RT 03 RW 05,,Jl. Rt 03 Rw 05,Grewing,003,005,,,Aktif,1
+rt,Paryono,Ketua RT 04 RW 05,,Jl. Rt 04 Rw 05,Grewing,004,005,,,Aktif,1
+rt,Harsono,Ketua RT 01 RW 06,,Jl. Rt 01 Rw 06,Grewing,001,006,,,Aktif,1
+rt,Maryono,Ketua RT 02 RW 06,,Jl. Rt 02 Rw 06,Grewing,002,006,,,Aktif,1
+rt,Slamet Wahyudi,Ketua RT 03 RW 06,,Jl. Rt 03 Rw 06,Grewing,003,006,,,Aktif,1
+rt,Triyono,Ketua RT 01 RW 07,,Jl. Rt 01 Rw 07,Pedana,001,007,,,Aktif,1
+rt,Slamet Sutrisno,Ketua RT 02 RW 07,,Jl. Rt 02 Rw 07,Pedana,002,007,,,Aktif,1
+rt,Agus Triyono,Ketua RT 01 RW 08,,Jl. Rt 01 Rw 08,Pedana,001,008,,,Aktif,1
+rt,Ahmad Fauzi,Ketua RT 02 RW 08,,Jl. Rt 02 Rw 08,Pedana,002,008,,,Aktif,1

@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="form-container animate-in">
-    <form action="{{ url_for('admin.edit_struktur_route', struktur_id=item.id) }}" method="POST" class="form">
+    <form action="{{ url_for('admin.edit_struktur_route', struktur_id=item.id) }}" method="POST" enctype="multipart/form-data" class="form">
         <!-- Data Dasar -->
         <div class="form-section">
             <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -131,20 +131,28 @@
             <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                 📷 Foto & Dokumen
             </h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="foto_url">URL Foto</label>
-                    <input type="url" id="foto_url" name="foto_url" value="{{ item.foto_url or '' }}">
-                    {% if item.foto_url %}
-                    <div class="mt-2">
-                        <img src="{{ item.foto_url }}" alt="Preview" class="w-20 h-20 object-cover rounded-lg">
-                    </div>
-                    {% endif %}
+            {% if item.foto_url %}
+            <div class="form-group">
+                <label>Foto Saat Ini</label>
+                <div class="mt-2">
+                    <img src="{{ item.foto_url }}" alt="Preview" class="w-24 h-24 object-cover rounded-lg shadow">
                 </div>
-                <div class="form-group">
-                    <label for="sk_url">URL Dokumen SK</label>
-                    <input type="url" id="sk_url" name="sk_url" value="{{ item.sk_url or '' }}">
-                </div>
+            </div>
+            {% endif %}
+            <div class="form-group">
+                <label for="foto_file">Upload Foto Baru</label>
+                <input type="file" id="foto_file" name="foto_file" accept="image/*" class="w-full border border-gray-300 rounded-lg p-2">
+                <small class="hint">Format: JPG, PNG, WEBP. Maks 2MB. Kosongkan jika tidak diubah.</small>
+            </div>
+            <div class="form-group">
+                <label for="foto_url">Atau URL Foto</label>
+                <input type="url" id="foto_url" name="foto_url" value="{{ item.foto_url or '' }}" placeholder="https://contoh.com/foto.jpg">
+                <small class="hint">Isi jika ingin menggunakan link eksternal</small>
+            </div>
+            <div class="form-group">
+                <label for="sk_url">URL Dokumen SK</label>
+                <input type="url" id="sk_url" name="sk_url" value="{{ item.sk_url or '' }}" placeholder="https://contoh.com/sk.pdf">
+                <small class="hint">Link PDF scan SK</small>
             </div>
         </div>
 

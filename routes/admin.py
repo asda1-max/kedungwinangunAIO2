@@ -10,7 +10,9 @@ Error Handling:
 """
 
 import os
+import re
 import uuid
+import json
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app, send_from_directory
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -65,6 +67,7 @@ from models import (
     update_struktur,
     delete_struktur,
     toggle_struktur_aktif,
+    batch_import_struktur,
     # UMKM
     get_all_umkm,
     get_umkm_by_id,
@@ -1002,13 +1005,28 @@ def add_struktur_route():
             rw = request.form.get('rw', '').strip()
             telepon = request.form.get('telepon', '').strip()
             email = request.form.get('email', '').strip()
-            foto_url = request.form.get('foto_url', '').strip()
             sk_url = request.form.get('sk_url', '').strip()
             no_sk = request.form.get('no_sk', '').strip()
             tanggal_sk = request.form.get('tanggal_sk', '').strip()
             masa_jabatan = request.form.get('masa_jabatan', '').strip()
             status = request.form.get('status', 'Aktif').strip()
             icon = request.form.get('icon', '').strip()
+
+            # Handle foto upload
+            foto_url = request.form.get('foto_url', '').strip()
+            foto_file = request.files.get('foto_file')
+            if foto_file and foto_file.filename:
+                from werkzeug.utils import secure_filename
+                import os
+                import uuid
+                
+                ext = foto_file.filename.rsplit('.', 1)[1].lower() if '.' in foto_file.filename else 'jpg'
+                filename = f"struktur_{uuid.uuid4().hex}.{ext}"
+                upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'struktur')
+                os.makedirs(upload_dir, exist_ok=True)
+                foto_path = os.path.join(upload_dir, filename)
+                foto_file.save(foto_path)
+                foto_url = f'/static/uploads/struktur/{filename}'
 
             if not kategori or not nama:
                 flash_error('Kategori dan Nama harus diisi!')
@@ -1056,7 +1074,6 @@ def edit_struktur_route(struktur_id):
             rw = request.form.get('rw', '').strip()
             telepon = request.form.get('telepon', '').strip()
             email = request.form.get('email', '').strip()
-            foto_url = request.form.get('foto_url', '').strip()
             sk_url = request.form.get('sk_url', '').strip()
             no_sk = request.form.get('no_sk', '').strip()
             tanggal_sk = request.form.get('tanggal_sk', '').strip()
@@ -1065,6 +1082,22 @@ def edit_struktur_route(struktur_id):
             icon = request.form.get('icon', '').strip()
             aktif = 1 if request.form.get('aktif') else 0
             no_urut = int(request.form.get('no_urut', '0').strip())
+
+            # Handle foto upload
+            foto_url = request.form.get('foto_url', '').strip()
+            foto_file = request.files.get('foto_file')
+            if foto_file and foto_file.filename:
+                from werkzeug.utils import secure_filename
+                import os
+                import uuid
+                
+                ext = foto_file.filename.rsplit('.', 1)[1].lower() if '.' in foto_file.filename else 'jpg'
+                filename = f"struktur_{uuid.uuid4().hex}.{ext}"
+                upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'struktur')
+                os.makedirs(upload_dir, exist_ok=True)
+                foto_path = os.path.join(upload_dir, filename)
+                foto_file.save(foto_path)
+                foto_url = f'/static/uploads/struktur/{filename}'
 
             if not kategori or not nama:
                 flash_error('Kategori dan Nama harus diisi!')
@@ -1122,6 +1155,104 @@ def toggle_struktur_route(struktur_id):
     return redirect(url_for('admin.struktur'))
 
 
+@admin_bp.route("/struktur/import", methods=['POST'])
+@admin_required
+def import_struktur():
+    """Batch import struktur dari CSV"""
+    try:
+        file = request.files.get('csv_file')
+        if not file:
+            flash_error('File CSV wajib diupload')
+            return redirect(url_for('admin.struktur'))
+        
+        csv_content = file.read().decode('utf-8')
+        if not csv_content.strip():
+            flash_error('File CSV kosong')
+            return redirect(url_for('admin.struktur'))
+        
+        results = batch_import_struktur(csv_content)
+        
+        if results['success'] > 0:
+            flash(f'Berhasil import {results["success"]} dari {results["total"]} data!', 'success')
+        
+        if results['errors']:
+            error_msg = f'<br>'.join(results['errors'][:10])
+            if len(results['errors']) > 10:
+                error_msg += f'<br>...dan {len(results["errors"]) - 10} error lainnya'
+            flash(f'Error:<br>{error_msg}', 'warning')
+        
+        return redirect(url_for('admin.struktur'))
+        
+    except Exception as e:
+        logger.error(f"Error importing struktur: {str(e)}")
+        flash_error(f'Error import: {str(e)}')
+        return redirect(url_for('admin.struktur'))
+
+
+@admin_bp.route("/struktur/export")
+@admin_required
+def export_struktur():
+    """Export struktur ke CSV"""
+    from flask import Response
+    import csv
+    import io
+    
+    struktur_list = get_all_struktur()
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Header
+    writer.writerow(['kategori', 'nama', 'jabatan', 'nik', 'alamat', 'dusun', 'rt', 'rw', 'telepon', 'email', 'status', 'aktif'])
+    
+    # Data
+    for item in struktur_list:
+        writer.writerow([
+            item.get('kategori', ''),
+            item.get('nama', ''),
+            item.get('jabatan', ''),
+            item.get('nik', ''),
+            item.get('alamat', ''),
+            item.get('dusun', ''),
+            item.get('rt', ''),
+            item.get('rw', ''),
+            item.get('telepon', ''),
+            item.get('email', ''),
+            item.get('status', ''),
+            item.get('aktif', 1)
+        ])
+    
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=struktur_organisasi.csv'}
+    )
+
+
+@admin_bp.route("/struktur/template")
+@admin_required
+def download_struktur_template():
+    """Download template CSV"""
+    from flask import Response
+    import io
+    
+    template = """kategori,nama,jabatan,nik,alamat,dusun,rt,rw,telepon,email,status,aktif
+perangkat,Johannes Sitepu,Kepala Desa,,Jl. Desa No.1,Kedungwaru,,001,,,Aktif,1
+perangkat,Maria Sitanggang,Sekretaris Desa,,Jl. Desa No.1,Kedungwaru,,001,,,Aktif,1
+bpd,Ahmad Dahlan,Ketua BPD,,Jl. Desa No.2,Kedungwaru,,001,,,Aktif,1
+pkk,Siti Aminah,Ketua PKK,,Jl. Desa No.3,Kedungwaru,,001,,,Aktif,1
+karang_taruna,Budi Santoso,Ketua Karang Taruna,,Jl. Desa No.4,Kedungwaru,,001,,,Aktif,1
+rt,Sukarno,Ketua RT 01,,Jl. Desa No.5,Kedungwaru,001,001,,Aktif,1
+rw,Hassan Basri,Ketua RW 01,,Jl. Desa No.6,Kedungwaru,,001,,,Aktif,1"""
+    
+    return Response(
+        template,
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=template_struktur.csv'}
+    )
+
+
 # ════════════════════════════════════════════════════════════════════════
 # ── UMKM MANAGEMENT ─────────────────────────────────────────────────
 # ════════════════════════════════════════════════════════════════════════
@@ -1137,6 +1268,80 @@ def umkm():
         logger.error(f"Error loading umkm page: {str(e)}")
         flash_error('Terjadi kesalahan saat memuat halaman')
         return redirect(url_for('admin.dashboard'))
+
+
+@admin_bp.route("/umkm/parse-location", methods=['POST'])
+@admin_required
+def parse_umkm_location():
+    """Parse Google Maps link to extract location data"""
+    from flask import jsonify
+    
+    maps_url = request.json.get('maps_url', '').strip()
+    
+    if not maps_url:
+        return jsonify({'success': False, 'error': 'URL kosong'})
+    
+    result = {
+        'success': False,
+        'latitude': None,
+        'longitude': None,
+        'nama': '',
+        'alamat': '',
+        'error': ''
+    }
+    
+    try:
+        # Pattern 1: maps.google.com or maps.app.goo.gl (short URL)
+        # Redirect short URLs first
+        if 'maps.app.goo.gl' in maps_url or ('goo.gl' in maps_url and 'maps' in maps_url):
+            import urllib.request
+            try:
+                req = urllib.request.Request(maps_url, headers={'User-Agent': 'Mozilla/5.0'})
+                response = urllib.request.urlopen(req, timeout=10)
+                maps_url = response.url
+            except Exception as e:
+                result['error'] = 'Tidak dapat mengakses link shortened'
+                return jsonify(result)
+        
+        # Pattern 2: @lat,lng format
+        match = re.search(r'@(-?\d+\.?\d*),(-?\d+\.?\d*)', maps_url)
+        if match:
+            result['latitude'] = float(match.group(1))
+            result['longitude'] = float(match.group(2))
+            result['success'] = True
+        
+        # Pattern 3: place/Name format for nama
+        place_match = re.search(r'place/([^/]+)', maps_url)
+        if place_match:
+            result['nama'] = place_match.group(1).replace('+', ' ')
+        
+        # Pattern 4: /data=...!3d...!4d... format (older style)
+        if not result['success']:
+            coord_match = re.search(r'!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)', maps_url)
+            if coord_match:
+                result['latitude'] = float(coord_match.group(1))
+                result['longitude'] = float(coord_match.group(2))
+                result['success'] = True
+        
+        # Pattern 5: query at end
+        if not result['success']:
+            query_match = re.search(r'query=([^&]+)', maps_url)
+            if query_match:
+                result['nama'] = query_match.group(1).replace('+', ' ')
+            lat_lng_match = re.search(r'(-?\d+\.\d+),(-?\d+\.\d+)', maps_url)
+            if lat_lng_match:
+                result['latitude'] = float(lat_lng_match.group(1))
+                result['longitude'] = float(lat_lng_match.group(2))
+                result['success'] = True
+        
+        if not result['success']:
+            result['error'] = 'Koordinat tidak ditemukan dalam link'
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        result['error'] = str(e)
+        return jsonify(result)
 
 
 @admin_bp.route("/umkm/add", methods=['GET', 'POST'])
@@ -1286,9 +1491,11 @@ def kependudukan():
     """Halaman manage kependudukan dengan charts"""
     try:
         all_data = get_all_kependudukan()
+        # Build stats dict with hanya jumlah value
         stats = {}
         for item in all_data:
-            stats[item['label'].lower().replace(' ', '_')] = item
+            key = item['label'].lower().replace(' ', '_')
+            stats[key] = item.get('jumlah', 0)
 
         if request.method == 'POST':
             # Update all population data
