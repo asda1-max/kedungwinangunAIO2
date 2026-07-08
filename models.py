@@ -1469,7 +1469,15 @@ def get_all_pengumuman(aktif=None):
         conn = get_db_connection()
         cursor = conn.cursor()
         if aktif is not None:
-            cursor.execute('SELECT * FROM pengumuman WHERE aktif = ? ORDER BY created_at DESC', (
+            cursor.execute('SELECT * FROM pengumuman WHERE aktif = ? ORDER BY created_at DESC', (aktif,))
+        else:
+            cursor.execute('SELECT * FROM pengumuman ORDER BY created_at DESC')
+        items = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return items
+    except Exception as e:
+        logger.error(f"Error getting all pengumuman: {str(e)}")
+        return []
 
 # KEPENDUDUKAN
 def update_kependudukan(kategori, label, jumlah, satuan='orang', tahun=None):
@@ -1488,16 +1496,6 @@ def update_kependudukan(kategori, label, jumlah, satuan='orang', tahun=None):
     except Exception as e:
         logger.error('Error updating kependudukan')
         return False
-
-aktif)
-        else:
-            cursor.execute('SELECT * FROM pengumuman ORDER BY created_at DESC')
-        items = [dict(row) for row in cursor.fetchall()]
-        conn.close()
-        return items
-    except Exception as e:
-        logger.error(f"Error getting all pengumuman: {str(e)}")
-        return []
 
 def get_pengumuman_by_id(pengumuman_id):
     """Ambil satu pengumuman berdasarkan ID"""
