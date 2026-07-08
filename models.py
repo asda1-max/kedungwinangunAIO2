@@ -1472,18 +1472,6 @@ def get_all_pengumuman(aktif=None):
             cursor.execute('SELECT * FROM pengumuman WHERE aktif = ? ORDER BY created_at DESC', (
 
 # KEPENDUDUKAN
-def get_all_kependudukan():
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM kependudukan ORDER BY kategori, label')
-        items = [dict(row) for row in cursor.fetchall()]
-        conn.close()
-        return items
-    except Exception as e:
-        logger.error('Error getting kependudukan')
-        return []
-
 def update_kependudukan(kategori, label, jumlah, satuan='orang', tahun=None):
     try:
         conn = get_db_connection()
@@ -1501,7 +1489,7 @@ def update_kependudukan(kategori, label, jumlah, satuan='orang', tahun=None):
         logger.error('Error updating kependudukan')
         return False
 
-aktif,))
+aktif)
         else:
             cursor.execute('SELECT * FROM pengumuman ORDER BY created_at DESC')
         items = [dict(row) for row in cursor.fetchall()]
@@ -1787,4 +1775,34 @@ def toggle_potensi_aktif(potensi_id):
         return True
     except Exception as e:
         logger.error(f"Error toggling potensi {potensi_id}: {str(e)}")
+        return False
+
+
+def get_all_kependudukan():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM kependudukan ORDER BY kategori, label')
+        items = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return items
+    except Exception as e:
+        logger.error(f"Error getting kependudukan: {str(e)}")
+        return []
+
+def update_kependudukan(kategori, label, jumlah, satuan='orang', tahun=None):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id FROM kependudukan WHERE kategori = ? AND label = ?', (kategori, label))
+        existing = cursor.fetchone()
+        if existing:
+            cursor.execute('UPDATE kependudukan SET jumlah = ?, satuan = ?, tahun = ? WHERE kategori = ? AND label = ?', (jumlah, satuan, tahun, kategori, label))
+        else:
+            cursor.execute('INSERT INTO kependudukan (kategori, label, jumlah, satuan, tahun) VALUES (?, ?, ?, ?, ?)', (kategori, label, jumlah, satuan, tahun))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating kependudukan: {str(e)}")
         return False
