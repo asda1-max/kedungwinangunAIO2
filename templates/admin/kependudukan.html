@@ -2,7 +2,7 @@
 
 {% block title %}Info Kependudukan - Admin Panel{% endblock %}
 {% block page_title %}Info Kependudukan{% endblock %}
-{% block page_subtitle %}Kelola data statistik penduduk{% endblock %}
+{% block page_subtitle %}Kelola data statistik penduduk Desa{% endblock %}
 
 {% block content %}
 <div class="mb-6">
@@ -13,103 +13,211 @@
     </div>
 </div>
 
-<form method="POST" action="{{ url_for('admin.update_kependudukan_bulk') }}">
-    <!-- Penduduk Section -->
-    <div class="card mb-6">
-        <div class="card-header bg-[#155C1B] text-white">
-            <h3>👥 Data Penduduk</h3>
-        </div>
-        <div class="card-body">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Total Penduduk</label>
-                    <input type="number" name="total_penduduk" value="{{ stats.total_penduduk.jumlah|default(0) }}">
+<!-- Quick Stats Cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#155C1B] text-center">
+        <div class="text-2xl font-bold text-[#155C1B]">{{ stats.total_penduduk.jumlah|default(0)|int|format(",") }}</div>
+        <div class="text-xs text-gray-500">Total Penduduk</div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500 text-center">
+        <div class="text-2xl font-bold text-blue-600">{{ stats.jumlah_kk.jumlah|default(0)|int|format(",") }}</div>
+        <div class="text-xs text-gray-500">Kartu Keluarga</div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-[#155C1B] text-center">
+        <div class="text-2xl font-bold text-[#155C1B]">{{ stats.laki_laki.jumlah|default(0)|int|format(",") }}</div>
+        <div class="text-xs text-gray-500">Laki-laki</div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-pink-500 text-center">
+        <div class="text-2xl font-bold text-pink-600">{{ stats.perempuan.jumlah|default(0)|int|format(",") }}</div>
+        <div class="text-xs text-gray-500">Perempuan</div>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-6 mb-6">
+    <!-- Form Section -->
+    <div class="lg:col-span-2">
+        <form method="POST" action="{{ url_for('admin.kependudukan') }}">
+            <!-- Penduduk Section -->
+            <div class="card mb-6">
+                <div class="card-header bg-[#155C1B] text-white">
+                    <h3>👥 Data Penduduk</h3>
                 </div>
-                <div class="form-group">
-                    <label>Laki-laki</label>
-                    <input type="number" name="laki_laki" value="{{ stats.laki_laki.jumlah|default(0) }}">
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Total Penduduk</label>
+                            <input type="number" name="total_penduduk" value="{{ stats.total_penduduk.jumlah|default(0) }}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Laki-laki</label>
+                            <input type="number" name="laki_laki" value="{{ stats.laki_laki.jumlah|default(0) }}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Perempuan</label>
+                            <input type="number" name="perempuan" value="{{ stats.perempuan.jumlah|default(0) }}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Kartu Keluarga</label>
+                            <input type="number" name="jumlah_kk" value="{{ stats.jumlah_kk.jumlah|default(0) }}" min="0">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Perempuan</label>
-                    <input type="number" name="perempuan" value="{{ stats.perempuan.jumlah|default(0) }}">
+            </div>
+
+            <!-- Usia Produktif Section -->
+            <div class="card mb-6">
+                <div class="card-header bg-green-600 text-white">
+                    <h3>💼 Usia Produktif (15-64 tahun)</h3>
                 </div>
-                <div class="form-group">
-                    <label>Kartu Keluarga</label>
-                    <input type="number" name="jumlah_kk" value="{{ stats.jumlah_kk.jumlah|default(0) }}">
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Total Usia Produktif</label>
+                            <input type="number" name="usia_produktif_total" value="{{ stats.usia_produktif_total.jumlah|default(0) }}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Bekerja</label>
+                            <input type="number" name="pekerja" value="{{ stats.pekerja.jumlah|default(0) }}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Pelajar/Mahasiswa</label>
+                            <input type="number" name="pelajar" value="{{ stats.pelajar.jumlah|default(0) }}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Ibu Rumah Tangga</label>
+                            <input type="number" name="irt" value="{{ stats.irt.jumlah|default(0) }}" min="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usia Non-Produktif Section -->
+            <div class="card mb-6">
+                <div class="card-header bg-gray-600 text-white">
+                    <h3>👴👶 Usia Non-Produktif</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Usia 0-14 tahun</label>
+                            <input type="number" name="usia_0_14" value="{{ stats.usia_0_14.jumlah|default(0) }}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Usia 65+ tahun</label>
+                            <input type="number" name="usia_65_plus" value="{{ stats.usia_65_plus.jumlah|default(0) }}" min="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Summary Stats -->
+    <div>
+        <div class="card mb-6">
+            <div class="card-header">
+                <h3>📊 Rasio JK</h3>
+            </div>
+            <div class="card-body">
+                {% set lk = stats.laki_laki.jumlah|default(0)|int %}
+                {% set pr = stats.perempuan.jumlah|default(0)|int %}
+                {% set total_jk = lk + pr %}
+                <div class="text-center mb-4">
+                    <div class="text-3xl font-bold">
+                        {% if total_jk > 0 %}
+                            {{ "%.1f"|format((lk / total_jk * 100)) }}% : {{ "%.1f"|format((pr / total_jk * 100)) }}%
+                        {% else %}
+                            50% : 50%
+                        {% endif %}
+                    </div>
+                    <div class="text-sm text-gray-500">Lk : Pr</div>
+                </div>
+                <div class="flex justify-center gap-4 text-sm">
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-[#155C1B]"></span> Lk {{ lk|format(",") }}</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-pink-500"></span> Pr {{ pr|format(",") }}</span>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Usia Produktif Section -->
-    <div class="card mb-6">
-        <div class="card-header bg-[#155C1B] text-white">
-            <h3>📊 Usia Produktif (15-64 tahun)</h3>
-        </div>
-        <div class="card-body">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Total Usia Produktif</label>
-                    <input type="number" name="usia_produktif_total" value="{{ stats.usia_produktif_total.jumlah|default(0) }}">
+        <div class="card mb-6">
+            <div class="card-header">
+                <h3>📈 Ringkasan</h3>
+            </div>
+            <div class="card-body space-y-3">
+                <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span class="text-sm">Rata-rata KK</span>
+                    <span class="font-semibold text-sm">
+                        {% set tot = stats.total_penduduk.jumlah|default(0)|int %}
+                        {% set kk = stats.jumlah_kk.jumlah|default(0)|int %}
+                        {{ "%.1f"|format((tot / kk)) if kk > 0 else 0 }} org
+                    </span>
                 </div>
-                <div class="form-group">
-                    <label>Pekerja (Bekerja)</label>
-                    <input type="number" name="pekerja" value="{{ stats.pekerja.jumlah|default(0) }}">
+                <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span class="text-sm">% Usia Produktif</span>
+                    <span class="font-semibold text-sm text-green-600">
+                        {% set prod = stats.usia_produktif_total.jumlah|default(0)|int %}
+                        {{ "%.1f"|format((prod / tot * 100)) if tot > 0 else 0 }}%
+                    </span>
                 </div>
-                <div class="form-group">
-                    <label>Pelajar/Mahasiswa</label>
-                    <input type="number" name="pelajar" value="{{ stats.pelajar.jumlah|default(0) }}">
+                <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span class="text-sm">% Anak-anak</span>
+                    <span class="font-semibold text-sm text-amber-600">
+                        {% set anak = stats.usia_0_14.jumlah|default(0)|int %}
+                        {{ "%.1f"|format((anak / tot * 100)) if tot > 0 else 0 }}%
+                    </span>
                 </div>
-                <div class="form-group">
-                    <label>Ibu Rumah Tangga</label>
-                    <input type="number" name="irt" value="{{ stats.irt.jumlah|default(0) }}">
+                <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span class="text-sm">% Lansia</span>
+                    <span class="font-semibold text-sm text-gray-600">
+                        {% set lansia = stats.usia_65_plus.jumlah|default(0)|int %}
+                        {{ "%.1f"|format((lansia / tot * 100)) if tot > 0 else 0 }}%
+                    </span>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Usia Non-Produktif Section -->
-    <div class="card mb-6">
-        <div class="card-header bg-gray-600 text-white">
-            <h3>👴👶 Usia Non-Produktif</h3>
-        </div>
-        <div class="card-body">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Usia 0-14 tahun</label>
-                    <input type="number" name="usia_0_14" value="{{ stats.usia_0_14.jumlah|default(0) }}">
-                </div>
-                <div class="form-group">
-                    <label>Usia 65+ tahun</label>
-                    <input type="number" name="usia_65_plus" value="{{ stats.usia_65_plus.jumlah|default(0) }}">
-                </div>
+        <div class="card">
+            <div class="card-header">
+                <h3>🔗 Link Publik</h3>
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('public.info_kependudukan') }}" target="_blank" class="btn btn-outline w-full">
+                    👁️ Lihat Halaman Publik
+                </a>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="btn-group">
-        <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
-    </div>
-</form>
-
+<!-- Charts Section -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<div class="mt-8 grid md:grid-cols-2 gap-6">
+<div class="grid md:grid-cols-2 gap-6">
     <!-- Chart Jenis Kelamin -->
     <div class="card">
         <div class="card-header">
             <h3>📊 Perbandingan L/P</h3>
         </div>
         <div class="card-body">
-            <canvas id="jkChart" height="200"></canvas>
+            <canvas id="jkChart" height="250"></canvas>
             <script>
             new Chart(document.getElementById('jkChart'), {
                 type: 'pie',
                 data: {
-                    labels: ['Laki-laki', 'Perempuan'],
+                    labels: ['Laki-laki ({{ stats.laki_laki.jumlah|default(0)|int|format(",") }})', 'Perempuan ({{ stats.perempuan.jumlah|default(0)|int|format(",") }})'],
                     datasets: [{
                         data: [{{ stats.laki_laki.jumlah|default(0) }}, {{ stats.perempuan.jumlah|default(0) }}],
                         backgroundColor: ['#155C1B', '#ec4899']
                     }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
                 }
             });
             </script>
@@ -119,15 +227,19 @@
     <!-- Chart Usia -->
     <div class="card">
         <div class="card-header">
-            <h3>📊 Usia Produktif vs Non-Produktif</h3>
+            <h3>📊 Distribusi Usia</h3>
         </div>
         <div class="card-body">
-            <canvas id="usiaChart" height="200"></canvas>
+            <canvas id="usiaChart" height="250"></canvas>
             <script>
             new Chart(document.getElementById('usiaChart'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['Produktif', '0-14 th', '65+ th'],
+                    labels: [
+                        'Produktif ({{ stats.usia_produktif_total.jumlah|default(0)|int|format(",") }})',
+                        '0-14 th ({{ stats.usia_0_14.jumlah|default(0)|int|format(",") }})',
+                        '65+ th ({{ stats.usia_65_plus.jumlah|default(0)|int|format(",") }})'
+                    ],
                     datasets: [{
                         data: [
                             {{ stats.usia_produktif_total.jumlah|default(0) }},
@@ -136,10 +248,61 @@
                         ],
                         backgroundColor: ['#155C1B', '#f59e0b', '#6b7280']
                     }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
                 }
             });
             </script>
         </div>
+    </div>
+</div>
+
+<!-- Bar Chart for Usia -->
+<div class="card mt-6">
+    <div class="card-header">
+        <h3>📈 Komposisi Penduduk per Kelompok Usia</h3>
+    </div>
+    <div class="card-body">
+        <canvas id="usiaBarChart" height="100"></canvas>
+        <script>
+        new Chart(document.getElementById('usiaBarChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Usia Produktif (15-64)', 'Anak-anak (0-14)', 'Lansia (65+)'],
+                datasets: [{
+                    label: 'Jumlah Penduduk',
+                    data: [
+                        {{ stats.usia_produktif_total.jumlah|default(0) }},
+                        {{ stats.usia_0_14.jumlah|default(0) }},
+                        {{ stats.usia_65_plus.jumlah|default(0) }}
+                    ],
+                    backgroundColor: ['#155C1B', '#f59e0b', '#6b7280'],
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        </script>
     </div>
 </div>
 {% endblock %}

@@ -36,41 +36,83 @@
     <main class="max-w-6xl mx-auto px-4 py-8">
         <!-- Summary Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white rounded-xl p-6 shadow-md text-center">
-                <div class="text-4xl font-bold text-[#155C1B]">{{ stats.total_penduduk|default(0)|int|format(",") }}</div>
-                <div class="text-gray-500 text-sm">Total Penduduk</div>
+            <div class="bg-white rounded-xl p-6 shadow-md text-center border-t-4 border-[#155C1B]">
+                <div class="text-4xl font-bold text-[#155C1B]">{{ stats.total_penduduk|default(0)|int }}</div>
+                <div class="text-gray-500 text-sm mt-1">Total Penduduk</div>
             </div>
-            <div class="bg-white rounded-xl p-6 shadow-md text-center">
-                <div class="text-4xl font-bold text-blue-600">{{ stats.jumlah_kk|default(0)|int|format(",") }}</div>
-                <div class="text-gray-500 text-sm">Kartu Keluarga</div>
+            <div class="bg-white rounded-xl p-6 shadow-md text-center border-t-4 border-blue-500">
+                <div class="text-4xl font-bold text-blue-600">{{ stats.jumlah_kk|default(0)|int }}</div>
+                <div class="text-gray-500 text-sm mt-1">Kartu Keluarga</div>
             </div>
-            <div class="bg-white rounded-xl p-6 shadow-md text-center">
-                <div class="text-4xl font-bold text-[#155C1B]">{{ stats.laki_laki|default(0)|int|format(",") }}</div>
-                <div class="text-gray-500 text-sm">Laki-laki</div>
+            <div class="bg-white rounded-xl p-6 shadow-md text-center border-t-4 border-[#155C1B]">
+                <div class="text-4xl font-bold text-[#155C1B]">{{ stats.laki_laki|default(0)|int }}</div>
+                <div class="text-gray-500 text-sm mt-1">👨 Laki-laki</div>
             </div>
-            <div class="bg-white rounded-xl p-6 shadow-md text-center">
-                <div class="text-4xl font-bold text-pink-600">{{ stats.perempuan|default(0)|int|format(",") }}</div>
-                <div class="text-gray-500 text-sm">Perempuan</div>
+            <div class="bg-white rounded-xl p-6 shadow-md text-center border-t-4 border-pink-500">
+                <div class="text-4xl font-bold text-pink-600">{{ stats.perempuan|default(0)|int }}</div>
+                <div class="text-gray-500 text-sm mt-1">👩 Perempuan</div>
             </div>
         </div>
 
-        <!-- Charts Row -->
+        <!-- Ratio Card -->
+        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 shadow-md mb-8">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <p class="text-gray-600 text-sm">Rasio Jenis Kelamin</p>
+                    <p class="text-2xl font-bold text-gray-800">
+                        {% set lk = stats.laki_laki|default(0)|int %}
+                        {% set pr = stats.perempuan|default(0)|int %}
+                        {% set total_jk = lk + pr %}
+                        {% if total_jk > 0 %}
+                            {{ "{:.1f}".format(lk / total_jk * 100) }}% : {{ "{:.1f}".format(pr / total_jk * 100) }}%
+                        {% else %}
+                            50% : 50%
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-4 py-2 bg-[#155C1B] text-white rounded-full text-sm font-semibold">
+                        Lk {{ "{:,}".format(lk) }}
+                    </span>
+                    <span class="text-gray-400">:</span>
+                    <span class="px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-semibold">
+                        Pr {{ "{:,}".format(pr) }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1: JK Pie & Usia Doughnut -->
         <div class="grid md:grid-cols-2 gap-6 mb-8">
             <!-- Chart JK -->
             <div class="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 class="font-bold text-gray-800 mb-4 text-center">Perbandingan Jenis Kelamin</h3>
+                <h3 class="font-bold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+                    <span class="text-2xl">👫</span> Perbandingan Jenis Kelamin
+                </h3>
                 <div class="max-w-xs mx-auto">
                     <canvas id="jkChart"></canvas>
                 </div>
                 <div class="flex justify-center gap-6 mt-4">
-                    <span class="flex items-center gap-2"><span class="w-4 h-4 rounded bg-[#155C1B]"></span> Laki-laki</span>
-                    <span class="flex items-center gap-2"><span class="w-4 h-4 rounded bg-pink-500"></span> Perempuan</span>
+                    <span class="flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-[#155C1B]"></span> Laki-laki
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-pink-500"></span> Perempuan
+                    </span>
                 </div>
+                {% set total_jk = lk + pr %}
+                {% if total_jk > 0 %}
+                <div class="mt-4 text-center text-sm text-gray-500">
+                    Selisih: {{ "{:,}".format((lk - pr)|abs) }} jiwa ({{ "{:.1f}".format((lk - pr)|abs / total_jk * 100) }}%)
+                </div>
+                {% endif %}
             </div>
 
             <!-- Chart Usia -->
             <div class="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 class="font-bold text-gray-800 mb-4 text-center">Distribusi Usia</h3>
+                <h3 class="font-bold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+                    <span class="text-2xl">📊</span> Distribusi Usia Penduduk
+                </h3>
                 <div class="max-w-xs mx-auto">
                     <canvas id="usiaChart"></canvas>
                 </div>
@@ -82,59 +124,145 @@
             </div>
         </div>
 
-        <!-- Detail Tables -->
-        <div class="grid md:grid-cols-2 gap-6">
-            <!-- Usia Produktif -->
+        <!-- Charts Row 2: Bar Chart Usia -->
+        <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Bar Chart Distribusi Usia -->
             <div class="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    💼 Usia Produktif (15-64 tahun)
+                <h3 class="font-bold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+                    <span class="text-2xl">📈</span> Komposisi Penduduk per Kelompok Usia
                 </h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                        <span>Total</span>
-                        <span class="font-bold text-[#155C1B]">{{ stats.usia_produktif_total|default(0)|int|format(",") }} orang</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                        <span>Bekerja</span>
-                        <span class="font-semibold">{{ stats.pekerja|default(0)|int|format(",") }} orang</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                        <span>Pelajar/Mahasiswa</span>
-                        <span class="font-semibold">{{ stats.pelajar|default(0)|int|format(",") }} orang</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                        <span>Ibu Rumah Tangga</span>
-                        <span class="font-semibold">{{ stats.irt|default(0)|int|format(",") }} orang</span>
-                    </div>
+                <div class="h-72">
+                    <canvas id="usiaBarChart"></canvas>
                 </div>
             </div>
 
+            <!-- Stat Cards Usia Produktif -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="font-bold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+                    <span class="text-2xl">💼</span> Rincian Usia Produktif (15-64 tahun)
+                </h3>
+                <div class="space-y-4">
+                    <!-- Total Produktif -->
+                    <div class="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border-l-4 border-[#155C1B]">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-700">Total Usia Produktif</span>
+                            <span class="text-2xl font-bold text-[#155C1B]">{{ "{:,}".format(stats.usia_produktif_total|default(0)|int) }}</span>
+                        </div>
+                        <div class="mt-2 w-full bg-green-200 rounded-full h-2">
+                            {% set prod = stats.usia_produktif_total|default(0)|int %}
+                            {% set tot = stats.total_penduduk|default(0)|int %}
+                            <div class="bg-[#155C1B] h-2 rounded-full" style="width: {{ (prod / tot * 100) if tot > 0 else 0 }}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">{{ "{:.1f}".format(prod / tot * 100) if tot > 0 else 0 }}% dari total penduduk</p>
+                    </div>
+
+                    <!-- Bekerja -->
+                    <div class="p-4 bg-blue-50 rounded-xl border-l-4 border-blue-500">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-700">🛠️ Bekerja</span>
+                            <span class="text-xl font-bold text-blue-600">{{ "{:,}".format(stats.pekerja|default(0)|int) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Pelajar/Mahasiswa -->
+                    <div class="p-4 bg-purple-50 rounded-xl border-l-4 border-purple-500">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-700">📚 Pelajar/Mahasiswa</span>
+                            <span class="text-xl font-bold text-purple-600">{{ "{:,}".format(stats.pelajar|default(0)|int) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- IRT -->
+                    <div class="p-4 bg-pink-50 rounded-xl border-l-4 border-pink-500">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-700">🏠 Ibu Rumah Tangga</span>
+                            <span class="text-xl font-bold text-pink-600">{{ "{:,}".format(stats.irt|default(0)|int) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Tables: Usia Non-Produktif -->
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
             <!-- Usia Non-Produktif -->
             <div class="bg-white rounded-2xl p-6 shadow-lg">
                 <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
                     👴👶 Usia Non-Produktif
                 </h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
-                        <span>Anak-anak (0-14 th)</span>
-                        <span class="font-bold text-amber-600">{{ stats.usia_0_14|default(0)|int|format(",") }} orang</span>
+                <div class="space-y-4">
+                    <!-- Anak-anak -->
+                    <div class="p-4 bg-amber-50 rounded-xl border-l-4 border-amber-400">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-medium text-gray-700">Anak-anak (0-14 th)</span>
+                                <p class="text-xs text-gray-500">Belum produktif / sekolah</p>
+                            </div>
+                            <span class="text-2xl font-bold text-amber-600">{{ "{:,}".format(stats.usia_0_14|default(0)|int) }}</span>
+                        </div>
+                        <div class="mt-2 w-full bg-amber-200 rounded-full h-2">
+                            {% set anak = stats.usia_0_14|default(0)|int %}
+                            {% set tot = stats.total_penduduk|default(0)|int %}
+                            <div class="bg-amber-400 h-2 rounded-full" style="width: {{ (anak / tot * 100) if tot > 0 else 0 }}%"></div>
+                        </div>
                     </div>
-                    <div class="flex justify-between items-center p-3 bg-gray-100 rounded-lg">
-                        <span>Lansia (65+ th)</span>
-                        <span class="font-bold text-gray-600">{{ stats.usia_65_plus|default(0)|int|format(",") }} orang</span>
+
+                    <!-- Lansia -->
+                    <div class="p-4 bg-gray-100 rounded-xl border-l-4 border-gray-400">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-medium text-gray-700">Lansia (65+ th)</span>
+                                <p class="text-xs text-gray-500">Tidak produktif / pensiun</p>
+                            </div>
+                            <span class="text-2xl font-bold text-gray-600">{{ "{:,}".format(stats.usia_65_plus|default(0)|int) }}</span>
+                        </div>
+                        <div class="mt-2 w-full bg-gray-300 rounded-full h-2">
+                            {% set lansia = stats.usia_65_plus|default(0)|int %}
+                            {% set tot = stats.total_penduduk|default(0)|int %}
+                            <div class="bg-gray-400 h-2 rounded-full" style="width: {{ (lansia / tot * 100) if tot > 0 else 0 }}%"></div>
+                        </div>
                     </div>
                 </div>
+
                 <div class="mt-6 p-4 bg-blue-50 rounded-xl">
                     <p class="text-blue-800 text-sm">
-                        <strong>💡 Catatan:</strong> Usia produktif (15-64 tahun) adalah kelompok usia yang potensial untuk bekerja dan berwirausaha.
+                        <strong>💡 Info:</strong> Usia produktif (15-64 tahun) adalah kelompok usia yang potensial untuk bekerja dan berwirausaha.
                     </p>
+                </div>
+            </div>
+
+            <!-- Summary Info -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    📋 Ringkasan Data
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="text-gray-600">📍 Total Penduduk</span>
+                        <span class="font-bold text-[#155C1B]">{{ "{:,}".format(stats.total_penduduk|default(0)|int) }} jiwa</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="text-gray-600">👨‍👩‍👧‍👦 Total KK</span>
+                        <span class="font-bold">{{ "{:,}".format(stats.jumlah_kk|default(0)|int) }} KK</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="text-gray-600">📊 Rata-rata Anggota KK</span>
+                        {% set tot = stats.total_penduduk|default(0)|int %}
+                        {% set kk = stats.jumlah_kk|default(0)|int %}
+                        <span class="font-bold">{{ "{:.1f}".format(tot / kk) if kk > 0 else 0 }} orang</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <span class="text-gray-600">💼 % Usia Produktif</span>
+                        {% set prod = stats.usia_produktif_total|default(0)|int %}
+                        <span class="font-bold text-[#155C1B]">{{ "{:.1f}".format(prod / tot * 100) if tot > 0 else 0 }}%</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Source -->
         <div class="mt-8 text-center text-gray-400 text-sm">
-            Data bersumber dari {{ tahun }} - Desa {{ site_name }}
+            📅 Data bersumber dari tahun {{ tahun }} - Desa {{ site_name }}
         </div>
     </main>
 
@@ -147,13 +275,30 @@
         new Chart(document.getElementById('jkChart'), {
             type: 'pie',
             data: {
-                labels: ['Laki-laki (' + lk + ')', 'Perempuan (' + pr + ')'],
+                labels: ['Laki-laki (' + lk.toLocaleString('id-ID') + ')', 'Perempuan (' + pr.toLocaleString('id-ID') + ')'],
                 datasets: [{
                     data: [lk, pr],
-                    backgroundColor: ['#155C1B', '#ec4899']
+                    backgroundColor: ['#155C1B', '#ec4899'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
                 }]
             },
-            options: { responsive: true, plugins: { legend: { position: 'bottom' } }
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const value = context.raw;
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return context.label + ': ' + value.toLocaleString('id-ID') + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
         });
 
         // Usia Doughnut Chart
@@ -163,13 +308,73 @@
         new Chart(document.getElementById('usiaChart'), {
             type: 'doughnut',
             data: {
-                labels: ['Produktif (' + prod + ')', '0-14 th (' + anak + ')', '65+ th (' + lansia + ')'],
+                labels: ['Produktif (' + prod.toLocaleString('id-ID') + ')', '0-14 th (' + anak.toLocaleString('id-ID') + ')', '65+ th (' + lansia.toLocaleString('id-ID') + ')'],
                 datasets: [{
                     data: [prod, anak, lansia],
-                    backgroundColor: ['#155C1B', '#f59e0b', '#6b7280']
+                    backgroundColor: ['#155C1B', '#f59e0b', '#6b7280'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
                 }]
             },
-            options: { responsive: true, plugins: { legend: { position: 'bottom' } }
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const value = context.raw;
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return context.label + ' - ' + percentage + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Usia Bar Chart
+        new Chart(document.getElementById('usiaBarChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Usia Produktif (15-64)', 'Anak-anak (0-14)', 'Lansia (65+)'],
+                datasets: [{
+                    label: 'Jumlah Penduduk',
+                    data: [prod, anak, lansia],
+                    backgroundColor: ['#155C1B', '#f59e0b', '#6b7280'],
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw.toLocaleString('id-ID') + ' jiwa';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString('id-ID');
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Jumlah Penduduk'
+                        }
+                    }
+                }
+            }
         });
     </script>
 </body>
