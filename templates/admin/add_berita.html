@@ -101,9 +101,15 @@
                 </div>
             </div>
 
-            <div class="form-group">
+	            <div class="form-group">
                 <label for="gambar_alt">Deskripsi Gambar</label>
                 <input type="text" id="gambar_alt" name="gambar_alt" placeholder="Contoh: Foto gotong royong warga">
+            </div>
+
+            <div class="form-group">
+                <label for="video_url">URL Video</label>
+                <input type="url" id="video_url" name="video_url" placeholder="https://youtube.com/watch?v=...">
+                <p class="hint">Tambahkan video YouTube/Vimeo (opsional)</p>
             </div>
 
             <div class="form-group">
@@ -114,6 +120,17 @@
                         Tandai sebagai berita unggulan
                     </label>
                 </div>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="facebook_auto_post" name="facebook_auto_post">
+                    <label for="facebook_auto_post">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328c-.075 1.417-1.452 2.824-3.328 2.824H10.5c-1.414 0-2.684 1.098-2.684 2.701 0 1.603 1.27 2.701 2.684 2.701h8.328c3.082 0 4.578-1.998 4.578-4.701V12.073z"/></svg>
+                        Auto-post ke Facebook saat publish
+                    </label>
+                </div>
+                <p class="hint text-blue-600">⚠️ Butuh Page Access Token Facebook untuk auto-post</p>
             </div>
 
             <div class="btn-group">

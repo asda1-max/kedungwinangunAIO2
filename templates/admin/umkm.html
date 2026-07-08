@@ -1,0 +1,93 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}UMKM - Admin Panel{% endblock %}
+{% block page_title %}UMKM{% endblock %}
+{% block page_subtitle %}Kelola data UMKM Desa{% endblock %}
+
+{% block header_actions %}
+<div class="user-menu">
+    <div class="user-avatar">{{ session.get('user_nama', 'A')[0]|upper }}</div>
+    <div class="user-info">
+        <h4>{{ session.get('user_nama', 'Admin') }}</h4>
+        <span>Administrator</span>
+    </div>
+</div>
+<a href="{{ url_for('admin.add_umkm_route') }}" class="btn btn-primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Tambah UMKM
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-wrap gap-2">
+    <a href="?kategori=all" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">Semua</a>
+    <a href="?kategori=makanan" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">Makanan</a>
+    <a href="?kategori=minuman" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">Minuman</a>
+    <a href="?kategori=kerajinan" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">Kerajinan</a>
+    <a href="?kategori=jasa" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">Jasa</a>
+    <a href="?kategori=pertanian" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">Pertanian</a>
+</div>
+
+{% if umkm_list %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    {% for item in umkm_list %}
+    <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all overflow-hidden">
+        {% if item.foto_url %}
+        <div class="h-40 bg-gray-100 overflow-hidden">
+            <img src="{{ item.foto_url }}" alt="{{ item.nama }}" class="w-full h-full object-cover">
+        </div>
+        {% else %}
+        <div class="h-40 bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center">
+            <span class="text-6xl">🏪</span>
+        </div>
+        {% endif %}
+        <div class="p-4">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2 py-0.5 bg-[#73AA0F]/10 text-[#155C1B] text-xs font-medium rounded-full">
+                    {{ item.kategori|title }}
+                </span>
+                {% if item.aktif == 1 %}
+                <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Aktif</span>
+                {% else %}
+                <span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">Nonaktif</span>
+                {% endif %}
+            </div>
+            <h4 class="font-bold text-gray-800 mb-1 truncate">{{ item.nama }}</h4>
+            {% if item.pemiliki_nama %}
+            <p class="text-gray-500 text-sm mb-2">👤 {{ item.pemiliki_nama }}</p>
+            {% endif %}
+            {% if item.dusun %}
+            <p class="text-gray-500 text-sm mb-2">📍 {{ item.dusun }}{% if item.rt %} RT {{ item.rt }}{% endif %}</p>
+            {% endif %}
+        </div>
+        <div class="px-4 pb-4 flex gap-2">
+            <a href="{{ url_for('admin.edit_umkm_route', umkm_id=item.id) }}" class="btn btn-edit btn-sm flex-1 text-center">Edit</a>
+            <form action="{{ url_for('admin.toggle_umkm_route', umkm_id=item.id) }}" method="POST" class="flex-1">
+                <button type="submit" class="btn btn-view btn-sm w-full text-xs">
+                    {% if item.aktif == 1 %}Hide{% else %}Show{% endif %}
+                </button>
+            </form>
+            <form action="{{ url_for('admin.delete_umkm_route', umkm_id=item.id) }}" method="POST" class="flex-1" onsubmit="return confirm('Hapus data ini?')">
+                <button type="submit" class="btn btn-delete btn-sm w-full text-xs">Hapus</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty animate-in">
+    <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+    </div>
+    <h3>Belum ada data UMKM</h3>
+    <p>Tambahkan data UMKM pertama untuk ditampilkan di peta</p>
+    <a href="{{ url_for('admin.add_umkm_route') }}" class="btn btn-primary">Tambah UMKM</a>
+</div>
+{% endif %}
+{% endblock %}

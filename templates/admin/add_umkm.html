@@ -1,0 +1,116 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Tambah UMKM - Admin Panel{% endblock %}
+{% block page_title %}Tambah UMKM{% endblock %}
+{% block page_subtitle %}Tambah data usaha baru{% endblock %}
+
+{% block content %}
+<div class="form-container animate-in">
+    <form action="{{ url_for('admin.add_umkm_route') }}" method="POST" class="form">
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📋 Data Dasar</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nama">Nama UMKM <span class="text-red-500">*</span></label>
+                    <input type="text" id="nama" name="nama" required placeholder="Nama usaha">
+                </div>
+                <div class="form-group">
+                    <label for="kategori">Kategori</label>
+                    <select id="kategori" name="kategori">
+                        <option value="makanan">Makanan</option>
+                        <option value="minuman">Minuman</option>
+                        <option value="kerajinan">Kerajinan</option>
+                        <option value="jasa">Jasa</option>
+                        <option value="pertanian">Pertanian</option>
+                        <option value="peternakan">Peternakan</option>
+                        <option value="perikanan">Perikanan</option>
+                        <option value="umum">Umum/Lainnya</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="deskripsi">Deskripsi</label>
+                <textarea id="deskripsi" name="deskripsi" rows="3" placeholder="Deskripsi usaha"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="produk_jasa">Produk/Jasa yang Ditawarkan</label>
+                <textarea id="produk_jasa" name="produk_jasa" rows="2" placeholder="Daftar produk atau jasa"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="harga_range">Kisaran Harga</label>
+                <input type="text" id="harga_range" name="harga_range" placeholder="Contoh: Rp 5.000 - Rp 50.000">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">👤 Data Pemilik</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="pemiliki_nama">Nama Pemilik</label>
+                    <input type="text" id="pemiliki_nama" name="pemiliki_nama" placeholder="Nama lengkap">
+                </div>
+                <div class="form-group">
+                    <label for="pemiliki_kontak">Kontak (WhatsApp)</label>
+                    <input type="text" id="pemiliki_kontak" name="pemiliki_kontak" placeholder="08xxxxxxxxxx">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📍 Lokasi</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="alamat">Alamat Lengkap</label>
+                    <input type="text" id="alamat" name="alamat" placeholder="Alamat lengkap">
+                </div>
+                <div class="form-group">
+                    <label for="dusun">Dusun</label>
+                    <input type="text" id="dusun" name="dusun" placeholder="Nama dusun">
+                </div>
+                <div class="form-group">
+                    <label for="rt">RT</label>
+                    <input type="text" id="rt" name="rt" placeholder="001" maxlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="rw">RW</label>
+                    <input type="text" id="rw" name="rw" placeholder="001" maxlength="3">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="jam_operasional">Jam Operasional</label>
+                <input type="text" id="jam_operasional" name="jam_operasional" placeholder="Contoh: 08.00 - 20.00">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">🗺️ Koordinat (untuk Peta)</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="latitude">Latitude</label>
+                    <input type="text" id="latitude" name="latitude" placeholder="-7.6333">
+                    <small class="hint">Contoh: -7.6333</small>
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude</label>
+                    <input type="text" id="longitude" name="longitude" placeholder="109.5250">
+                    <small class="hint">Contoh: 109.5250</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📷 Foto</h3>
+            <div class="form-group">
+                <label for="foto_url">URL Foto</label>
+                <input type="url" id="foto_url" name="foto_url" placeholder="https://contoh.com/foto.jpg">
+                <small class="hint">Link foto produk atau tempat usaha</small>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin.umkm') }}" class="btn btn-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

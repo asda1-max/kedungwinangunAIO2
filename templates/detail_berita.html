@@ -4,8 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ artikel.judul }} — {{ desa.nama }}</title>
-    <meta name="description" content="{{ artikel.excerpt[:160] }}">
+    <title>{{ artikel.judul }} — {{ site_name }}</title>
+    <meta name="description" content="{{ artikel.excerpt[:160] if artikel.excerpt else '' }}">
+
+    <!-- Open Graph for Facebook Share -->
+    <meta property="og:title" content="{{ artikel.judul }}">
+    <meta property="og:description" content="{{ artikel.excerpt[:200] if artikel.excerpt else '' }}">
+    <meta property="og:image" content="{{ artikel.gambar_url if artikel.gambar_url else '' }}">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="{{ site_name }}">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -23,6 +32,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        .share-btn { transition: all 0.2s; }
+        .share-btn:hover { transform: translateY(-2px); }
+    </style>
 
     <style>
         /* ── Komentar Section ── */
@@ -406,6 +420,74 @@
                     (Konten lengkap artikel akan ditampilkan di sini setelah terhubung ke database.)
                 </p>
             </div>
+
+            <!-- Video Embed -->
+            {% if artikel.video_url %}
+            <div class="mt-8 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    🎬 Video Terkait
+                </h3>
+                <div class="aspect-video rounded-xl overflow-hidden shadow-lg">
+                    {% if 'youtube' in artikel.video_url or 'youtu.be' in artikel.video_url %}
+                        {% set video_id = artikel.video_url.split('v=')[1] if 'v=' in artikel.video_url else artikel.video_url.split('/')[-1] %}
+                        {% set video_id = video_id.split('&')[0] %}
+                        <iframe src="https://www.youtube.com/embed/{{ video_id }}"
+                            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen class="w-full h-full"></iframe>
+                    {% elif 'vimeo' in artikel.video_url %}
+                        {% set video_id = artikel.video_url.split('/')[-1] %}
+                        <iframe src="https://player.vimeo.com/video/{{ video_id }}"
+                            frameborder="0" allow="autoplay; fullscreen; picture-in-picture"
+                            allowfullscreen class="w-full h-full"></iframe>
+                    {% else %}
+                        <video controls class="w-full h-full">
+                            <source src="{{ artikel.video_url }}" type="video/mp4">
+                        </video>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Share Buttons -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <span class="text-sm font-semibold text-gray-600">Bagikan:</span>
+                    <div class="flex gap-3">
+                        <!-- Facebook -->
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}"
+                           target="_blank"
+                           class="share-btn inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-md">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328c-.075 1.417-1.452 2.824-3.328 2.824H10.5c-1.414 0-2.684 1.098-2.684 2.701 0 1.603 1.27 2.701 2.684 2.701h8.328c3.082 0 4.578-1.998 4.578-4.701V12.073z"/></svg>
+                            Facebook
+                        </a>
+                        <!-- WhatsApp -->
+                        <a href="https://wa.me/?text={{ artikel.judul|urlencode }}%20{{ request.url|urlencode }}"
+                           target="_blank"
+                           class="share-btn inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 shadow-md">
+                            💬 WhatsApp
+                        </a>
+                        <!-- Twitter/X -->
+                        <a href="https://twitter.com/intent/tweet?text={{ artikel.judul|urlencode }}&url={{ request.url|urlencode }}"
+                           target="_blank"
+                           class="share-btn inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 shadow-md">
+                            𝕏 Twitter
+                        </a>
+                        <!-- Copy Link -->
+                        <button onclick="copyLink()"
+                                class="share-btn inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 border border-gray-200">
+                            🔗 Copy Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+            function copyLink() {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Link berhasil disalin!');
+                });
+            }
+            </script>
 
             <!-- ── KOMENTAR SECTION ── -->
             <section class="komentar-section" id="komentar">

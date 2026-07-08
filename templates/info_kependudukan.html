@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Info Kependudukan - {{ site_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'desa-dark': '#155C1B', 'desa-mid': '#2A6726',
+                        'desa-light': '#73AA0F', 'desa-muted': '#5B8A4E',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-50">
+    {% include 'partials/navbar.html' %}
+
+    <!-- Hero -->
+    <section class="bg-gradient-to-br from-[#155C1B] to-[#228B22] text-white py-12">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <h1 class="text-4xl font-bold mb-2">📊 Info Kependudukan</h1>
+            <p class="text-green-100">Data demografi Desa {{ site_name }}</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-xl p-6 shadow-md text-center">
+                <div class="text-4xl font-bold text-[#155C1B]">{{ stats.total_penduduk|default(0)|int|format(",") }}</div>
+                <div class="text-gray-500 text-sm">Total Penduduk</div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-md text-center">
+                <div class="text-4xl font-bold text-blue-600">{{ stats.jumlah_kk|default(0)|int|format(",") }}</div>
+                <div class="text-gray-500 text-sm">Kartu Keluarga</div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-md text-center">
+                <div class="text-4xl font-bold text-[#155C1B]">{{ stats.laki_laki|default(0)|int|format(",") }}</div>
+                <div class="text-gray-500 text-sm">Laki-laki</div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-md text-center">
+                <div class="text-4xl font-bold text-pink-600">{{ stats.perempuan|default(0)|int|format(",") }}</div>
+                <div class="text-gray-500 text-sm">Perempuan</div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <!-- Chart JK -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="font-bold text-gray-800 mb-4 text-center">Perbandingan Jenis Kelamin</h3>
+                <div class="max-w-xs mx-auto">
+                    <canvas id="jkChart"></canvas>
+                </div>
+                <div class="flex justify-center gap-6 mt-4">
+                    <span class="flex items-center gap-2"><span class="w-4 h-4 rounded bg-[#155C1B]"></span> Laki-laki</span>
+                    <span class="flex items-center gap-2"><span class="w-4 h-4 rounded bg-pink-500"></span> Perempuan</span>
+                </div>
+            </div>
+
+            <!-- Chart Usia -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="font-bold text-gray-800 mb-4 text-center">Distribusi Usia</h3>
+                <div class="max-w-xs mx-auto">
+                    <canvas id="usiaChart"></canvas>
+                </div>
+                <div class="flex flex-wrap justify-center gap-4 mt-4 text-sm">
+                    <span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-[#155C1B]"></span> Produktif (15-64)</span>
+                    <span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-amber-400"></span> 0-14 th</span>
+                    <span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-gray-400"></span> 65+ th</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Tables -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- Usia Produktif -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    💼 Usia Produktif (15-64 tahun)
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <span>Total</span>
+                        <span class="font-bold text-[#155C1B]">{{ stats.usia_produktif_total|default(0)|int|format(",") }} orang</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span>Bekerja</span>
+                        <span class="font-semibold">{{ stats.pekerja|default(0)|int|format(",") }} orang</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span>Pelajar/Mahasiswa</span>
+                        <span class="font-semibold">{{ stats.pelajar|default(0)|int|format(",") }} orang</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span>Ibu Rumah Tangga</span>
+                        <span class="font-semibold">{{ stats.irt|default(0)|int|format(",") }} orang</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usia Non-Produktif -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    👴👶 Usia Non-Produktif
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
+                        <span>Anak-anak (0-14 th)</span>
+                        <span class="font-bold text-amber-600">{{ stats.usia_0_14|default(0)|int|format(",") }} orang</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-100 rounded-lg">
+                        <span>Lansia (65+ th)</span>
+                        <span class="font-bold text-gray-600">{{ stats.usia_65_plus|default(0)|int|format(",") }} orang</span>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-blue-50 rounded-xl">
+                    <p class="text-blue-800 text-sm">
+                        <strong>💡 Catatan:</strong> Usia produktif (15-64 tahun) adalah kelompok usia yang potensial untuk bekerja dan berwirausaha.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Source -->
+        <div class="mt-8 text-center text-gray-400 text-sm">
+            Data bersumber dari {{ tahun }} - Desa {{ site_name }}
+        </div>
+    </main>
+
+    {% include 'partials/footer.html' %}
+
+    <script>
+        // JK Pie Chart
+        const lk = {{ stats.laki_laki|default(0) }};
+        const pr = {{ stats.perempuan|default(0) }};
+        new Chart(document.getElementById('jkChart'), {
+            type: 'pie',
+            data: {
+                labels: ['Laki-laki (' + lk + ')', 'Perempuan (' + pr + ')'],
+                datasets: [{
+                    data: [lk, pr],
+                    backgroundColor: ['#155C1B', '#ec4899']
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } }
+        });
+
+        // Usia Doughnut Chart
+        const prod = {{ stats.usia_produktif_total|default(0) }};
+        const anak = {{ stats.usia_0_14|default(0) }};
+        const lansia = {{ stats.usia_65_plus|default(0) }};
+        new Chart(document.getElementById('usiaChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Produktif (' + prod + ')', '0-14 th (' + anak + ')', '65+ th (' + lansia + ')'],
+                datasets: [{
+                    data: [prod, anak, lansia],
+                    backgroundColor: ['#155C1B', '#f59e0b', '#6b7280']
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } }
+        });
+    </script>
+</body>
+</html>

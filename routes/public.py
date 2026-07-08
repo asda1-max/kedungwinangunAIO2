@@ -30,6 +30,9 @@ from models import (
     get_all_potensi,
     get_all_pengumuman,
     get_all_sejarah,
+    get_all_umkm,
+    get_umkm_for_geojson,
+    get_all_kependudukan,
 )
 from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
 from errors import safe_handler, flash_error, ValidationError, NotFoundError, json_success_response
@@ -407,9 +410,25 @@ def peta_interaktif():
     from datetime import datetime
 
     try:
-        from models import get_all_pages
+        from models import get_all_pages, get_all_umkm
         desa_info = get_desa_info_with_maps()
         custom_pages = get_all_pages()
+
+        # Get UMKM data
+        umkm_list = get_all_umkm(aktif=1)
+        umkm_geojson = get_umkm_for_geojson(aktif=1)
+
+        # Kategori labels
+        kategori_labels = {
+            'makanan': '🍜 Makanan',
+            'minuman': '🥤 Minuman',
+            'kerajinan': '🎨 Kerajinan',
+            'jasa': '🔧 Jasa',
+            'pertanian': '🌾 Pertanian',
+            'peternakan': '🐔 Peternakan',
+            'perikanan': '🐟 Perikanan',
+            'umum': '🏪 Umum',
+        }
 
         return render_template(
             "peta_interaktif.html",
@@ -421,11 +440,23 @@ def peta_interaktif():
             site_tagline=desa_info['tagline'],
             site_description=desa_info['deskripsi'],
             custom_pages=custom_pages,
+            umkm_list=umkm_list,
+            umkm_geojson=umkm_geojson,
+            kategori_labels=kategori_labels,
         )
     except Exception as e:
         logger.error(f"Error loading peta interaktif page: {str(e)}")
         flash('Terjadi kesalahan saat memuat halaman peta', 'error')
         return redirect(url_for('public.index'))
+
+
+# API endpoint for UMKM GeoJSON
+@public_bp.route("/api/umkm/geojson")
+def api_umkm_geojson():
+    """API endpoint for UMKM GeoJSON data"""
+    from flask import jsonify
+    geojson = get_umkm_for_geojson(aktif=1)
+    return jsonify(geojson)
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -604,6 +635,34 @@ def sejarah():
 # ════════════════════════════════════════════════════════════════════════
 # ── PENGUMUMAN ────────────────────────────────────────────────────────
 # ════════════════════════════════════════════════════════════════════════
+
+@public_bp.route("/info-kependudukan")
+def info_kependudukan():
+    """Halaman Info Kependudukan dengan Charts"""
+    from datetime import datetime
+    try:
+        from config import NAV_LINKS
+        desa_info = get_desa_info_with_maps()
+        custom_pages = get_all_pages()
+        all_data = get_all_kependudukan()
+
+        stats = {}
+        for item in all_data:
+            stats[item['label'].lower().replace(' ', '_').replace('-', '_')] = item.get('jumlah', 0)
+
+        return render_template(
+            "info_kependudukan.html",
+            page={"title": "Info Kependudukan"},
+            stats=stats,
+            site_name=desa_info['nama'],
+            nav_links=NAV_LINKS,
+            tahun=datetime.now().year,
+            custom_pages=custom_pages,
+        )
+    except Exception as e:
+        logger.error(f"Error loading kependudukan: {str(e)}")
+        return redirect(url_for('public.index'))
+
 
 @public_bp.route("/pengumuman")
 def pengumuman():
