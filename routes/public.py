@@ -33,6 +33,7 @@ from models import (
     get_all_umkm,
     get_umkm_for_geojson,
     get_all_kependudukan,
+    add_kritik_saran,
 )
 from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
 from errors import safe_handler, flash_error, ValidationError, NotFoundError, json_success_response
@@ -333,6 +334,78 @@ def kontak():
         logger.error(f"Error loading kontak page: {str(e)}")
         flash('Terjadi kesalahan saat memuat halaman kontak', 'error')
         return redirect(url_for('public.index'))
+
+
+@public_bp.route("/kritik-saran", methods=['GET', 'POST'])
+def kritik_saran():
+    """Halaman dan form kritik/saran"""
+    from datetime import datetime
+
+    if request.method == 'POST':
+        nama = request.form.get('nama', '').strip()
+        email = request.form.get('email', '').strip()
+        telepon = request.form.get('telepon', '').strip()
+        subjek = request.form.get('subjek', '').strip()
+        kategori = request.form.get('kategori', 'kritik')
+        isi = request.form.get('isi', '').strip()
+
+        if not nama or not subjek or not isi:
+            flash('Nama, subjek, dan isi kritik/saran wajib diisi!', 'error')
+            return redirect(url_for('public.kritik_saran'))
+
+        if add_kritik_saran(nama, subjek, isi, email, telepon, kategori):
+            flash('Terima kasih! Kritik dan saran Anda telah dikirim.', 'success')
+        else:
+            flash('Gagal mengirim kritik/saran. Silakan coba lagi.', 'error')
+
+        return redirect(url_for('public.kritik_saran'))
+
+    try:
+        desa_info = get_desa_info_with_maps()
+        custom_pages = get_all_pages()
+
+        return render_template(
+            "kritik_saran.html",
+            desa=desa_info,
+            nav_links=[{**n, "active": False} for n in NAV_LINKS],
+            tahun=datetime.now().year,
+            site_name=desa_info['nama'],
+            site_tagline=desa_info['tagline'],
+            site_description=desa_info['deskripsi'],
+            custom_pages=custom_pages,
+        )
+    except Exception as e:
+        logger.error(f"Error loading kritik_saran page: {str(e)}")
+        flash('Terjadi kesalahan saat memuat halaman', 'error')
+        return redirect(url_for('public.index'))
+
+
+@public_bp.route("/api/kritik-saran", methods=['POST'])
+def api_kritik_saran():
+    """API endpoint untuk submit kritik/saran (JSON)"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'Data tidak valid'}), 400
+
+    nama = data.get('nama', '').strip()
+    subjek = data.get('subjek', '').strip()
+    isi = data.get('isi', '').strip()
+
+    if not nama or not subjek or not isi:
+        return jsonify({'success': False, 'error': 'Nama, subjek, dan isi wajib diisi'}), 400
+
+    success = add_kritik_saran(
+        nama=nama,
+        subjek=subjek,
+        isi=isi,
+        email=data.get('email', '').strip() or None,
+        telepon=data.get('telepon', '').strip() or None,
+        kategori=data.get('kategori', 'kritik')
+    )
+
+    if success:
+        return jsonify({'success': True, 'message': 'Kritik dan saran telah dikirim'})
+    return jsonify({'success': False, 'error': 'Gagal mengirim'}), 500
 
 
 @public_bp.route("/galeri")

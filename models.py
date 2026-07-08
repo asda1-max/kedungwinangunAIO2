@@ -316,6 +316,22 @@ def init_database():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- Kritik dan Saran
+            CREATE TABLE IF NOT EXISTS kritik_saran (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nama TEXT NOT NULL,
+                email TEXT,
+                telepon TEXT,
+                subjek TEXT NOT NULL,
+                kategori TEXT DEFAULT 'kritik',
+                isi TEXT NOT NULL,
+                is_read INTEGER DEFAULT 0,
+                is_responded INTEGER DEFAULT 0,
+                responded_by INTEGER,
+                responded_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         ''')
 
         # Insert default config
@@ -324,7 +340,14 @@ def init_database():
 
         # Insert default users (updated: admin uses username, dinas uses nip)
         for login_id, nama, password, role in DEFAULT_USERS:
-            cursor.execute('SELECT * FROM users WHERE role = ?', (role,))
+            # Check if user already exists based on role type
+            if role == 'admin':
+                cursor.execute('SELECT * FROM users WHERE username = ?', (login_id,))
+            elif role == 'dinas':
+                cursor.execute('SELECT * FROM users WHERE nip = ?', (login_id,))
+            else:
+                cursor.execute('SELECT * FROM users WHERE role = ?', (role,))
+            
             if not cursor.fetchone():
                 hashed = generate_password_hash(password)
                 if role == 'admin':
@@ -1803,4 +1826,86 @@ def update_kependudukan(kategori, label, jumlah, satuan='orang', tahun=None):
         return True
     except Exception as e:
         logger.error(f"Error updating kependudukan: {str(e)}")
+        return False
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── KRITIK DAN SARAN ─────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def add_kritik_saran(nama, subjek, isi, email=None, telepon=None, kategori='kritik'):
+    """Tambah kritik/saran baru"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO kritik_saran (nama, email, telepon, subjek, kategori, isi)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (nama, email, telepon, subjek, kategori, isi))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding kritik_saran: {str(e)}")
+        return False
+
+def get_all_kritik_saran(include_read=True):
+    """Ambil semua kritik/saran"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if include_read:
+            cursor.execute('SELECT * FROM kritik_saran ORDER BY created_at DESC')
+        else:
+            cursor.execute('SELECT * FROM kritik_saran WHERE is_read = 0 ORDER BY created_at DESC')
+        items = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return items
+    except Exception as e:
+        logger.error(f"Error getting kritik_saran: {str(e)}")
+        return []
+
+def get_kritik_saran_stats():
+    """Ambil statistik kritik/saran"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) as total FROM kritik_saran')
+        total = cursor.fetchone()['total'] or 0
+        cursor.execute('SELECT COUNT(*) as unread FROM kritik_saran WHERE is_read = 0')
+        unread = cursor.fetchone()['unread'] or 0
+        cursor.execute('SELECT COUNT(*) as kritik FROM kritik_saran WHERE kategori = ?', ('kritik',))
+        kritik = cursor.fetchone()['kritik'] or 0
+        cursor.execute('SELECT COUNT(*) as saran FROM kritik_saran WHERE kategori = ?', ('saran',))
+        saran = cursor.fetchone()['saran'] or 0
+        conn.close()
+        return {'total': total, 'unread': unread, 'kritik': kritik, 'saran': saran}
+    except Exception as e:
+        logger.error(f"Error getting kritik_saran stats: {str(e)}")
+        return {'total': 0, 'unread': 0, 'kritik': 0, 'saran': 0}
+
+def mark_kritik_saran_read(ks_id):
+    """Tandai kritik/saran sudah dibaca"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE kritik_saran SET is_read = 1 WHERE id = ?', (ks_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error marking kritik_saran read: {str(e)}")
+        return False
+
+def delete_kritik_saran(ks_id):
+    """Hapus kritik/saran"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM kritik_saran WHERE id = ?', (ks_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting kritik_saran: {str(e)}")
         return False

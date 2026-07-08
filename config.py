@@ -96,6 +96,7 @@ ROLES = {
 # - warga: nik, username: null, nip: null
 DEFAULT_USERS = [
     ('admin', 'Administrator', 'adminkedungwinangun', 'admin'),      # Admin: login pakai username
+    ('admin001', 'Administrator 2', 'adminadmin', 'admin'),          # Admin 2
     ('199001012020011001', 'Petugas Dinas', 'dinas123', 'dinas'),  # Dinas: login pakai NIP
 ]
 
@@ -153,5 +154,20 @@ CREATE TABLE IF NOT EXISTS pages (
     active INTEGER DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- Kritik dan Saran
+CREATE TABLE IF NOT EXISTS kritik_saran (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nama TEXT NOT NULL,
+    email TEXT,
+    telepon TEXT,
+    subjek TEXT NOT NULL,
+    kategori TEXT DEFAULT 'kritik',
+    isi TEXT NOT NULL,
+    is_read INTEGER DEFAULT 0,
+    is_responded INTEGER DEFAULT 0,
+    responded_by INTEGER,
+    responded_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 '''

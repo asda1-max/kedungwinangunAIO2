@@ -1,0 +1,139 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Kritik dan Saran - Admin Panel{% endblock %}
+
+{% block page_title %}Kritik dan Saran{% endblock %}
+{% block page_icon %}💬{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Total</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ stats.total }}</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">📨</div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Belum Dibaca</p>
+                    <p class="text-2xl font-bold text-red-600">{{ stats.unread }}</p>
+                </div>
+                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center text-2xl">🔴</div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Kritik</p>
+                    <p class="text-2xl font-bold text-orange-600">{{ stats.kritik }}</p>
+                </div>
+                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-2xl">📝</div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Saran</p>
+                    <p class="text-2xl font-bold text-green-600">{{ stats.saran }}</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-2xl">💡</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-4 border border-blue-100">
+        <p class="text-sm text-blue-800">
+            <span class="font-semibold">💡 Info:</span> Kritik dan saran dari warga akan muncul di sini. 
+            Klik tombol "Baca" untuk menandai sudah dibaca.
+        </p>
+    </div>
+
+    <!-- Messages List -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="font-semibold text-gray-800">Daftar Kritik dan Saran</h3>
+            <span class="text-sm text-gray-500">{{ kritik_saran_list|length }} pesan</span>
+        </div>
+
+        {% if kritik_saran_list %}
+        <div class="divide-y divide-gray-100">
+            {% for ks in kritik_saran_list %}
+            <div class="p-5 hover:bg-gray-50 transition-colors {% if not ks.is_read %}bg-blue-50/50{% endif %}">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                        <!-- Header -->
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold 
+                                {% if ks.kategori == 'kritik' %}bg-orange-100 text-orange-700{% else %}bg-green-100 text-green-700{% endif %}">
+                                {% if ks.kategori == 'kritik' %}📝 Kritik{% else %}💡 Saran{% endif %}
+                            </span>
+                            {% if not ks.is_read %}
+                            <span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">Baru</span>
+                            {% endif %}
+                            <span class="text-xs text-gray-400">{{ ks.created_at }}</span>
+                        </div>
+
+                        <!-- Content -->
+                        <h4 class="font-semibold text-gray-800 mb-1">{{ ks.subjek }}</h4>
+                        <p class="text-sm text-gray-600 mb-3">{{ ks.isi[:150] }}{% if ks.isi|length > 150 %}...{% endif %}</p>
+
+                        <!-- Sender Info -->
+                        <div class="flex items-center gap-4 text-xs text-gray-500">
+                            <span class="flex items-center gap-1">
+                                <span>👤</span> {{ ks.nama }}
+                            </span>
+                            {% if ks.email %}
+                            <span class="flex items-center gap-1">
+                                <span>📧</span> {{ ks.email }}
+                            </span>
+                            {% endif %}
+                            {% if ks.telepon %}
+                            <span class="flex items-center gap-1">
+                                <span>📱</span> {{ ks.telepon }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-col gap-2">
+                        {% if not ks.is_read %}
+                        <form action="{{ url_for('admin.read_kritik_saran', ks_id=ks.id) }}" method="POST">
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                ✓ Baca
+                            </button>
+                        </form>
+                        {% endif %}
+                        <form action="{{ url_for('admin.delete_kritik_saran_route', ks_id=ks.id) }}" method="POST"
+                              onsubmit="return confirm('Yakin ingin menghapus kritik/saran ini?');">
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-red-100 text-red-600 text-sm font-medium rounded-lg hover:bg-red-200 transition-colors">
+                                🗑️ Hapus
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-12 text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="text-3xl">💬</span>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Belum Ada Kritik dan Saran</h3>
+            <p class="text-sm text-gray-500">Kritik dan saran dari warga akan muncul di sini.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

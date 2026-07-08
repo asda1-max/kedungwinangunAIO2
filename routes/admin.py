@@ -75,6 +75,11 @@ from models import (
     # Kependudukan
     get_all_kependudukan,
     update_kependudukan,
+    # Kritik dan Saran
+    get_all_kritik_saran,
+    get_kritik_saran_stats,
+    mark_kritik_saran_read,
+    delete_kritik_saran,
 )
 from errors import admin_required, flash_error
 from config import Config
@@ -1701,3 +1706,56 @@ def toggle_potensi_route(potensi_id):
         logger.error(f"Error toggling potensi {potensi_id}: {str(e)}")
         flash_error('Terjadi kesalahan saat mengubah status potensi')
     return redirect(url_for('admin.potensi'))
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── KRITIK DAN SARAN MANAGEMENT ──────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+@admin_bp.route("/kritik-saran")
+@admin_required
+def kritik_saran():
+    """Halaman daftar kritik dan saran"""
+    try:
+        kritik_saran_list = get_all_kritik_saran(include_read=True)
+        stats = get_kritik_saran_stats()
+        
+        return render_template(
+            "admin/kritik_saran.html",
+            kritik_saran_list=kritik_saran_list,
+            stats=stats,
+        )
+    except Exception as e:
+        logger.error(f"Error loading kritik_saran: {str(e)}")
+        flash_error('Terjadi kesalahan saat memuat halaman')
+        return redirect(url_for('admin.dashboard'))
+
+@admin_bp.route("/kritik-saran/read/<int:ks_id>", methods=['POST'])
+@admin_required
+def read_kritik_saran(ks_id):
+    """Tandai kritik/saran sudah dibaca"""
+    try:
+        result = mark_kritik_saran_read(ks_id)
+        if result:
+            flash('Kritik/saran ditandai sudah dibaca', 'success')
+        else:
+            flash_error('Gagal menandai kritik/saran')
+    except Exception as e:
+        logger.error(f"Error marking kritik_saran read {ks_id}: {str(e)}")
+        flash_error('Terjadi kesalahan')
+    return redirect(url_for('admin.kritik_saran'))
+
+@admin_bp.route("/kritik-saran/delete/<int:ks_id>", methods=['POST'])
+@admin_required
+def delete_kritik_saran_route(ks_id):
+    """Hapus kritik/saran"""
+    try:
+        result = delete_kritik_saran(ks_id)
+        if result:
+            flash('Kritik/saran berhasil dihapus', 'success')
+        else:
+            flash_error('Gagal menghapus kritik/saran')
+    except Exception as e:
+        logger.error(f"Error deleting kritik_saran {ks_id}: {str(e)}")
+        flash_error('Terjadi kesalahan saat menghapus')
+    return redirect(url_for('admin.kritik_saran'))
