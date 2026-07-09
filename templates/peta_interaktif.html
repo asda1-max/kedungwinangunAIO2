@@ -96,7 +96,7 @@
                     🏪 Mode UMKM
                 </button>
                 <button @click="mapMode = 'rtrw'; switchMapMode()" :class="mapMode === 'rtrw' ? 'active' : ''" class="tab-btn flex items-center gap-2">
-                    🏘️ Mode RT/RW
+                    🏘️ Mode Informasi Desa
                 </button>
             </div>
         </div>
@@ -143,6 +143,22 @@
                             <div class="legend-item">
                                 <div class="legend-color" style="background: #1565C0;"></div>
                                 <span class="text-sm text-gray-600">RT</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #7B1FA2;"></div>
+                                <span class="text-sm text-gray-600">Perangkat Desa</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #00838F;"></div>
+                                <span class="text-sm text-gray-600">BPD</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #C62828;"></div>
+                                <span class="text-sm text-gray-600">PKK</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #2E7D32;"></div>
+                                <span class="text-sm text-gray-600">Karang Taruna</span>
                             </div>
                             <div class="legend-item">
                                 <div class="legend-line" style="background: #155C1B;"></div>
@@ -290,17 +306,24 @@
                 if (rtrwList) {
                     features.forEach((feature, idx) => {
                         const props = feature.properties || {};
+                        const jenis = props.jenis || '';
                         
-                        // Build label
+                        // Build label based on jenis
                         let label = '';
-                        if (props.rt && props.rw) {
+                        if (jenis === 'RT' && props.rt && props.rw) {
                             label = `RT ${props.rt} / RW ${props.rw}`;
-                        } else if (props.rw) {
+                        } else if (jenis === 'RW' && props.rw) {
                             label = `RW ${props.rw}`;
-                        } else if (props.jenis) {
-                            label = props.jenis.charAt(0).toUpperCase() + props.jenis.slice(1);
+                        } else if (jenis === 'Perangkat Desa') {
+                            label = props.nama_ketua || 'Perangkat Desa';
+                        } else if (jenis === 'BPD') {
+                            label = props.nama_ketua || 'BPD';
+                        } else if (jenis === 'PKK') {
+                            label = props.nama_ketua || 'PKK';
+                        } else if (jenis === 'Karang Taruna') {
+                            label = props.nama_ketua || 'Karang Taruna';
                         } else {
-                            label = `Area ${idx + 1}`;
+                            label = props.nama_ketua || jenis || `Area ${idx + 1}`;
                         }
                         
                         // Get coordinates
@@ -309,16 +332,27 @@
                             [lng, lat] = feature.geometry.coordinates;
                         }
                         
+                        // Icon colors and labels by jenis
+                        const iconConfig = {
+                            'RW': { color: '#E65100', text: 'RW', icon: '🏢' },
+                            'RT': { color: '#1565C0', text: 'RT', icon: '🏠' },
+                            'Perangkat Desa': { color: '#7B1FA2', text: 'PD', icon: '🏛️' },
+                            'BPD': { color: '#00838F', text: 'BPD', icon: '🏛️' },
+                            'PKK': { color: '#C62828', text: 'PKK', icon: '👩' },
+                            'Karang Taruna': { color: '#2E7D32', text: 'KT', icon: '👥' },
+                        };
+                        const config = iconConfig[jenis] || { color: '#757575', text: jenis.slice(0,2).toUpperCase(), icon: '📍' };
+                        
                         const card = document.createElement('div');
                         card.className = 'rt-card mb-2';
                         card.innerHTML = `
                             <div class="flex items-center justify-between">
                                 <div class="min-w-0 flex-1">
-                                    <span class="font-semibold text-gray-800 text-sm">${label}</span>
-                                    ${props.nama_ketua ? `<p class="text-gray-500 text-xs truncate">👤 ${props.nama_ketua}</p>` : ''}
-                                    ${props.wilayah ? `<p class="text-gray-400 text-xs truncate">📍 ${props.wilayah}</p>` : ''}
+                                    <span class="px-2 py-0.5 rounded text-xs font-bold" style="background:${config.color}20;color:${config.color}">${jenis}</span>
+                                    <p class="font-semibold text-gray-800 text-sm mt-1">${label}</p>
+                                    ${props.jabatan ? `<p class="text-gray-500 text-xs truncate">📋 ${props.jabatan}</p>` : ''}
                                 </div>
-                                <span class="text-xl flex-shrink-0 ml-2">${props.jenis === 'RW' ? '🏢' : '🏠'}</span>
+                                <span class="text-xl flex-shrink-0 ml-2">${config.icon}</span>
                             </div>
                         `;
                         
@@ -337,9 +371,8 @@
                         
                         // Create marker
                         if (feature.geometry.type === 'Point' && lat && lng) {
-                            const isRW = props.jenis === 'RW';
                             const icon = L.divIcon({
-                                html: `<div style="background:${isRW ? '#E65100' : '#1565C0'};color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${isRW ? 'RW' : 'RT'}</div>`,
+                                html: `<div style="background:${config.color};color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${config.text}</div>`,
                                 className: 'custom-marker',
                                 iconSize: [36, 36],
                                 iconAnchor: [18, 18]
@@ -348,7 +381,8 @@
                             const popupContent = `
                                 <div class="text-sm min-w-[180px]">
                                     <h4 class="font-bold text-gray-800 mb-1">${label}</h4>
-                                    ${props.nama_ketua ? `<p class="text-gray-600">👤 ${props.nama_ketua}</p>` : ''}
+                                    <p class="text-xs font-semibold" style="color:${config.color}">${jenis}</p>
+                                    ${props.nama_ketua ? `<p class="text-gray-600 mt-1">👤 ${props.nama_ketua}</p>` : ''}
                                     ${props.jabatan ? `<p class="text-gray-500">📋 ${props.jabatan}</p>` : ''}
                                     ${props.wilayah ? `<p class="text-gray-500">📍 ${props.wilayah}</p>` : ''}
                                     ${props.no_hp ? `<p class="text-gray-500">📞 ${props.no_hp}</p>` : ''}

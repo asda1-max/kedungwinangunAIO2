@@ -1,17 +1,17 @@
-# CLAUDE.md - Project Reference
+# CLAUDE.md - Project Reference (Updated)
 
-## Project Identity
-
-**Name**: Desa Kedungwinangun AIO  
+**Project**: Desa Kedungwinangun AIO  
 **Type**: Flask Web Application (Desa Digital / E-Government)  
-**Location**: c:/Productivity/Coding/Projects/kedungwinangunAIO/  
-**Port**: 5209 (default)
+**Location**: C:\Productivity\Coding\Projects\kedungwinangunAIO  
+**Port**: 5209 (default)  
+**Last Updated**: 9 Juli 2026
 
 ---
 
 ## Quick Start
 
 ```bash
+cd C:\Productivity\Coding\Projects\kedungwinangunAIO
 pip install -r requirements.txt
 python app.py
 # Opens: http://localhost:5209
@@ -25,87 +25,73 @@ python app.py
 ```
 Backend:    Python 3.12 + Flask 3.0+
 Database:   SQLite3 (file: database.db)
-Frontend:   HTML5 + Tailwind CSS 3.x + Vanilla JS
-PDF:        ReportLab 4.0+
+Frontend:   HTML5 + Tailwind CSS 3.x + Vanilla JS + Alpine.js
+PDF:        ReportLab 4.0+ (placeholder)
 AI:         OpenRouter API (server-side)
 Auth:       Werkzeug PBKDF2 hashing
 ```
 
 ### Directory Structure
 ```
-├── app.py              # Flask app factory + blueprints registration
-├── config.py           # Config class + DEFAULT_CONFIG dict
-├── models.py           # All DB operations (get_db_connection, helpers)
+├── app.py              # Entry point, blueprint registration, chatbot API, error handlers
+├── config.py           # Config class, DEFAULT_CONFIG, NAV_LINKS, DUSUN_DATA, SQL_SCHEMA
+├── models.py           # ALL DB operations - 2592 lines of models
 ├── database.py         # Database error handling + safe DB operations
-├── errors.py           # Error handlers, decorators, validation helpers
-├── pdf_generator.py    # PDF generation (placeholder - not implemented)
-├── routes/
-│   ├── __init__.py           # Blueprint exports (modular + legacy)
-│   ├── public.py             # Legacy: monolithic public blueprint (1241 lines)
-│   ├── admin.py              # Legacy: monolithic admin blueprint (2404 lines)
-│   ├── public_auth.py        # Public: login, logout
-│   ├── public_home.py        # Public: homepage / beranda
-│   ├── public_berita.py      # Public: berita list, detail, komentar API
-│   ├── public_pages.py       # Public: galeri, kontak, kritik saran, custom pages
-│   ├── public_struktur.py     # Public: struktur organisasi, sejarah desa
-│   ├── public_info.py        # Public: kependudukan, pengumuman, peta, transparansi
-│   ├── public_aduan.py       # Public: aduan, program kerja, agenda
-│   ├── admin_dashboard.py    # Admin: dashboard, auth redirects
-│   ├── admin_berita.py       # Admin: berita CRUD
-│   ├── admin_galeri.py       # Admin: galeri CRUD + toggle
-│   ├── admin_pages.py        # Admin: pages, sejarah, config management
-│   ├── admin_struktur.py     # Admin: struktur CRUD + import/export/template
-│   ├── admin_umkm.py         # Admin: UMKM CRUD + google maps parser
-│   ├── admin_potensi.py     # Admin: potensi, kependudukan
-│   ├── admin_pengumuman.py   # Admin: pengumuman, APBDes CRUD
-│   ├── admin_aduan.py        # Admin: aduan, kritik saran, program kerja, agenda
-│   └── admin_accounts.py     # Admin: account center, settings
-├── templates/          # Jinja2 templates
-│   ├── index.html, berita.html, galeri.html, kontak.html
-│   ├── admin/          # 27 admin templates
-│   ├── partials/       # Navbar, footer, chatbot, dark-mode
-│   └── user/           # User templates
+├── errors.py           # Custom exceptions, decorators, validation helpers (873 lines)
+├── routes/             # Route handlers (modular blueprints)
+│   ├── __init__.py           # Blueprint exports
+│   ├── public.py             # Legacy: monolithic public routes (50,852 bytes)
+│   ├── public_auth.py        # Login, logout
+│   ├── public_home.py        # Homepage / beranda
+│   ├── public_berita.py      # Berita list, detail, komentar API
+│   ├── public_pages.py       # Galeri, kontak, kritik saran, custom pages
+│   ├── public_struktur.py    # Struktur organisasi, sejarah desa
+│   ├── public_info.py        # Kependudukan, pengumuman, peta, transparansi
+│   ├── public_aduan.py       # Aduan, program kerja, agenda
+│   ├── admin.py              # Legacy: monolithic admin routes (102,408 bytes)
+│   ├── admin_dashboard.py    # Dashboard, auth redirects
+│   ├── admin_berita.py       # Berita CRUD
+│   ├── admin_galeri.py       # Galeri CRUD + toggle
+│   ├── admin_pages.py        # Pages, sejarah, config management
+│   ├── admin_struktur.py     # Struktur CRUD + import/export/template
+│   ├── admin_umkm.py        # UMKM CRUD + Google Maps location parser
+│   ├── admin_potensi.py     # Potensi, kependudukan
+│   ├── admin_pengumuman.py   # Pengumuman, APBDes CRUD
+│   ├── admin_aduan.py        # Aduan, kritik saran, program kerja, agenda
+│   ├── admin_accounts.py     # Account center, settings
+│   └── admin_rtrw.py        # RT/RW locations management (separate blueprint)
+├── templates/          # Jinja2 templates (30+ files)
+│   ├── base.html             # Main layout with navbar, footer, dark mode
+│   ├── index.html            # Homepage (68,635 bytes)
+│   ├── berita.html           # News listing
+│   ├── detail_berita.html    # News detail + comments
+│   ├── galeri.html           # Photo gallery
+│   ├── kontak.html           # Contact page
+│   ├── aduan.html            # Complaint form
+│   ├── kritik_saran.html     # Kritik dan saran form
+│   ├── program_kerja.html    # Work programs
+│   ├── agenda.html           # Village agenda
+│   ├── transparansi.html     # APBDes transparency
+│   ├── info_kependudukan.html # Demographics
+│   ├── peta_interaktif.html  # Interactive map
+│   ├── sejarah.html          # Village history
+│   ├── struktur.html         # Organization structure
+│   ├── struktur_detail.html  # Person detail
+│   ├── pengumuman.html       # Announcements
+│   ├── login.html            # Unified login
+│   ├── page.html             # Dynamic pages
+│   ├── cek_aduan.html        # Check complaint status
+│   ├── error.html            # Error page
+│   ├── admin/                # 40+ admin templates
+│   ├── partials/             # Navbar, footer, chatbot, dark-mode
+│   └── dinas/                # Dinas templates
 ├── static/
-│   ├── styles.css
-│   ├── dark-mode.js
-│   ├── images/
-│   └── data/geojson    # Peta interaktif GeoJSON
-└── uploads/            # User uploads (KTP, KK, berita, galeri, dll)
+│   ├── styles.css            # Main CSS (846 lines)
+│   ├── dark-mode.js          # Dark mode script
+│   └── data/geojson          # Peta interaktif GeoJSON
+├── geojson/                  # GeoJSON files for map layers
+└── uploads/                  # User uploads (KTP, KK, berita, galeri, dll)
 ```
-
-### Routes Architecture
-
-Routes dipisah jadi modul-modul kecil untuk maintainability. Masing-masing file mendefinisikan blueprint sendiri yang kemudian di-export via `__init__.py`.
-
-```python
-# routes/__init__.py exports:
-from routes import (
-    # Legacy (original monolithic files)
-    public_bp,           # routes/public.py
-    admin_bp,            # routes/admin.py
-    # Modular public blueprints
-    public_auth_bp,      # login, logout
-    public_home_bp,      # homepage
-    public_berita_bp,    # berita + komentar API
-    public_pages_bp,     # galeri, kontak, kritik saran, pages
-    public_struktur_bp,  # struktur, sejarah
-    public_info_bp,      # kependudukan, pengumuman, peta, transparansi
-    public_aduan_bp,     # aduan, program kerja, agenda
-    # Modular admin blueprints
-    admin_dashboard_bp,  # dashboard, auth
-    admin_berita_bp,     # berita CRUD
-    admin_galeri_bp,     # galeri CRUD
-    admin_pages_bp,      # pages, sejarah, config
-    admin_struktur_bp,   # struktur CRUD + import/export
-    admin_umkm_bp,      # UMKM CRUD + location parser
-    admin_potensi_bp,   # potensi, kependudukan
-    admin_pengumuman_bp, # pengumuman, APBDes
-    admin_aduan_bp,     # aduan, kritik saran, program kerja, agenda
-    admin_accounts_bp,  # account center, settings
-)
-```
-
-> **Note**: File `public.py` dan `admin.py` original dipertahankan untuk backward compatibility saat migrate. Setelah semua routes dipindah, file legacy bisa dihapus.
 
 ---
 
@@ -120,55 +106,44 @@ cursor = conn.cursor()
 conn.close()
 ```
 
-### Tables
+### Tables (16 tables)
+
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
 | `users` | All users (admin/dinas/penduduk) | id, nik, username, nip, nama_lengkap, password_hash, role, status |
 | `berita` | News articles | judul, excerpt, kategori, badge_class, gambar_url, video_url, facebook_auto_post, unggulan |
+| `sejarah_desa` | Village history timeline | judul, sub_judul, konten, tahun_dari, tahun_sampai, gambar_url |
 | `config` | Website config | key, value |
 | `galeri` | Photos | judul, deskripsi, kategori, gambar_url, aktif |
 | `pages` | Dynamic pages | title, slug, content, icon, order_num, active |
 | `komentar` | News comments | berita_id, parent_id, user_id, nama_pengirim, konten |
 | `struktur_organisasi` | Village org structure | kategori, nama, jabatan, nik, alamat, telepon, foto_url, status |
-| `sejarah_desa` | Village history timeline | judul, sub_judul, konten, tahun_dari, tahun_sampai, gambar_url |
 | `pengumuman` | Announcements | judul, isi, kategori, is_penting, lampiran, author, aktif |
 | `apbdes` | Budget items | tahun, jenis, nama, icon, jumlah, deskripsi |
 | `apbdes_summary` | Budget summary | tahun, total_pendapatan, total_belanja, pembiayaan_net |
 | `umkm` | UMKM listings | nama, kategori, pemiliki_nama, alamat, latitude, longitude, foto_url |
 | `kependudukan` | Demographics data | kategori, label, jumlah, satuan, tahun |
 | `potensi_desa` | Village potentials | nama, kategori, deskripsi, gambar_url, icon |
-| `aduan` | Complaint system | nomor_aduan, nama, email, telepon, nik, alamat, judul, kategori, lokasi, isi, status, tanggapan |
-| `program_kerja` | Work programs | nama, kategori, tahun, target, realiasi, anggaran, icon, status, progress |
-| `agenda` | Village events/agenda | judul, deskripsi, tanggal, tanggal_mulai, waktu, lokasi, icon, kategori, penanggung_jawab, peserta, status |
-| `permohonan_acc` | Registration approvals | user_id, status, created_at |
+| `aduan` | Complaint system | nomor_aduan, nama, email, telepon, nik, judul, kategori, lokasi, status, tanggapan |
+| `kritik_saran` | Kritik dan saran | nama, email, telepon, subjek, kategori, isi, is_read, is_responded |
+| `program_kerja` | Work programs | judul, kategori, tahun, target, realiasi, anggaran, icon, status, aktif |
+| `agenda` | Village events | judul, deskripsi, tanggal_mulai, tanggal_selesai, waktu, lokasi, icon, status |
+| `lokasi_rtrw` | RT/RW locations | jenis, rw, rt, nama_ketua, wilayah, alamat, latitude, longitude |
 
 ---
 
-## Routes Reference
+## Routes Architecture
 
-### Pattern: Blueprint Decorators
-
-Each route module defines its own blueprint. Import the appropriate one for the route you're working on.
-
+### Blueprint Registration (app.py)
 ```python
-# Example: Adding a route in public_berita.py
-from routes.public_berita import public_bp as bp
-
-@bp.route("/berita")
-def berita():
-    ...
-
-# For protected routes, use the admin_required decorator
-@bp.route("/dashboard")
-@admin_required
-def dashboard():
-    user = get_user_by_id(session.get('user_id'))
-    return render_template("admin/dashboard.html", user=user)
+from routes import public_bp, admin_bp, admin_rtrw_bp
+app.register_blueprint(public_bp)     # Public routes: /, /berita, /login, dll
+app.register_blueprint(admin_bp)      # Admin routes: /admin/*
+app.register_blueprint(admin_rtrw_bp) # RT/RW: /admin/rtrw/*
 ```
 
-> **Note**: Legacy `public_bp` and `admin_bp` from monolithic files are still available for backward compatibility.
+### Public Routes (public_bp, prefix: /)
 
-### Public Routes (public_bp)
 | Route | Template | Description |
 |-------|---------|-------------|
 | `/` | index.html | Homepage, berita carousel, potensi, pengumuman |
@@ -177,7 +152,7 @@ def dashboard():
 | `/berita` | berita.html | News listing with pagination |
 | `/berita/<id>` | detail_berita.html | News detail + comments |
 | `/sejarah` | sejarah.html | Village history timeline |
-| `/info-kependudukan` | info_kependudukan.html | Demographics with charts |
+| `/info-kependudukan` | info_kependimento.html | Demographics with charts |
 | `/struktur` | struktur.html | Village organization chart |
 | `/struktur/<id>` | struktur_detail.html | Person detail page |
 | `/galeri` | galeri.html | Photo gallery |
@@ -186,85 +161,103 @@ def dashboard():
 | `/transparansi` | transparansi.html | APBDes transparency |
 | `/peta-interaktif` | peta_interaktif.html | Interactive map with UMKM markers |
 | `/page/<slug>` | page.html | Dynamic pages |
-| `/api/berita` | - | JSON: all news |
-| `/aduan` | aduan.html | Complaint form + check status |
-| `/aduan/cek` | aduan_cek.html | Check complaint by nomor |
+| `/aduan` | aduan.html | Complaint form |
+| `/aduan/cek` | cek_aduan.html | Check complaint status |
+| `/kritik-saran` | kritik_saran.html | Kritik dan saran form |
 | `/program-kerja` | program_kerja.html | Work programs listing |
 | `/agenda` | agenda.html | Village agenda/calendar |
+| `/api/berita` | - | JSON: all news |
 | `/api/berita/<id>/komentar` | - | GET/POST/DELETE comments |
 | `/api/umkm/geojson` | - | GeoJSON for interactive map |
+| `/api/kritik-saran` | - | POST kritik/saran (JSON) |
 
 ### Admin Routes (admin_bp, prefix: /admin)
+
 | Route | Template | Description |
 |-------|---------|-------------|
-| `/dashboard` | admin/dashboard.html | Stats overview |
-| `/login` | - | Redirect to unified login |
-| `/logout` | - | Admin logout |
-| `/config` | admin/config.html | Website settings |
-| `/settings` | admin/settings.html | Admin account settings |
-| `/accounts` | admin/account_center.html | All users management |
-| `/accounts/user/<id>` | admin/account_detail.html | User edit/detail |
-| `/accounts/create` | admin/account_create.html | Create admin/dinas account |
-| `/berita/add` | admin/add_berita.html | Create news |
-| `/berita/edit/<id>` | admin/edit_berita.html | Edit news |
-| `/berita/delete/<id>` | - | Delete news |
-| `/galeri` | admin/galeri.html | Photo management |
-| `/galeri/add` | admin/add_galeri.html | Add photo |
-| `/galeri/edit/<id>` | admin/edit_galeri.html | Edit photo |
-| `/galeri/delete/<id>` | - | Delete photo |
-| `/galeri/toggle/<id>` | - | Toggle photo status |
-| `/pages` | admin/pages.html | Dynamic pages CRUD |
-| `/pages/add` | admin/add_page.html | Add page |
-| `/pages/edit/<id>` | admin/edit_page.html | Edit page |
-| `/pages/delete/<id>` | - | Delete page |
-| `/pages/toggle/<id>` | - | Toggle page status |
-| `/struktur` | admin/struktur.html | Organization structure CRUD |
-| `/struktur/add` | admin/add_struktur.html | Add structure member |
-| `/struktur/edit/<id>` | admin/edit_struktur.html | Edit structure member |
-| `/struktur/delete/<id>` | - | Delete structure member |
-| `/struktur/toggle/<id>` | - | Toggle member status |
-| `/struktur/import` | - | Batch import dari CSV |
-| `/struktur/export` | - | Export semua data ke CSV |
-| `/struktur/template` | - | Download template CSV |
-| `/umkm/parse-location` | - | Parse Google Maps URL ke koordinat |
-| `/sejarah` | admin/sejarah.html | Village history management |
-| `/sejarah/add` | admin/add_sejarah.html | Add history entry |
-| `/sejarah/edit/<id>` | admin/edit_sejarah.html | Edit history entry |
-| `/sejarah/delete/<id>` | - | Delete history entry |
-| `/sejarah/toggle/<id>` | - | Toggle entry status |
-| `/pengumuman` | admin/pengumuman.html | Announcements CRUD |
-| `/pengumuman/add` | admin/add_pengumuman.html | Add announcement |
-| `/pengumuman/edit/<id>` | admin/edit_pengumuman.html | Edit announcement |
-| `/pengumuman/delete/<id>` | - | Delete announcement |
-| `/pengumuman/toggle/<id>` | - | Toggle announcement status |
-| `/apbdes` | admin/apbdes.html | Budget management |
-| `/apbdes/add` | admin/add_apbdes.html | Add budget item |
-| `/apbdes/edit/<id>` | admin/edit_apbdes.html | Edit budget item |
-| `/apbdes/delete/<id>` | - | Delete budget item |
-| `/umkm` | admin/umkm.html | UMKM management |
-| `/umkm/add` | admin/add_umkm.html | Add UMKM |
-| `/umkm/edit/<id>` | admin/edit_umkm.html | Edit UMKM |
-| `/umkm/delete/<id>` | - | Delete UMKM |
-| `/umkm/toggle/<id>` | - | Toggle UMKM status |
-| `/kependudukan` | admin/kependudukan.html | Demographics management |
-| `/potensi` | admin/potensi.html | Village potentials CRUD |
-| `/potensi/add` | admin/add_potensi.html | Add potential |
-| `/potensi/edit/<id>` | admin/edit_potensi.html | Edit potential |
-| `/potensi/delete/<id>` | - | Delete potential |
-| `/potensi/toggle/<id>` | - | Toggle potential status |
-| `/aduan` | admin/aduan.html | Complaint management |
-| `/aduan/<id>` | admin/aduan_detail.html | Complaint detail + response |
-| `/aduan/delete/<id>` | - | Delete complaint |
-| `/program-kerja` | admin/program_kerja.html | Work programs management |
-| `/program-kerja/add` | admin/add_program_kerja.html | Add work program |
-| `/program-kerja/edit/<id>` | admin/edit_program_kerja.html | Edit work program |
-| `/program-kerja/delete/<id>` | - | Delete work program |
-| `/program-kerja/toggle/<id>` | - | Toggle work program status |
-| `/agenda` | admin/agenda.html | Agenda management |
-| `/agenda/add` | admin/add_agenda.html | Add agenda |
-| `/agenda/edit/<id>` | admin/edit_agenda.html | Edit agenda |
-| `/agenda/delete/<id>` | - | Delete agenda |
-| `/agenda/toggle/<id>` | - | Toggle agenda status |
+| `/admin/login` | - | Redirect to unified login |
+| `/admin/logout` | - | Admin logout |
+| `/admin/dashboard` | admin/dashboard.html | Stats overview |
+| `/admin/config` | admin/config.html | Website settings |
+| `/admin/settings` | admin/settings.html | Admin account settings |
+| `/admin/accounts` | admin/account_center.html | All users management |
+| `/admin/accounts/user/<id>` | admin/account_detail.html | User edit/detail |
+| `/admin/accounts/create` | admin/account_create.html | Create admin/dinas account |
+| `/admin/accounts/user/delete/<id>` | - | Delete user |
+| `/admin/berita/add` | admin/add_berita.html | Create news |
+| `/admin/berita/edit/<id>` | admin/edit_berita.html | Edit news |
+| `/admin/berita/delete/<id>` | - | Delete news |
+| `/admin/galeri` | admin/galeri.html | Photo management |
+| `/admin/galeri/add` | admin/add_galeri.html | Add photo |
+| `/admin/galeri/edit/<id>` | admin/edit_galeri.html | Edit photo |
+| `/admin/galeri/delete/<id>` | - | Delete photo |
+| `/admin/galeri/toggle/<id>` | - | Toggle photo status |
+| `/admin/pages` | admin/pages.html | Dynamic pages CRUD |
+| `/admin/pages/add` | admin/add_page.html | Add page |
+| `/admin/pages/edit/<id>` | admin/edit_page.html | Edit page |
+| `/admin/pages/delete/<id>` | - | Delete page |
+| `/admin/pages/toggle/<id>` | - | Toggle page status |
+| `/admin/sejarah` | admin/sejarah.html | Village history management |
+| `/admin/sejarah/add` | admin/add_sejarah.html | Add history entry |
+| `/admin/sejarah/edit/<id>` | admin/edit_sejarah.html | Edit history entry |
+| `/admin/sejarah/delete/<id>` | - | Delete history entry |
+| `/admin/sejarah/toggle/<id>` | - | Toggle entry status |
+| `/admin/struktur` | admin/struktur.html | Organization structure CRUD |
+| `/admin/struktur/add` | admin/add_struktur.html | Add structure member |
+| `/admin/struktur/edit/<id>` | admin/edit_struktur.html | Edit structure member |
+| `/admin/struktur/delete/<id>` | - | Delete structure member |
+| `/admin/struktur/toggle/<id>` | - | Toggle member status |
+| `/admin/struktur/import` | - | Batch import from CSV |
+| `/admin/struktur/export` | - | Export all data to CSV |
+| `/admin/struktur/template` | - | Download CSV template |
+| `/admin/umkm` | admin/umkm.html | UMKM management |
+| `/admin/umkm/add` | admin/add_umkm.html | Add UMKM |
+| `/admin/umkm/edit/<id>` | admin/edit_umkm.html | Edit UMKM |
+| `/admin/umkm/delete/<id>` | - | Delete UMKM |
+| `/admin/umkm/toggle/<id>` | - | Toggle UMKM status |
+| `/admin/umkm/parse-location` | - | Parse Google Maps URL to coordinates |
+| `/admin/potensi` | admin/potensi.html | Village potentials CRUD |
+| `/admin/potensi/add` | admin/add_potensi.html | Add potential |
+| `/admin/potensi/edit/<id>` | admin/edit_potensi.html | Edit potential |
+| `/admin/potensi/delete/<id>` | - | Delete potential |
+| `/admin/potensi/toggle/<id>` | - | Toggle potential status |
+| `/admin/kependudukan` | admin/kependudukan.html | Demographics management |
+| `/admin/pengumuman` | admin/pengumuman.html | Announcements CRUD |
+| `/admin/pengumuman/add` | admin/add_pengumuman.html | Add announcement |
+| `/admin/pengumuman/edit/<id>` | admin/edit_pengumuman.html | Edit announcement |
+| `/admin/pengumuman/delete/<id>` | - | Delete announcement |
+| `/admin/pengumuman/toggle/<id>` | - | Toggle announcement status |
+| `/admin/apbdes` | admin/apbdes.html | Budget management |
+| `/admin/apbdes/add` | admin/add_apbdes.html | Add budget item |
+| `/admin/apbdes/edit/<id>` | admin/edit_apbdes.html | Edit budget item |
+| `/admin/apbdes/delete/<id>` | - | Delete budget item |
+| `/admin/kritik-saran` | admin/kritik_saran.html | Kritik dan saran management |
+| `/admin/kritik-saran/read/<id>` | - | Mark as read |
+| `/admin/kritik-saran/delete/<id>` | - | Delete kritik/saran |
+| `/admin/aduan` | admin/aduan.html | Complaint management |
+| `/admin/aduan/<id>` | admin/aduan_detail.html | Complaint detail + response |
+| `/admin/aduan/delete/<id>` | - | Delete complaint |
+| `/admin/program-kerja` | admin/program_kerja.html | Work programs management |
+| `/admin/program-kerja/add` | admin/add_program_kerja.html | Add work program |
+| `/admin/program-kerja/edit/<id>` | admin/edit_program_kerja.html | Edit work program |
+| `/admin/program-kerja/delete/<id>` | - | Delete work program |
+| `/admin/program-kerja/toggle/<id>` | - | Toggle work program status |
+| `/admin/agenda` | admin/agenda.html | Agenda management |
+| `/admin/agenda/add` | admin/add_agenda.html | Add agenda |
+| `/admin/agenda/edit/<id>` | admin/edit_agenda.html | Edit agenda |
+| `/admin/agenda/delete/<id>` | - | Delete agenda |
+| `/admin/agenda/toggle/<id>` | - | Toggle agenda status |
+
+### RT/RW Routes (admin_rtrw_bp, prefix: /admin/rtrw)
+
+| Route | Template | Description |
+|-------|---------|-------------|
+| `/admin/rtrw/` | admin/lokasi_rtrw.html | List all RT/RW locations |
+| `/admin/rtrw/add` | admin/add_lokasi_rtrw.html | Add RT/RW location |
+| `/admin/rtrw/edit/<id>` | admin/edit_lokasi_rtrw.html | Edit RT/RW location |
+| `/admin/rtrw/delete/<id>` | - | Delete RT/RW location |
+| `/admin/rtrw/toggle/<id>` | - | Toggle RT/RW status |
+| `/admin/rtrw/api/geojson` | - | Get all locations as GeoJSON |
 
 ---
 
@@ -294,7 +287,7 @@ from models import (
 @admin_required        # admin only
 @dinas_required        # admin OR dinas
 @login_required        # any logged-in user
-@require_role(*roles)  # specific roles
+@require_role(*roles) # specific roles
 ```
 
 ### User Management
@@ -304,7 +297,7 @@ get_pending_users()
 get_all_warga()
 get_all_warga_approved()
 get_all_users()                      # all admin/dinas/penduduk
-get_user_stats()                    # returns {total, by_role, by_status}
+get_user_stats()                     # returns {total, by_role, by_status}
 update_user_data(user_id, data)
 update_user_role(user_id, new_role, updated_by)
 update_user_password(user_id, new_password)
@@ -408,7 +401,7 @@ get_umkm_for_geojson(aktif=1)  # returns GeoJSON FeatureCollection
 # - @lat,lng format: https://maps.google.com/@-7.7004,109.6432,15z
 # - place format: https://maps.google.com/place/Toko+Kita/@...
 # - query format: https://maps.google.com?q=-7.7004,109.6432
-# - Short URLs: https://maps.app.goo.gl/...
+# - Short URLs: https://maps.app.goo.gl/... (auto-resolved)
 ```
 
 ### Struktur Foto Upload
@@ -448,6 +441,26 @@ save_apbdes_summary(tahun, total_pendapatan, total_belanja, pembiayaan_net)
 get_available_tahun()
 ```
 
+### Kritik dan Saran
+```python
+get_all_kritik_saran(include_read=False)
+get_kritik_saran_stats()
+mark_kritik_saran_read(ks_id)
+delete_kritik_saran(ks_id)
+add_kritik_saran(nama, subjek, isi, email=None, telepon=None, kategori='kritik')
+```
+
+### Lokasi RT/RW
+```python
+get_all_lokasi_rtrw()
+get_lokasi_rtrw_by_id(id)
+add_lokasi_rtrw(jenis, rw, rt, nama_ketua, jabatan, wilayah, alamat, no_hp, latitude, longitude)
+update_lokasi_rtrw(id, jenis, rw, rt, nama_ketua, jabatan, wilayah, alamat, no_hp, latitude, longitude, aktif)
+delete_lokasi_rtrw(id)
+toggle_lokasi_rtrw_aktif(id)
+get_lokasi_rtrw_geojson()  # Returns GeoJSON FeatureCollection
+```
+
 ### Config
 ```python
 get_config(key, default)
@@ -464,6 +477,7 @@ get_aduan_by_nomor(nomor_aduan)
 add_aduan(nama, judul, deskripsi, kategori, email, telepon, nik, ...)
 update_aduan(aduan_id, judul, deskripsi, kategori, lokasi, status, prioritas, catatan)
 delete_aduan(aduan_id)
+respond_aduan(aduan_id, tanggapan, responded_by)
 get_aduan_stats()
 ```
 
@@ -471,8 +485,8 @@ get_aduan_stats()
 ```python
 get_all_program_kerja(aktif=None, tahun=None)
 get_program_kerja_by_id(program_id)
-add_program_kerja(nama, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status)
-update_program_kerja(program_id, nama, deskripsi, kategori, tahun, target, realiasi, ...)
+add_program_kerja(judul, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status)
+update_program_kerja(program_id, judul, deskripsi, kategori, tahun, target, realiasi, ...)
 delete_program_kerja(program_id)
 toggle_program_kerja_aktif(program_id)
 ```
@@ -481,18 +495,43 @@ toggle_program_kerja_aktif(program_id)
 ```python
 get_all_agenda(aktif=None, status=None, tahun=None)
 get_agenda_by_id(agenda_id)
-add_agenda(judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu, lokasi, icon, ...)
-update_agenda(agenda_id, judul, deskripsi, kategori, tanggal, tanggal_mulai, ...)
+add_agenda(judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi, icon, ...)
+update_agenda(agenda_id, judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, ...)
 delete_agenda(agenda_id)
 toggle_agenda_aktif(agenda_id)
 ```
 
 ---
 
-## Struktur Organisasi Categories
-```python
-PERANGKAT_DESA = ["perangkat", "bpd", "pkk", "karang_taruna", "rt", "rw"]
-```
+## Roles
+
+| Role | Login ID | Password | Can Do |
+|------|----------|----------|--------|
+| `admin` | `admin` | `adminkedungwinangun` | Full admin panel access |
+| `admin` | `admin001` | `adminadmin` | Full admin panel access |
+| `dinas` | `199001012020011001` | `dinas123` | Verify warga, approve letters, admin panel |
+| `penduduk` | NIK (16 digits) | self-set | Register, submit letters |
+
+### Role Permissions
+
+| Feature | Guest | Penduduk | Dinas | Admin |
+|---------|:-----:|:--------:|:-----:|:-----:|
+| View Homepage | YES | YES | YES | YES |
+| View Berita | YES | YES | YES | YES |
+| View Galeri | YES | YES | YES | YES |
+| View Kontak | YES | YES | YES | YES |
+| Submit Aduan | YES | YES | YES | YES |
+| Submit Kritik/Saran | YES | YES | YES | YES |
+| Register | NO | YES | NO | NO |
+| Submit Letter | NO | YES | NO | NO |
+| View Status Letter | NO | YES | YES | NO |
+| Approve Registration | NO | NO | YES | NO |
+| Approve/Reject Letter | NO | NO | YES | NO |
+| View All Warga | NO | NO | YES | NO |
+| Manage Berita | NO | NO | NO | YES |
+| Manage Galeri | NO | NO | NO | YES |
+| Manage Config | NO | NO | NO | YES |
+| Manage Account | NO | NO | NO | YES |
 
 ---
 
@@ -501,13 +540,14 @@ PERANGKAT_DESA = ["perangkat", "bpd", "pkk", "karang_taruna", "rt", "rw"]
 ### Nav Links
 ```python
 NAV_LINKS = [
-    {"label": "Beranda", "href": "/"},
-    {"label": "Sejarah", "href": "/sejarah"},
-    {"label": "Kependudukan", "href": "/info-kependudukan"},
-    {"label": "Pengumuman", "href": "/pengumuman"},
-    {"label": "Berita", "href": "/berita"},
-    {"label": "Galeri", "href": "/galeri"},
-    {"label": "Kontak", "href": "/kontak"},
+    {"label": "Beranda", "href": "/", "active": True},
+    {"label": "Sejarah", "href": "/sejarah", "active": False},
+    {"label": "Kependudukan", "href": "/info-kependudukan", "active": False},
+    {"label": "Pengumuman", "href": "/pengumuman", "active": False},
+    {"label": "Berita", "href": "/berita", "active": False},
+    {"label": "Galeri", "href": "/galeri", "active": False},
+    {"label": "Kontak", "href": "/kontak", "active": False},
+    {"label": "Lainnya", "href": "#", "active": False, "is_dropdown": True},
 ]
 ```
 
@@ -520,14 +560,6 @@ DUSUN_DATA = [
     {"nama": "Dusun Entak", "delay": "0.26s"},
     {"nama": "Dusun Grewing", "delay": "0.33s"},
     {"nama": "Dusun Pedana", "delay": "0.40s"},
-]
-```
-
-### Default Users
-```python
-DEFAULT_USERS = [
-    ('admin', 'Administrator', 'adminkedungwinangun', 'admin'),           # Admin login
-    ('199001012020011001', 'Petugas Dinas', 'dinas123', 'dinas'),        # Dinas login (NIP)
 ]
 ```
 
@@ -545,13 +577,103 @@ MAP_DEFAULT_ZOOM = 15
 
 ---
 
-## Roles
+## Struktur Organisasi Categories
+```python
+PERANGKAT_DESA = ["perangkat", "bpd", "pkk", "karang_taruna", "rt", "rw"]
 
-| Role | Login ID | Password | Can Do |
-|------|----------|----------|--------|
-| `admin` | `admin` | `adminkedungwinangun` | Full admin panel access |
-| `dinas` | `199001012020011001` | `dinas123` | Verify warga, approve letters, admin panel |
-| `penduduk` | NIK (16 digits) | self-set | Register, submit letters |
+kategori_labels = {
+    'perangkat': 'Perangkat Desa',
+    'bpd': 'BPD',
+    'pkk': 'PKK',
+    'karang_taruna': 'Karang Taruna',
+    'rt': 'RT',
+    'rw': 'RW',
+}
+```
+
+---
+
+## UMKM Categories
+```python
+kategori_labels = {
+    'makanan': 'Makanan',
+    'minuman': 'Minuman',
+    'kerajinan': 'Kerajinan',
+    'jasa': 'Jasa',
+    'pertanian': 'Pertanian',
+    'peternakan': 'Peternakan',
+    'perikanan': 'Perikanan',
+    'umum': 'Umum',
+}
+```
+
+---
+
+## APBDes Jenis
+```python
+APBDES_JENIS = ['pendapatan', 'belanja', 'pembiayaan']
+```
+
+## Aduan Categories
+```python
+ADUAN_KATEGORI = {
+    'infrastruktur': 'Infrastruktur',
+    'lingkungan': 'Lingkungan',
+    'kesehatan': 'Kesehatan',
+    'pendidikan': 'Pendidikan',
+    'keamanan': 'Keamanan',
+    'pelecehan': 'Pelecehan/Kekerasan',
+    'korupsi': 'Korupsi',
+    'lainnya': 'Lainnya',
+}
+
+ADUAN_STATUS = {
+    'menunggu': 'Menunggu',
+    'diterima': 'Diterima',
+    'dalam_proses': 'Dalam Proses',
+    'selesai': 'Selesai',
+    'ditolak': 'Ditolak',
+}
+```
+
+## Kritik Saran Categories
+```python
+KRITIK_KATEGORI = {
+    'kritik': 'Kritik',
+    'saran': 'Saran',
+    'pertanyaan': 'Pertanyaan',
+    'lainnya': 'Lainnya',
+}
+```
+
+## Program Kerja Status
+```python
+PROGRAM_STATUS = {
+    'rencana': 'Rencana',
+    'berlangsung': 'Berlangsung',
+    'selesai': 'Selesai',
+}
+```
+
+## Agenda Status
+```python
+AGENDA_STATUS = {
+    'akan_datang': 'Akan Datang',
+    'sedang_berlangsung': 'Sedang Berlangsung',
+    'selesai': 'Selesai',
+    'dibatalkan': 'Dibatalkan',
+}
+
+AGENDA_KATEGORI = {
+    'umum': 'Umum',
+    'kegiatan': 'Kegiatan',
+    'rapat': 'Rapat',
+    'musyawarah': 'Musyawarah',
+    'pembangunan': 'Pembangunan',
+    'kesehatan': 'Kesehatan',
+    'pendidikan': 'Pendidikan',
+}
+```
 
 ---
 
@@ -568,6 +690,30 @@ Models tried in order:
 1. `nvidia/nemotron-3-ultra-550b-a55b:free`
 2. `google/gemma-4-26b-a4b-it:free`
 3. `openrouter/free`
+
+### Health Check
+```
+GET /health
+Response: {"status": "healthy", "app": "Desa Kedungwinangun"}
+```
+
+### Comment API
+```
+GET /api/berita/<id>/komentar
+POST /api/berita/<id>/komentar  (JSON: {konten, parent_id?, nama_pengirim?})
+DELETE /api/berita/<id>/komentar/<komentar_id>
+```
+
+### UMKM GeoJSON API
+```
+GET /api/umkm/geojson
+Response: GeoJSON FeatureCollection
+```
+
+### Kritik Saran API
+```
+POST /api/kritik-saran  (JSON: {nama, email?, telepon?, subjek, kategori, isi})
+```
 
 ---
 
@@ -618,15 +764,11 @@ def upload():
 ### Error Handlers (errors.py)
 ```python
 from errors import (
-    flash_error,               # Flash error message
-    json_error_response,       # JSON error response
-    json_success_response,     # JSON success response
-    ValidationError,           # Custom exception
-    NotFoundError,             # Custom exception
-    safe_handler,              # Decorator with error handling
-    validate_required,         # Validate required fields
-    validate_email,            # Validate email format
-    validate_phone,            # Validate Indonesian phone
+    AppError, DatabaseError, ValidationError, NotFoundError, UnauthorizedError, ForbiddenError,
+    flash_error, json_error_response, json_success_response,
+    admin_required, dinas_required, login_required, require_role,
+    validate_required, validate_email, validate_password, validate_phone,
+    render_error_page, safe_handler,
 )
 ```
 
@@ -634,92 +776,24 @@ from errors import (
 
 ## Key Files to Know
 
-| File | Purpose |
-|------|---------|
-| `app.py` | Entry point, blueprints, chatbot endpoint, error handlers |
-| `config.py` | Config class, NAV_LINKS, DUSUN_DATA, SQL_SCHEMA, DEFAULT_USERS |
-| `models.py` | ALL database operations - look here first |
-| `database.py` | Database error handling, safe DB operations |
-| `errors.py` | Custom exceptions, decorators, validation helpers |
-| `routes/` | Route handlers (see Routes Architecture above) |
-| `routes/public.py` | Legacy: monolithic public routes (login, berita, galeri, dll) |
-| `routes/admin.py` | Legacy: monolithic admin routes (all CRUD operations) |
-
----
-
-## UMKM Categories
-```python
-kategori_labels = {
-    'makanan': '🍜 Makanan',
-    'minuman': '🥤 Minuman',
-    'kerajinan': '🎨 Kerajinan',
-    'jasa': '🔧 Jasa',
-    'pertanian': '🌾 Pertanian',
-    'peternakan': '🐔 Peternakan',
-    'perikanan': '🐟 Perkins',
-    'umum': '🏪 Umum',
-}
-```
-
----
-
-## APBDes Jenis
-```python
-APBDES_JENIS = ['pendapatan', 'belanja', 'pembiayaan']
-```
-
-## Aduan Categories
-```python
-ADUAN_KATEGORI = {
-    'infrastruktur': '🏗️ Infrastruktur',
-    'lingkungan': '🌿 Lingkungan',
-    'kesehatan': '🏥 Kesehatan',
-    'pendidikan': '📚 Pendidikan',
-    'keamanan': '🔒 Keamanan',
-    'pelecehan': '⚠️ Pelecehan/Kekerasan',
-    'korupsi': '💰 Korupsi',
-    'lainnya': '📝 Lainnya',
-}
-
-ADUAN_STATUS = {
-    'pending': '⏳ Menunggu',
-    'diterima': '📋 Diterima',
-    'dalam_proses': '🔄 Dalam Proses',
-    'selesai': '✅ Selesai',
-    'ditolak': '❌ Ditolak',
-}
-```
-
-## Program Kerja Status
-```python
-PROGRAM_STATUS = {
-    'rencana': '📋 Rencana',
-    'berlangsung': '🔄 Berlangsung',
-    'selesai': '✅ Selesai',
-}
-```
-
-## Agenda Status
-```python
-AGENDA_STATUS = {
-    'akan_datang': '📅 Akan Datang',
-    'sedang_berlangsung': '🔄 Sedang Berlangsung',
-    'selesai': '✅ Selesai',
-    'dibatalkan': '❌ Dibatalkan',
-}
-
-AGENDA_KATEGORI = {
-    'umum': '📅 Umum',
-    'kegiatan': '🎉 Kegiatan',
-    'rapat': '🏛️ Rapat',
-    'pembangunan': '🏗️ Pembangunan',
-    'pertemuan': '👥 Pertemuan',
-}
-```
+| File | Size | Purpose |
+|------|------|---------|
+| `app.py` | 454 lines | Entry point, blueprints, chatbot endpoint, error handlers |
+| `config.py` | 202 lines | Config class, NAV_LINKS, DUSUN_DATA, SQL_SCHEMA, DEFAULT_USERS |
+| `models.py` | 2592 lines | ALL database operations - look here first |
+| `database.py` | - | Database error handling, safe DB operations |
+| `errors.py` | 873 lines | Custom exceptions, decorators, validation helpers |
+| `routes/__init__.py` | 60 lines | Blueprint exports |
+| `routes/public.py` | 50,852 bytes | Legacy: monolithic public routes |
+| `routes/admin.py` | 102,408 bytes | Legacy: monolithic admin routes |
+| `templates/base.html` | 33,713 bytes | Main layout with navbar, footer, dark mode |
+| `templates/index.html` | 68,635 bytes | Homepage |
+| `static/styles.css` | 846 lines | Main CSS |
 
 ---
 
 ## Website Config Keys (DEFAULT_CONFIG)
+
 ```python
 # Website Info
 website_nama, website_tagline, website_deskripsi, website_meta_description
@@ -740,3 +814,108 @@ sosial_facebook, sosial_instagram, sosial_twitter
 # Footer
 footer_copyright
 ```
+
+---
+
+## GeoJSON Layers
+
+### UMKM GeoJSON
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [longitude, latitude]
+      },
+      "properties": {
+        "id": 1,
+        "nama": "Toko Kelontong",
+        "kategori": "makanan",
+        "alamat": "Jl. Desa No. 1",
+        "pemiliki": "Budi"
+      }
+    }
+  ]
+}
+```
+
+### RT/RW GeoJSON
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [longitude, latitude]
+      },
+      "properties": {
+        "id": 1,
+        "jenis": "RT",
+        "rw": "01",
+        "rt": "01",
+        "nama_ketua": "Joko",
+        "alamat": "Jl. RT 01"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Legacy Files (Maintained for Compatibility)
+
+The following files are maintained but routes have been refactored into modular files:
+
+- `routes/public.py` - Original monolithic public routes (still used by app.py)
+- `routes/admin.py` - Original monolithic admin routes (still used by app.py)
+
+New modular files provide the same functionality in smaller, more maintainable chunks.
+
+---
+
+## UI Design System
+
+### Color Palette
+```
+Primary:   #155C1B (Forest Green)
+Accent:    #73AA0F (Light Green)
+Dark:      #0f3d14 (Darker Green)
+Muted:     #5B8A4E (Muted Green)
+```
+
+### Typography
+```
+Font: Inter (Google Fonts)
+Weights: 400, 500, 600, 700, 800
+```
+
+### Dark Mode
+Dark mode is implemented in `templates/base.html` with Tailwind CSS `dark:` classes and custom CSS overrides.
+
+---
+
+## UI Plan Update Reference
+
+For UI redesign guidelines, see `ui_plan_update.md` which contains:
+
+1. **Design Foundation** - CSS Variables, Typography Scale, Spacing System
+2. **Layout System** - Centric Grid, Container Max-Widths, Page Structure Patterns
+3. **Component Library** - Buttons, Cards, Forms, Navigation, Alerts, Tables
+4. **Page Specifications** - Homepage, Berita, Galeri, Struktur, Aduan, Program Kerja, Transparansi
+5. **Admin Panel** - Dashboard, Form Pages, CRUD Pages
+6. **Dark Mode** - Color Overrides
+7. **Responsive Breakpoints** - Grid Columns by Breakpoint
+8. **Animations** - Allowed Animations, Transition Guidelines
+9. **Emoji Guide** - Emoji Replacement Guide
+10. **Accessibility** - Contrast, Focus States, Semantic HTML
+11. **Implementation Checklist** - Phases 1-6
+
+---
+
+*Last updated: 9 Juli 2026*
