@@ -36,13 +36,30 @@ Auth:       Werkzeug PBKDF2 hashing
 ├── app.py              # Flask app factory + blueprints registration
 ├── config.py           # Config class + DEFAULT_CONFIG dict
 ├── models.py           # All DB operations (get_db_connection, helpers)
-├── database.py          # Database error handling + safe DB operations
-├── errors.py            # Error handlers, decorators, validation helpers
+├── database.py         # Database error handling + safe DB operations
+├── errors.py           # Error handlers, decorators, validation helpers
 ├── pdf_generator.py    # PDF generation (placeholder - not implemented)
 ├── routes/
-│   ├── __init__.py     # Blueprint exports
-│   ├── public.py       # Blueprint 'public_bp' - website publik
-│   └── admin.py        # Blueprint 'admin_bp' - /admin/*
+│   ├── __init__.py           # Blueprint exports (modular + legacy)
+│   ├── public.py             # Legacy: monolithic public blueprint (1241 lines)
+│   ├── admin.py              # Legacy: monolithic admin blueprint (2404 lines)
+│   ├── public_auth.py        # Public: login, logout
+│   ├── public_home.py        # Public: homepage / beranda
+│   ├── public_berita.py      # Public: berita list, detail, komentar API
+│   ├── public_pages.py       # Public: galeri, kontak, kritik saran, custom pages
+│   ├── public_struktur.py     # Public: struktur organisasi, sejarah desa
+│   ├── public_info.py        # Public: kependudukan, pengumuman, peta, transparansi
+│   ├── public_aduan.py       # Public: aduan, program kerja, agenda
+│   ├── admin_dashboard.py    # Admin: dashboard, auth redirects
+│   ├── admin_berita.py       # Admin: berita CRUD
+│   ├── admin_galeri.py       # Admin: galeri CRUD + toggle
+│   ├── admin_pages.py        # Admin: pages, sejarah, config management
+│   ├── admin_struktur.py     # Admin: struktur CRUD + import/export/template
+│   ├── admin_umkm.py         # Admin: UMKM CRUD + google maps parser
+│   ├── admin_potensi.py     # Admin: potensi, kependudukan
+│   ├── admin_pengumuman.py   # Admin: pengumuman, APBDes CRUD
+│   ├── admin_aduan.py        # Admin: aduan, kritik saran, program kerja, agenda
+│   └── admin_accounts.py     # Admin: account center, settings
 ├── templates/          # Jinja2 templates
 │   ├── index.html, berita.html, galeri.html, kontak.html
 │   ├── admin/          # 27 admin templates
@@ -55,6 +72,40 @@ Auth:       Werkzeug PBKDF2 hashing
 │   └── data/geojson    # Peta interaktif GeoJSON
 └── uploads/            # User uploads (KTP, KK, berita, galeri, dll)
 ```
+
+### Routes Architecture
+
+Routes dipisah jadi modul-modul kecil untuk maintainability. Masing-masing file mendefinisikan blueprint sendiri yang kemudian di-export via `__init__.py`.
+
+```python
+# routes/__init__.py exports:
+from routes import (
+    # Legacy (original monolithic files)
+    public_bp,           # routes/public.py
+    admin_bp,            # routes/admin.py
+    # Modular public blueprints
+    public_auth_bp,      # login, logout
+    public_home_bp,      # homepage
+    public_berita_bp,    # berita + komentar API
+    public_pages_bp,     # galeri, kontak, kritik saran, pages
+    public_struktur_bp,  # struktur, sejarah
+    public_info_bp,      # kependudukan, pengumuman, peta, transparansi
+    public_aduan_bp,     # aduan, program kerja, agenda
+    # Modular admin blueprints
+    admin_dashboard_bp,  # dashboard, auth
+    admin_berita_bp,     # berita CRUD
+    admin_galeri_bp,     # galeri CRUD
+    admin_pages_bp,      # pages, sejarah, config
+    admin_struktur_bp,   # struktur CRUD + import/export
+    admin_umkm_bp,      # UMKM CRUD + location parser
+    admin_potensi_bp,   # potensi, kependudukan
+    admin_pengumuman_bp, # pengumuman, APBDes
+    admin_aduan_bp,     # aduan, kritik saran, program kerja, agenda
+    admin_accounts_bp,  # account center, settings
+)
+```
+
+> **Note**: File `public.py` dan `admin.py` original dipertahankan untuk backward compatibility saat migrate. Setelah semua routes dipindah, file legacy bisa dihapus.
 
 ---
 
@@ -97,14 +148,25 @@ conn.close()
 
 ### Pattern: Blueprint Decorators
 
+Each route module defines its own blueprint. Import the appropriate one for the route you're working on.
+
 ```python
-# Protected route example
-@admin_bp.route("/dashboard")
+# Example: Adding a route in public_berita.py
+from routes.public_berita import public_bp as bp
+
+@bp.route("/berita")
+def berita():
+    ...
+
+# For protected routes, use the admin_required decorator
+@bp.route("/dashboard")
 @admin_required
 def dashboard():
     user = get_user_by_id(session.get('user_id'))
     return render_template("admin/dashboard.html", user=user)
 ```
+
+> **Note**: Legacy `public_bp` and `admin_bp` from monolithic files are still available for backward compatibility.
 
 ### Public Routes (public_bp)
 | Route | Template | Description |
@@ -579,8 +641,9 @@ from errors import (
 | `models.py` | ALL database operations - look here first |
 | `database.py` | Database error handling, safe DB operations |
 | `errors.py` | Custom exceptions, decorators, validation helpers |
-| `routes/public.py` | Public website routes (login, berita, galeri, dll) |
-| `routes/admin.py` | Admin panel routes (all CRUD operations) |
+| `routes/` | Route handlers (see Routes Architecture above) |
+| `routes/public.py` | Legacy: monolithic public routes (login, berita, galeri, dll) |
+| `routes/admin.py` | Legacy: monolithic admin routes (all CRUD operations) |
 
 ---
 
