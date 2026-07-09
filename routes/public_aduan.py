@@ -24,18 +24,28 @@ def set_nav_active(page_key, request_path=None):
     """
     Set active nav link based on page key.
     If page_key is 'Lainnya', checks if request_path is in LAINNYA_PAGES.
+    Uses prefix matching so /struktur/123 matches /struktur.
     """
-    # Check if we should highlight "Lainnya"
-    highlight_lainnya = page_key == "Lainnya" and request_path and request_path in LAINNYA_PAGES
-    
+    from config import LAINNYA_PAGES
+
+    def matches_lainnya(path):
+        """Check if path matches any LAINNYA_PAGES entry (prefix matching)"""
+        if not path:
+            return False
+        for lp in LAINNYA_PAGES:
+            if '<' in lp:
+                continue
+            if path == lp or path.startswith(lp + '/'):
+                return True
+        return False
+
     result = []
     for n in NAV_LINKS:
         if n["label"] == "Lainnya":
-            # Check if Lainnya should be active (either page_key == "Lainnya" or path is in LAINNYA_PAGES)
             result.append({
                 "label": n["label"],
                 "href": n["href"],
-                "active": highlight_lainnya,
+                "active": page_key == "Lainnya" and matches_lainnya(request_path),
                 "is_dropdown": True
             })
         else:

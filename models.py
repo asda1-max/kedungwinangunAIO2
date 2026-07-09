@@ -1369,6 +1369,37 @@ def get_all_struktur(aktif=None):
         logger.error(f"Error getting all struktur: {str(e)}")
         return []
 
+def get_struktur_for_geojson(aktif=1):
+    """Get struktur organisasi data formatted as GeoJSON features (only those with coordinates)"""
+    try:
+        items = get_all_struktur(aktif=aktif)
+        features = []
+        for item in items:
+            if item.get('latitude') and item.get('longitude'):
+                features.append({
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [item['longitude'], item['latitude']]
+                    },
+                    'properties': {
+                        'id': item['id'],
+                        'nama': item['nama'],
+                        'jabatan': item['jabatan'] or '',
+                        'kategori': item['kategori'] or '',
+                        'nik': item['nik'] or '',
+                        'alamat': item['alamat'] or '',
+                        'dusun': item['dusun'] or '',
+                        'telepon': item['telepon'] or '',
+                        'email': item['email'] or '',
+                        'foto_url': item['foto_url'] or '',
+                    }
+                })
+        return {'type': 'FeatureCollection', 'features': features}
+    except Exception as e:
+        logger.error(f"Error getting struktur geojson: {str(e)}")
+        return {'type': 'FeatureCollection', 'features': []}
+
 def get_struktur_by_kategori(kategori, aktif=None):
     """Ambil struktur berdasarkan kategori"""
     try:
@@ -2586,7 +2617,87 @@ def get_lokasi_rtrw_geojson():
                     "jabatan": loc.get('jabatan', ''),
                     "wilayah": loc.get('wilayah', ''),
                     "alamat": loc.get('alamat', ''),
-                    "no_hp": loc.get('no_hp', '')
+                    "no_hp": loc.get('no_hp', ''),
+                    "source": "rtrw"  # marker for filtering
                 }
             })
     return {"type": "FeatureCollection", "features": features}
+
+
+def get_all_locations_geojson(aktif=1):
+    """
+    Get ALL locations from all sources as unified GeoJSON FeatureCollection.
+    Sources:
+    - RT/RW from lokasi_rtrw table
+    - Perangkat Desa, BPD, PKK, Karang Taruna from struktur_organisasi table
+    """
+    features = []
+    
+    # 1. Get RT/RW locations
+    rtrw_data = get_lokasi_rtrw_geojson()
+    features.extend(rtrw_data.get('features', []))
+    
+    # 2. Get Struktur Organisasi locations (Perangkat Desa, BPD, PKK, dll)
+    struktur_data = get_struktur_for_geojson(aktif=aktif)
+    for feat in struktur_data.get('features', []):
+        # Map struktur properties to unified format
+        p = feat['properties']
+        features.append({
+            "type": "Feature",
+            "geometry": feat['geometry'],
+            "properties": {
+                "id": f"struktur_{p['id']}",
+                "jenis": p.get('kategori', 'perangkat'),
+                "nama": p.get('nama', ''),
+                "jabatan": p.get('jabatan', ''),
+                "kategori": p.get('kategori', ''),
+                "nik": p.get('nik', ''),
+                "alamat": p.get('alamat', ''),
+                "telepon": p.get('telepon', ''),
+                "email": p.get('email', ''),
+                "foto_url": p.get('foto_url', ''),
+                "source": "struktur"
+            }
+        })
+    
+    return {"type": "FeatureCollection", "features": features}
+
+
+# Kategori mapping untuk peta
+LOKASI_KATEGORI_LABELS = {
+    # Dari lokasi_rtrw
+    'RT': 'Rumah Ketua RT',
+    'RW': 'Rumah Ketua RW',
+    # Dari struktur_organisasi
+    'perangkat': 'Perangkat Desa',
+    'bpd': 'BPD',
+    'pkk': 'PKK',
+    'karang_taruna': 'Karang Taruna',
+    'rt': 'RT',
+    'rw': 'RW',
+    'lembaga': 'Lembaga Desa',
+}
+
+LOKASI_KATEGORI_ICONS = {
+    'RT': '🏠',
+    'RW': '🏛️',
+    'perangkat': '👔',
+    'bpd': '📋',
+    'pkk': '👩',
+    'karang_taruna': '🧑',
+    'rt': '🏠',
+    'rw': '🏛️',
+    'lembaga': '🏢',
+}
+
+LOKASI_KATEGORI_COLORS = {
+    'RT': '#457b9d',
+    'RW': '#264653',
+    'perangkat': '#1b4332',
+    'bpd': '#7c3aed',
+    'pkk': '#ec4899',
+    'karang_taruna': '#f59e0b',
+    'rt': '#457b9d',
+    'rw': '#264653',
+    'lembaga': '#6366f1',
+}

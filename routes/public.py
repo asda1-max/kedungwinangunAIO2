@@ -59,9 +59,18 @@ def set_nav_active(page_key, request_path=None):
     """
     Set active nav link based on page key.
     If page_key is 'Lainnya', checks if request_path is in LAINNYA_PAGES.
+    Uses prefix matching so /struktur/123 matches /struktur.
     """
-    # Check if we should highlight "Lainnya"
-    highlight_lainnya = page_key == "Lainnya" and request_path and request_path in LAINNYA_PAGES
+    def matches_lainnya(path):
+        """Check if path matches any LAINNYA_PAGES entry (prefix matching)"""
+        if not path:
+            return False
+        for lp in LAINNYA_PAGES:
+            if '<' in lp:
+                continue
+            if path == lp or path.startswith(lp + '/'):
+                return True
+        return False
     
     result = []
     for n in NAV_LINKS:
@@ -69,7 +78,7 @@ def set_nav_active(page_key, request_path=None):
             result.append({
                 "label": n["label"],
                 "href": n["href"],
-                "active": highlight_lainnya,
+                "active": page_key == "Lainnya" and matches_lainnya(request_path),
                 "is_dropdown": True
             })
         else:
@@ -401,7 +410,7 @@ def kritik_saran():
         return render_template(
             "kritik_saran.html",
             desa=desa_info,
-            nav_links=set_nav_active("Kontak"),
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -517,16 +526,15 @@ def peta_interaktif():
     from datetime import datetime
 
     try:
-        from models import get_all_pages, get_all_umkm, get_lokasi_rtrw_geojson
+        from models import get_all_pages, get_umkm_for_geojson, get_all_locations_geojson
         desa_info = get_desa_info_with_maps()
         custom_pages = get_all_pages()
 
-        # Get UMKM data
-        umkm_list = get_all_umkm(aktif=1)
-        umkm_geojson = get_umkm_for_geojson(aktif=1)
+        # Get unified location data (RT/RW + Perangkat Desa + BPD + PKK + dll)
+        all_locations_geojson = get_all_locations_geojson(aktif=1)
         
-        # Get RT/RW locations from database
-        rtrw_geojson = get_lokasi_rtrw_geojson()
+        # Get UMKM data
+        umkm_geojson = get_umkm_for_geojson(aktif=1)
 
         # Kategori labels
         kategori_labels = {
@@ -540,6 +548,16 @@ def peta_interaktif():
             'umum': '🏪 Umum',
         }
 
+        # Location kategori labels
+        lokasi_labels = {
+            'RT': '🏠 Rumah RT',
+            'RW': '🏛️ Rumah RW',
+            'perangkat': '👔 Perangkat Desa',
+            'bpd': '📋 BPD',
+            'pkk': '👩 PKK',
+            'karang_taruna': '🧑 Karang Taruna',
+        }
+
         return render_template(
             "peta_interaktif.html",
             page={"title": "Peta Interaktif"},
@@ -550,9 +568,9 @@ def peta_interaktif():
             site_tagline=desa_info['tagline'],
             site_description=desa_info['deskripsi'],
             custom_pages=custom_pages,
-            umkm_list=umkm_list,
             umkm_geojson=umkm_geojson,
-            rtrw_geojson=rtrw_geojson,
+            all_locations_geojson=all_locations_geojson,
+            lokasi_labels=lokasi_labels,
             kategori_labels=kategori_labels,
         )
     except Exception as e:
@@ -606,7 +624,7 @@ def struktur():
             "struktur.html",
             page={"title": "Struktur Organisasi"},
             desa=desa_info,
-            nav_links=set_nav_active("Sejarah"),
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -646,7 +664,7 @@ def struktur_detail(struktur_id):
             item=item,
             related=related,
             desa=desa_info,
-            nav_links=set_nav_active("Sejarah"),
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -1160,7 +1178,7 @@ def program_kerja():
             "program_kerja.html",
             page={"title": "Program Kerja"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -1186,84 +1204,33 @@ def program_kerja():
 
 @public_bp.route("/agenda")
 def agenda():
-    """Halaman agenda desa (timeline)"""
+    """Halaman agenda desa (kalender bulanan)"""
     try:
         from models import get_all_pages, get_all_agenda
-        from datetime import datetime, date
+        from datetime import datetime
         
         desa_info = get_desa_info_with_maps()
         custom_pages = get_all_pages()
-        
-        # Get filter
-        tahun_filter = request.args.get('tahun', type=int)
-        status_filter = request.args.get('status', '')
-        
-        agenda_list = get_all_agenda(aktif=1, tahun=tahun_filter, status=status_filter)
-        
-        # Separate upcoming and past
-        today = date.today()
-        upcoming = []
-        past = []
-        
-        for a in agenda_list:
-            try:
-                tgl = datetime.strptime(str(a.get('tanggal_mulai', '')), '%Y-%m-%d').date()
-                if tgl >= today:
-                    upcoming.append(a)
-                else:
-                    past.append(a)
-            except:
-                upcoming.append(a)
-        
-        # Get available years
-        all_agenda = get_all_agenda(aktif=1)
-        tahun_list = []
-        for ag in all_agenda:
-            try:
-                tgl = datetime.strptime(str(ag.get('tanggal_mulai', '')), '%Y-%m-%d').date()
-                if tgl.year not in tahun_list:
-                    tahun_list.append(tgl.year)
-            except:
-                pass
-        tahun_list = sorted(set(tahun_list), reverse=True)
-        if not tahun_list:
-            tahun_list = [datetime.now().year]
-        
-        # Kategori labels
-        kategori_labels = {
-            'kegiatan': '📌 Kegiatan',
-            'rapat': '🏛️ Rapat',
-            'musyawarah': '🤝 Musyawarah',
-            'pembangunan': '🏗️ Pembangunan',
-            'kesehatan': '🏥 Kesehatan',
-            'pendidikan': '📚 Pendidikan',
-            'umum': '📋 Umum',
-        }
+        agenda_list = get_all_agenda(aktif=1)
         
         status_labels = {
-            'akan_datang': '🟢 Akan Datang',
-            'sedang_berlangsung': '🟡 Sedang Berlangsung',
-            'selesai': '🔵 Selesai',
-            'dibatalkan': '🔴 Dibatalkan',
+            'akan_datang': 'Akan Datang',
+            'sedang_berlangsung': 'Berlangsung',
+            'selesai': 'Selesai',
+            'dibatalkan': 'Dibatalkan',
         }
 
         return render_template(
             "agenda.html",
             page={"title": "Agenda"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
             site_description=desa_info['deskripsi'],
             custom_pages=custom_pages,
             agenda_list=agenda_list,
-            upcoming=upcoming,
-            past=past,
-            tahun_list=tahun_list,
-            tahun_filter=tahun_filter,
-            status_filter=status_filter,
-            kategori_labels=kategori_labels,
             status_labels=status_labels,
         )
     except Exception as e:

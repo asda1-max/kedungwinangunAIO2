@@ -1313,51 +1313,70 @@ def parse_umkm_location():
     }
     
     try:
-        # Pattern 1: maps.google.com or maps.app.goo.gl (short URL)
-        # Redirect short URLs first
-        if 'maps.app.goo.gl' in maps_url or ('goo.gl' in maps_url and 'maps' in maps_url):
-            import urllib.request
+        # Pattern 1: Short URL (maps.app.goo.gl) - try to resolve
+        if 'maps.app.goo.gl' in maps_url or ('goo.gl' in maps_url.lower() and 'maps' in maps_url.lower()):
             try:
+                import urllib.request
                 req = urllib.request.Request(maps_url, headers={'User-Agent': 'Mozilla/5.0'})
                 response = urllib.request.urlopen(req, timeout=10)
                 maps_url = response.url
             except Exception as e:
-                result['error'] = 'Tidak dapat mengakses link shortened'
-                return jsonify(result)
+                # Short URL resolve failed - try to extract from original URL anyway
+                pass
         
-        # Pattern 2: @lat,lng format
-        match = re.search(r'@(-?\d+\.?\d*),(-?\d+\.?\d*)', maps_url)
-        if match:
-            result['latitude'] = float(match.group(1))
-            result['longitude'] = float(match.group(2))
-            result['success'] = True
+        # Pattern 1b: Marker coordinates !3d...!4d... format (HARUS PRIORITAS - ini lokasi marker)
+        # Extract ALL !3d!4d patterns and take the LAST one (usually the clicked marker)
+        coord_matches = list(re.finditer(r'!3d(-?[\d.]+)!4d(-?[\d.]+)', maps_url))
+        if coord_matches:
+            # Take the LAST !3d!4d match (most recent marker click)
+            last_match = coord_matches[-1]
+            lat_from_data = float(last_match.group(1))
+            lng_from_data = float(last_match.group(2))
+            # Validate it's reasonable coordinates for Indonesia
+            if -12 <= lat_from_data <= -5 and 95 <= lng_from_data <= 145:
+                result['latitude'] = lat_from_data
+                result['longitude'] = lng_from_data
+                result['success'] = True
         
-        # Pattern 3: place/Name format for nama
-        place_match = re.search(r'place/([^/]+)', maps_url)
-        if place_match:
-            result['nama'] = place_match.group(1).replace('+', ' ')
-        
-        # Pattern 4: /data=...!3d...!4d... format (older style)
+        # Pattern 2: @lat,lng format (most common) - e.g., maps.google.com/@-7.698188,109.651742,15z
+        # Only use if we don't have valid marker coords yet
         if not result['success']:
-            coord_match = re.search(r'!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)', maps_url)
+            match = re.search(r'@(-?[\d.]+),(-?[\d.]+)', maps_url)
+            if match:
+                result['latitude'] = float(match.group(1))
+                result['longitude'] = float(match.group(2))
+                result['success'] = True
+        
+        # Pattern 3: /data=...!3d...!4d... format (older style)
+        if not result['success']:
+            coord_match = re.search(r'!3d(-?[\d.]+)!4d(-?[\d.]+)', maps_url)
             if coord_match:
                 result['latitude'] = float(coord_match.group(1))
                 result['longitude'] = float(coord_match.group(2))
                 result['success'] = True
         
-        # Pattern 5: query at end
+        # Pattern 4: query=lat,lng format - e.g., ?query=-7.7004,109.6432
         if not result['success']:
-            query_match = re.search(r'query=([^&]+)', maps_url)
-            if query_match:
-                result['nama'] = query_match.group(1).replace('+', ' ')
-            lat_lng_match = re.search(r'(-?\d+\.\d+),(-?\d+\.\d+)', maps_url)
+            lat_lng_match = re.search(r'[?&]query=(-?[\d.]+),(-?[\d.]+)', maps_url)
             if lat_lng_match:
                 result['latitude'] = float(lat_lng_match.group(1))
                 result['longitude'] = float(lat_lng_match.group(2))
                 result['success'] = True
         
+        # Pattern 5: /place/Name format - e.g., /place/Toko+Kita/@...
+        place_match = re.search(r'/place/([^/@?]+)', maps_url)
+        if place_match:
+            import urllib.parse
+            result['nama'] = urllib.parse.unquote(place_match.group(1).replace('+', ' '))
+        
+        # Pattern 6: Extract name from anywhere in URL
+        if not result['nama']:
+            name_match = re.search(r'(?:q|query)=([^&]+)', maps_url)
+            if name_match:
+                result['nama'] = name_match.group(1).replace('+', ' ').replace('%20', ' ')
+        
         if not result['success']:
-            result['error'] = 'Koordinat tidak ditemukan dalam link'
+            result['error'] = 'Koordinat tidak ditemukan. Pastikan link berisi koordinat (format @lat,lng atau query=lat,lng)'
         
         return jsonify(result)
         

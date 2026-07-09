@@ -231,6 +231,7 @@
 
         .badge-green { background: #dcfce7; color: #166534; }
         .badge-blue { background: #dbeafe; color: #1d4ed8; }
+        .badge-yellow { background: #fef3c7; color: #b45309; }
         .badge-orange { background: #ffedd5; color: #c2410c; }
         .badge-purple { background: #f3e8ff; color: #7c3aed; }
         .badge-red { background: #fee2e2; color: #dc2626; }
@@ -239,6 +240,8 @@
         /* ── Form Elements ── */
         .form-group { margin-bottom: 20px; }
         .form-group:last-child { margin-bottom: 0; }
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        @media (min-width: 640px) { .form-grid { grid-template-columns: 1fr 1fr; } }
 
         label {
             display: block;
@@ -519,9 +522,206 @@
         .items-center { align-items: center; }
         .justify-between { justify-content: space-between; }
         .w-full { width: 100%; }
+        .flex-wrap { flex-wrap: wrap; }
+
+        /* ── RESPONSIVE ENHANCEMENTS ── */
+
+        /* Header mobile stack */
+        @media (max-width: 640px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            .header-left > div:last-child h2 {
+                font-size: 18px;
+            }
+
+            .header-left > div:last-child p {
+                font-size: 13px;
+            }
+
+            .header-right {
+                width: 100%;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .header-right .user-menu {
+                order: -1;
+            }
+        }
+
+        /* Hide button text on very small screens */
+        @media (max-width: 480px) {
+            .btn span.btn-label,
+            .btn .btn-label {
+                display: none;
+            }
+
+            .btn {
+                padding: 8px 12px;
+            }
+
+            .btn svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .user-menu .user-info {
+                display: none;
+            }
+
+            .header-left p {
+                display: none;
+            }
+        }
+
+        /* Sidebar overlay backdrop */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Card header stack on mobile */
+        @media (max-width: 640px) {
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .card-section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+        /* Table responsive: shrink cells on mobile */
+        @media (max-width: 640px) {
+            td, th {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
+
+            th {
+                font-size: 10px;
+            }
+        }
+
+        /* Form row always single column on mobile (override) */
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* Action buttons stack on mobile */
+        @media (max-width: 480px) {
+            .actions {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .actions .btn {
+                font-size: 11px;
+                padding: 6px 10px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn-group .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Stats grid on mobile */
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .stat-card {
+                padding: 14px;
+            }
+
+            .stat-content h3 {
+                font-size: 22px;
+            }
+
+            .stat-content p {
+                font-size: 12px;
+            }
+        }
+
+        /* Gallery grid mobile */
+        @media (max-width: 480px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Checkbox grid always single on mobile */
+        @media (max-width: 640px) {
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section padding on mobile */
+        @media (max-width: 640px) {
+            .card-section-body {
+                padding: 16px;
+            }
+
+            .card-section-header {
+                padding: 14px 16px;
+            }
+        }
+
+        /* Empty state mobile */
+        @media (max-width: 480px) {
+            .empty {
+                padding: 32px 16px;
+            }
+        }
+
+        /* Nav section spacing mobile */
+        @media (max-height: 700px) {
+            .nav-section {
+                margin-bottom: 12px;
+            }
+
+            .nav-item {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Sidebar overlay backdrop -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
     <div class="layout">
         <!-- ═══════════════════════════════════════════════════════════
              SIDEBAR
@@ -819,18 +1019,23 @@
          ═══════════════════════════════════════════════════════════ -->
     <script>
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
         }
 
         // Close sidebar on click outside (mobile)
         document.addEventListener('click', function(e) {
             const sidebar = document.getElementById('sidebar');
             const toggle = document.querySelector('.mobile-toggle');
+            const overlay = document.getElementById('sidebar-overlay');
             if (window.innerWidth <= 1024 &&
                 !sidebar.contains(e.target) &&
                 !toggle.contains(e.target) &&
                 sidebar.classList.contains('open')) {
                 sidebar.classList.remove('open');
+                overlay.classList.remove('show');
             }
         });
 

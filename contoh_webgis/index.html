@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebGIS UMKM & RT/RW - Kedungwinangun</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; }
+  #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 1; }
+
+  #title-bar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 900;
+    background: #1b4332; color: #fff; padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+  #title-bar h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  #title-bar span { font-size: 12px; opacity: 0.85; }
+
+  #panel {
+    position: absolute; top: 60px; left: 10px; z-index: 900;
+    background: #fff; border-radius: 10px; padding: 12px 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2); width: 220px;
+    font-size: 13px;
+  }
+  #panel h3 { margin: 0 0 8px 0; font-size: 13px; color: #1b4332; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+  .layer-item { display: flex; align-items: center; margin-bottom: 6px; gap: 6px; }
+  .layer-item label { cursor: pointer; flex: 1; }
+  .layer-item input { cursor: pointer; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+  #legend {
+    position: absolute; bottom: 20px; left: 10px; z-index: 900;
+    background: #fff; border-radius: 10px; padding: 10px 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2); font-size: 12px; max-width: 220px;
+  }
+  #legend h3 { margin: 0 0 6px 0; font-size: 12px; color: #1b4332; }
+  .legend-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 1px solid #333; }
+  .legend-box { width: 12px; height: 12px; display: inline-block; border: 2px solid #e76f51; background: rgba(231,111,81,0.15); }
+
+  .dusun-label {
+    background: rgba(255,255,255,0.92);
+    border: 1.5px solid #7209b7;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #3c096c;
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    text-align: center;
+    line-height: 1.3;
+  }
+  .dusun-label .label-rw { display:block; font-size: 12px; }
+  .dusun-label .label-nama { display:block; font-size: 10px; font-weight: 500; color: #5a189a; }
+
+  .leaflet-popup-content-wrapper { border-radius: 10px; }
+  .popup-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; color: #1b4332; }
+  .popup-row { font-size: 12px; margin: 2px 0; }
+  .popup-row b { color: #444; }
+</style>
+</head>
+<body>
+
+<div id="title-bar">
+  <h1>🗺️ Peta Interaktif UMKM & RT/RW Kedungwinangun</h1>
+  <span>Klirong, Kebumen</span>
+</div>
+
+<div id="panel">
+  <h3>Layer Peta</h3>
+  <div class="layer-item">
+    <input type="checkbox" id="chk-desa" checked>
+    <span class="swatch" style="border:2px solid #e76f51;background:rgba(231,111,81,0.15)"></span>
+    <label for="chk-desa">Batas Desa</label>
+  </div>
+  <div class="layer-item">
+    <input type="checkbox" id="chk-dusun" checked>
+    <span class="swatch" style="border:2px solid #7209b7;background:rgba(114,9,183,0.15)"></span>
+    <label for="chk-dusun">Batas Dusun/RW</label>
+  </div>
+  <div class="layer-item">
+    <input type="checkbox" id="chk-umkm" checked>
+    <span class="swatch" style="background:#e63946;border-radius:50%"></span>
+    <label for="chk-umkm">Titik UMKM</label>
+  </div>
+  <div class="layer-item">
+    <input type="checkbox" id="chk-rw" checked>
+    <span class="swatch" style="background:#264653"></span>
+    <label for="chk-rw">Titik RW</label>
+  </div>
+  <div class="layer-item">
+    <input type="checkbox" id="chk-rt" checked>
+    <span class="swatch" style="background:#457b9d;border-radius:50%"></span>
+    <label for="chk-rt">Titik RT</label>
+  </div>
+</div>
+
+<div id="legend">
+  <h3>Legenda</h3>
+  <div class="legend-row"><span class="legend-dot" style="background:#e63946"></span> UMKM</div>
+  <div class="legend-row"><span class="legend-dot" style="background:#457b9d"></span> Rumah Ketua RT</div>
+  <div class="legend-row"><span style="width:10px;height:10px;background:#264653;display:inline-block"></span> Rumah Ketua RW</div>
+  <div class="legend-row"><span class="legend-box"></span> Batas Desa Kedungwinangun</div>
+  <div class="legend-row"><span style="width:12px;height:12px;display:inline-block;border:2px solid #7209b7;background:rgba(114,9,183,0.12)"></span> Batas Dusun/RW</div>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const UMKM_DATA = {"type": "FeatureCollection", "name": "umkm_kedungwinangun", "features": [{"type": "Feature", "properties": {"nama_umkm": "Halalmart DC Kedungwinangun Klirong", "jenis_usaha": "Toko Kelontong/Sembako", "kategori": "Retail", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.651742, -7.698188]}}, {"type": "Feature", "properties": {"nama_umkm": "SRC ZAHRA", "jenis_usaha": "Toko Kelontong/Sembako", "kategori": "Retail", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.652227, -7.698972]}}, {"type": "Feature", "properties": {"nama_umkm": "SRC Setia Hati", "jenis_usaha": "Toko Kelontong/Sembako", "kategori": "Retail", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.651342, -7.697644]}}, {"type": "Feature", "properties": {"nama_umkm": "Toko Sejahtera", "jenis_usaha": "Toko Kelontong/Sembako", "kategori": "Retail", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.651721, -7.697039]}}, {"type": "Feature", "properties": {"nama_umkm": "Toko FIANTI Sembako", "jenis_usaha": "Toko Kelontong/Sembako", "kategori": "Retail", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.651231, -7.700886]}}, {"type": "Feature", "properties": {"nama_umkm": "SRC Buah Hati", "jenis_usaha": "Toko Kelontong/Sembako", "kategori": "Retail", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.651054, -7.704494]}}, {"type": "Feature", "properties": {"nama_umkm": "Enggal Buah", "jenis_usaha": "Toko Buah", "kategori": "Retail", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.651198, -7.702141]}}, {"type": "Feature", "properties": {"nama_umkm": "Mie Ayam Tarom", "jenis_usaha": "Warung Makan", "kategori": "Kuliner", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.654405, -7.700533]}}, {"type": "Feature", "properties": {"nama_umkm": "Mie Ayam Rizky", "jenis_usaha": "Warung Makan", "kategori": "Kuliner", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.652474, -7.700108]}}, {"type": "Feature", "properties": {"nama_umkm": "Warung Mie Ayam \"PAHALA\"", "jenis_usaha": "Warung Makan", "kategori": "Kuliner", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.651518, -7.699815]}}, {"type": "Feature", "properties": {"nama_umkm": "Bakso Urat Mie Ayam Bu Purwa", "jenis_usaha": "Warung Makan", "kategori": "Kuliner", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.652967, -7.699975]}}, {"type": "Feature", "properties": {"nama_umkm": "Warung Mie Ayam Tirto Roso", "jenis_usaha": "Warung Makan", "kategori": "Kuliner", "alamat": "Kedungwinangun, Klirong, Kebumen", "pemilik": "", "no_hp": "", "jam_operasional": "", "foto": "", "deskripsi": ""}, "geometry": {"type": "Point", "coordinates": [109.652595, -7.698273]}}]};
+const RTRW_DATA = {"type": "FeatureCollection", "name": "rtrw_kedungwinangun", "features": [{"type": "Feature", "properties": {"jenis": "RT", "rt": 4, "rw": 5, "wilayah": "RT 04 / RW 05", "nama_ketua": "PARYONO", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.656276, -7.702729]}}, {"type": "Feature", "properties": {"jenis": "RW", "rt": null, "rw": 5, "wilayah": "RW 05", "nama_ketua": "AHMAD MU'ALIM", "jabatan": "Ketua RW", "jumlah_rt": 4, "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.657039, -7.702704]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 3, "rw": 5, "wilayah": "RT 03 / RW 05", "nama_ketua": "RASBAN", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.657771, -7.705952]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 2, "rw": 5, "wilayah": "RT 02 / RW 05", "nama_ketua": "MUHAIMIN", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.657324, -7.707528]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 1, "rw": 5, "wilayah": "RT 01 / RW 05", "nama_ketua": "M.IDRIS", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.656062, -7.710364]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 1, "rw": 4, "wilayah": "RT 01 / RW 04", "nama_ketua": "AHMAD NASRULLOH", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.64916, -7.707879]}}, {"type": "Feature", "properties": {"jenis": "RW", "rt": null, "rw": 4, "wilayah": "RW 04", "nama_ketua": "SUDIBYO", "jabatan": "Ketua RW", "jumlah_rt": 2, "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.646933, -7.706413]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 2, "rw": 4, "wilayah": "RT 02 / RW 04", "nama_ketua": "AGUS STYAWAN", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.647081, -7.705701]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 2, "rw": 3, "wilayah": "RT 02 / RW 03", "nama_ketua": "ANGGA", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.654459, -7.7039]}}, {"type": "Feature", "properties": {"jenis": "RW", "rt": null, "rw": 3, "wilayah": "RW 03", "nama_ketua": "MAFUDIN", "jabatan": "Ketua RW", "jumlah_rt": 2, "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.652449, -7.701586]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 1, "rw": 3, "wilayah": "RT 01 / RW 03", "nama_ketua": "NAIMUN", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.652198, -7.701227]}}, {"type": "Feature", "properties": {"jenis": "RW", "rt": null, "rw": 6, "wilayah": "RW 06", "nama_ketua": "", "jabatan": "Ketua RW", "jumlah_rt": 3, "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.654668, -7.698161]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 3, "rw": 6, "wilayah": "RT 03 / RW 06", "nama_ketua": "SLAMET WAHYUDI", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.655761, -7.700277]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 2, "rw": 6, "wilayah": "RT 02 / RW 06", "nama_ketua": "MARYONO", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.655674, -7.700594]}}, {"type": "Feature", "properties": {"jenis": "RW", "rt": null, "rw": 2, "wilayah": "RW 02", "nama_ketua": "SYARIF TOYIB", "jabatan": "Ketua RW", "jumlah_rt": 2, "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.651394, -7.699031]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 3, "rw": 1, "wilayah": "RT 03 / RW 01", "nama_ketua": "TOKHANI", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.652532, -7.697009]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 1, "rw": 2, "wilayah": "RT 01 / RW 02", "nama_ketua": "TAMSIR", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.65296, -7.697599]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 2, "rw": 1, "wilayah": "RT 02 / RW 01", "nama_ketua": "SLAMET HARTADI", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.65247, -7.692632]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 1, "rw": 1, "wilayah": "RT 01 / RW 01", "nama_ketua": "JOKO PRANOWO", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.652077, -7.692679]}}, {"type": "Feature", "properties": {"jenis": "RW", "rt": null, "rw": 1, "wilayah": "RW 01", "nama_ketua": "WAWAN SETIAWAN", "jabatan": "Ketua RW", "jumlah_rt": 3, "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.651635, -7.692586]}}, {"type": "Feature", "properties": {"jenis": "RW", "rt": null, "rw": 8, "wilayah": "RW 08", "nama_ketua": "TUSIRAN", "jabatan": "Ketua RW", "jumlah_rt": 2, "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.656083, -7.69083]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 2, "rw": 8, "wilayah": "RT 02 / RW 08", "nama_ketua": "AHMAD FAUZI", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.656237, -7.690718]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 1, "rw": 8, "wilayah": "RT 01 / RW 08", "nama_ketua": "AGUS TRIYONO", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.655768, -7.690983]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 2, "rw": 7, "wilayah": "RT 02 / RW 07", "nama_ketua": "SLAMET SUTRISNO", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.65369, -7.692342]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 2, "rw": 2, "wilayah": "RT 02 / RW 02", "nama_ketua": "AGUS WIDODO", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.651833, -7.699277]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 1, "rw": 6, "wilayah": "RT 01 / RW 06", "nama_ketua": "HARSONO", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.655187, -7.702948]}}, {"type": "Feature", "properties": {"jenis": "RT", "rt": 1, "rw": 7, "wilayah": "RT 01 / RW 07", "nama_ketua": "TRIYONO", "jabatan": "Ketua RT", "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.653675, -7.696072]}}, {"type": "Feature", "properties": {"jenis": "RW", "rt": null, "rw": 7, "wilayah": "RW 07", "nama_ketua": "ZAHID NUR MUBAROK", "jabatan": "Ketua RW", "jumlah_rt": 2, "alamat": "Kedungwinangun, Klirong, Kebumen", "no_hp": ""}, "geometry": {"type": "Point", "coordinates": [109.653135, -7.695705]}}]};
+const DESA_DATA = {"type": "FeatureCollection", "name": "batas_desa_kedungwinangun", "features": [{"type": "Feature", "properties": {"nama_desa": "Kedungwinangun", "kecamatan": "Klirong", "kabupaten": "Kebumen", "provinsi": "Jawa Tengah", "luas_km2": 2.1, "sumber": "Hasil Delineasi Batas Desa 2017"}, "geometry": {"type": "MultiPolygon", "coordinates": [[[[109.659123, -7.709336], [109.659397, -7.709931], [109.65967, -7.710431], [109.659825, -7.710693], [109.659896, -7.710966], [109.659932, -7.711252], [109.659904, -7.71189], [109.659827, -7.712111], [109.659622, -7.712718], [109.659606, -7.712717], [109.659022, -7.712696], [109.658556, -7.71282], [109.658334, -7.712984], [109.658324, -7.712981], [109.658119, -7.712825], [109.657888, -7.71277], [109.657443, -7.712685], [109.65643, -7.712491], [109.656416, -7.712504], [109.656387, -7.712523], [109.656211, -7.712485], [109.656197, -7.71218], [109.656211, -7.711704], [109.656211, -7.711357], [109.656214, -7.711086], [109.656213, -7.711084], [109.655987, -7.710761], [109.655843, -7.710494], [109.655699, -7.710316], [109.655533, -7.710222], [109.655275, -7.710168], [109.655031, -7.710048], [109.654857, -7.709979], [109.654589, -7.709934], [109.654509, -7.709835], [109.654486, -7.709795], [109.654485, -7.709791], [109.654485, -7.709788], [109.654494, -7.709594], [109.65437, -7.709591], [109.654369, -7.70959], [109.654009, -7.709249], [109.653556, -7.708885], [109.653406, -7.708792], [109.653406, -7.708789], [109.653456, -7.707983], [109.650662, -7.708033], [109.650466, -7.707965], [109.650316, -7.707858], [109.650187, -7.707732], [109.650173, -7.707737], [109.649812, -7.707913], [109.649393, -7.708122], [109.649236, -7.708143], [109.648706, -7.708042], [109.647889, -7.707742], [109.647293, -7.707508], [109.647033, -7.707395], [109.647033, -7.707395], [109.647057, -7.707098], [109.647069, -7.706599], [109.647092, -7.706267], [109.647214, -7.705645], [109.647295, -7.705259], [109.647362, -7.704883], [109.647485, -7.704427], [109.647664, -7.704058], [109.647811, -7.703689], [109.648038, -7.702907], [109.648521, -7.701504], [109.648759, -7.700702], [109.64915, -7.699302], [109.649398, -7.698549], [109.649609, -7.697782], [109.649852, -7.696783], [109.650012, -7.696045], [109.650094, -7.695544], [109.650127, -7.695341], [109.650195, -7.694927], [109.650336, -7.694181], [109.650604, -7.693206], [109.650689, -7.692909], [109.650716, -7.692324], [109.65083, -7.691982], [109.650944, -7.691553], [109.650973, -7.691225], [109.651051, -7.690775], [109.65113, -7.690447], [109.651541, -7.69053], [109.651641, -7.690551], [109.651798, -7.690558], [109.651927, -7.690544], [109.652034, -7.690516], [109.65217, -7.690487], [109.652312, -7.690473], [109.652555, -7.69048], [109.652826, -7.690516], [109.653019, -7.690551], [109.653247, -7.690608], [109.653362, -7.690637], [109.653578, -7.690668], [109.653892, -7.690658], [109.654159, -7.690611], [109.654368, -7.690554], [109.654701, -7.690439], [109.655225, -7.69024], [109.655645, -7.690048], [109.655849, -7.690051], [109.656182, -7.690061], [109.65643, -7.690099], [109.656734, -7.69018], [109.657401, -7.690365], [109.657958, -7.690546], [109.658219, -7.690608], [109.658414, -7.690646], [109.658576, -7.690675], [109.658757, -7.690732], [109.658871, -7.690784], [109.658919, -7.690846], [109.658957, -7.690932], [109.659, -7.69116], [109.659024, -7.691455], [109.659033, -7.691688], [109.659038, -7.691841], [109.659009, -7.691993], [109.658943, -7.692112], [109.65879, -7.692355], [109.658757, -7.692493], [109.658719, -7.692707], [109.658667, -7.692968], [109.6586, -7.693164], [109.6585, -7.693349], [109.658395, -7.693497], [109.658257, -7.693597], [109.6581, -7.693654], [109.657853, -7.693682], [109.657596, -7.693692], [109.657287, -7.693692], [109.656796, -7.693701], [109.65642, -7.693739], [109.656225, -7.693792], [109.655925, -7.693873], [109.655749, -7.693963], [109.655583, -7.694063], [109.655421, -7.694215], [109.655312, -7.69441], [109.655273, -7.694591], [109.655278, -7.694739], [109.655321, -7.694948], [109.655383, -7.695105], [109.655483, -7.695248], [109.655607, -7.695381], [109.655806, -7.695514], [109.656116, -7.695681], [109.656544, -7.69589], [109.656863, -7.696052], [109.657044, -7.696176], [109.657191, -7.696314], [109.657267, -7.696471], [109.657306, -7.69668], [109.657363, -7.697251], [109.657367, -7.697542], [109.657358, -7.697761], [109.657325, -7.697908], [109.657253, -7.698113], [109.657144, -7.698279], [109.656949, -7.69856], [109.656677, -7.698903], [109.656378, -7.699312], [109.656297, -7.699512], [109.656278, -7.699593], [109.656249, -7.699759], [109.656249, -7.699959], [109.656287, -7.70034], [109.65632, -7.700559], [109.656397, -7.700887], [109.656487, -7.70113], [109.656596, -7.701349], [109.65672, -7.701515], [109.656896, -7.701663], [109.657277, -7.701925], [109.657786, -7.702248], [109.658176, -7.702482], [109.658567, -7.702729], [109.658809, -7.702881], [109.658952, -7.70301], [109.659104, -7.703219], [109.6592, -7.703414], [109.659228, -7.703538], [109.659228, -7.703676], [109.659204, -7.703762], [109.659157, -7.703881], [109.659123, -7.704061], [109.659128, -7.704214], [109.659157, -7.704504], [109.6592, -7.704918], [109.6592, -7.705094], [109.659185, -7.705285], [109.659133, -7.705522], [109.659033, -7.705779], [109.658924, -7.705979], [109.658752, -7.706213], [109.658686, -7.706365], [109.658614, -7.706569], [109.658563, -7.706993], [109.658533, -7.707303], [109.65854, -7.707635], [109.6586, -7.707921], [109.658742, -7.708361], [109.659123, -7.709336]]]]}}]};
+const DUSUN_DATA = {"type":"FeatureCollection","name":"DusunRWKedungwinangun","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"Id":0,"Dusun":"Pagak","RW":8,"Luas":69670.9251232,"centroid":[109.65710552503764,-7.692369696890515]},"geometry":{"type":"MultiPolygon","coordinates":[[[[109.65585658051376,-7.6944698381641565],[109.65555926791667,-7.694490752922203],[109.65543392798776,-7.692957338224015],[109.65521522683235,-7.692975230775675],[109.65515637474952,-7.691710437831151],[109.65435225251477,-7.691782055557016],[109.65429190391013,-7.689846262827778],[109.6546841136706,-7.6895581262931145],[109.65764119459287,-7.689738748781015],[109.65785682827935,-7.690282838121274],[109.6591277364052,-7.6905415594511455],[109.65932595894529,-7.691536842854419],[109.65855680221992,-7.69365830305812],[109.65697539121648,-7.693874913480121],[109.65585658051376,-7.6944698381641565]]]]}},{"type":"Feature","properties":{"Id":0,"Dusun":"Pedana","RW":7,"Luas":79517.7144773,"centroid":[109.65470596356911,-7.693857761059055]},"geometry":{"type":"MultiPolygon","coordinates":[[[[109.65758363121377,-7.698155309305262],[109.65684989344263,-7.698162513039743],[109.65647908642131,-7.698102927080527],[109.65619704147679,-7.698009201354284],[109.65571966502011,-7.697960719479555],[109.6543679964932,-7.698142040560826],[109.65406512344556,-7.697976217217986],[109.65375619507014,-7.6981167877564385],[109.65375746722164,-7.698009928034024],[109.65360185543656,-7.696962095081964],[109.65344989743986,-7.696973773316542],[109.65334374076438,-7.696579451407394],[109.65345033838497,-7.6956547710197105],[109.65399582456926,-7.695447223149937],[109.65412489103325,-7.694895225162722],[109.65427339250031,-7.694802971301989],[109.654261272886,-7.694252139576386],[109.6540380302589,-7.694280075001876],[109.65370785479863,-7.6932366206303815],[109.65337631906702,-7.6933535699469875],[109.65263278590032,-7.693463382541726],[109.65281150814448,-7.691059151434283],[109.65333535673604,-7.690306835232981],[109.65367623891412,-7.690011881310638],[109.65390536758908,-7.689927624084047],[109.65429190391013,-7.689846262827778],[109.65435225251477,-7.691782055557016],[109.65515637474952,-7.691710437831151],[109.65521522683235,-7.692975230775675],[109.65543392798776,-7.692957338224015],[109.65555926791667,-7.694490752922203],[109.65585658051376,-7.6944698381641565],[109.65584187726988,-7.695660614641515],[109.6575933760045,-7.696491889020048],[109.65778509540662,-7.697763548535011],[109.65758363121377,-7.698155309305262]]]]}},{"type":"Feature","properties":{"Id":0,"Dusun":"Karangmiri","RW":1,"Luas":75558.1937722,"centroid":[109.65258386883782,-7.6945415231519325]},"geometry":{"type":"MultiPolygon","coordinates":[[[[109.65375746722164,-7.698009928034024],[109.65160641115588,-7.698162108110466],[109.6516070545181,-7.69831050777252],[109.65077043770992,-7.698344133935832],[109.6507798802922,-7.698158435144216],[109.64974663939864,-7.698113045247134],[109.6503090456704,-7.69585838277558],[109.6507724317708,-7.694889068256871],[109.65116469732887,-7.693821202940545],[109.65126475074375,-7.69320449817445],[109.65179265950555,-7.691219769934193],[109.65281150814448,-7.691059151434283],[109.65263278590032,-7.693463382541726],[109.65337631906702,-7.6933535699469875],[109.65370785479863,-7.6932366206303815],[109.6540380302589,-7.694280075001876],[109.654261272886,-7.694252139576386],[109.65427339250031,-7.694802971301989],[109.65412489103325,-7.694895225162722],[109.65399582456926,-7.695447223149937],[109.65345033838497,-7.6956547710197105],[109.65334374076438,-7.696579451407394],[109.65344989743986,-7.696973773316542],[109.65360185543656,-7.696962095081964],[109.65375746722164,-7.698009928034024]]]]}},{"type":"Feature","properties":{"Id":0,"Dusun":"Kedungwaru","RW":2,"Luas":83616.4786949,"centroid":[109.6516072234792,-7.700246710022402]},"geometry":{"type":"MultiPolygon","coordinates":[[[[109.65375619507014,-7.6981167877564385],[109.65370825194324,-7.698899662658617],[109.65414500090722,-7.698852023383849],[109.65409121027291,-7.699794263049493],[109.65383958338157,-7.701025328509003],[109.65376981731373,-7.701487696089396],[109.65337570876422,-7.7013466596223115],[109.6525930929388,-7.701432236383178],[109.65258828602994,-7.701566059766362],[109.65162638905704,-7.701663840346514],[109.65158112304196,-7.702901404579925],[109.64807029307046,-7.7031447339819055],[109.6484796127813,-7.7020907390021796],[109.64863706181198,-7.701517584999077],[109.64912677799695,-7.70069915699531],[109.64958106019085,-7.698388119047324],[109.64968164165629,-7.698373611672237],[109.64974663939864,-7.698113045247134],[109.6507798802922,-7.698158435144216],[109.65077043770992,-7.698344133935832],[109.6516070545181,-7.69831050777252],[109.65160641115588,-7.698162108110466],[109.65375746722164,-7.698009928034024],[109.65375619507014,-7.6981167877564385]]]]}},{"type":"Feature","properties":{"Id":0,"Dusun":"Grewing","RW":6,"Luas":89615.8266152,"centroid":[109.6556873503489,-7.7044701651280025]},"geometry":{"type":"MultiPolygon","coordinates":[[[[109.65773730439173,-7.702304366744909],[109.65623379094112,-7.702497233034978],[109.65604542222374,-7.705922031310627],[109.65551765073542,-7.710896652540268],[109.65532651153849,-7.710960063902895],[109.65519532417842,-7.7108458560647595],[109.65474261163854,-7.7108164262388605],[109.65483692534357,-7.708967573871961],[109.65479675220169,-7.708971783644324],[109.65490504346558,-7.7078225300913505],[109.65504501555391,-7.707805753112377],[109.65524680629673,-7.706078368802195],[109.65524947796466,-7.704436882372657],[109.65494182699297,-7.704503447883347],[109.65462326412147,-7.703760493853034],[109.65466465225613,-7.703117883132026],[109.65442335269601,-7.703144155753938],[109.65376981731373,-7.701487696089396],[109.65383958338157,-7.701025328509003],[109.65409121027291,-7.699794263049493],[109.65414500090722,-7.698852023383849],[109.65370825194324,-7.698899662658617],[109.65375619507014,-7.6981167877564385],[109.65406512344556,-7.697976217217986],[109.6543679964932,-7.698142040560826],[109.65571966502011,-7.697960719479555],[109.65619704147679,-7.698009201354284],[109.65647908642131,-7.698102927080527],[109.65684989344263,-7.698162513039743],[109.65758363121377,-7.698155309305262],[109.65659642218628,-7.700043362280898],[109.65681739616078,-7.701691420447064],[109.65773730439173,-7.702304366744909]]]]}},{"type":"Feature","properties":{"Id":0,"Dusun":"Entak","RW":4,"Luas":144283.876002,"centroid":[109.6573389292852,-7.707313856678216]},"geometry":{"type":"MultiPolygon","coordinates":[[[[109.65773730439173,-7.702304366744909],[109.65948666064521,-7.703469977034645],[109.65934973634455,-7.7054211458438076],[109.65894098604225,-7.706457048812724],[109.65861921194792,-7.708170664543707],[109.65990709043979,-7.7113935451795],[109.65975069206405,-7.713361322799619],[109.65854527939644,-7.713405482375014],[109.65840680091125,-7.713296590865911],[109.65706875227269,-7.713273854404626],[109.65639997751174,-7.713174462944506],[109.65641102084082,-7.711799630846136],[109.65574050907831,-7.711002759187063],[109.65551765073542,-7.710896652540268],[109.65604542222374,-7.705922031310627],[109.65623379094112,-7.702497233034978],[109.65773730439173,-7.702304366744909]]]]}},{"type":"Feature","properties":{"Id":0,"Dusun":"Sasak","RW":4,"Luas":81321.8136047,"centroid":[109.65012239421435,-7.707933361555239]},"geometry":{"type":"MultiPolygon","coordinates":[[[[109.65309628252407,-7.7091499832407235],[109.65119381961578,-7.7093493442151],[109.6511453367355,-7.70964308139592],[109.6503531574787,-7.709788058660962],[109.64933114653775,-7.710183202057842],[109.64886530868476,-7.709637645414104],[109.64858317009076,-7.709683030931121],[109.64847610335732,-7.709870645429938],[109.64804859353188,-7.709950863686378],[109.64790023346877,-7.71011499307979],[109.6474487889316,-7.710181379712287],[109.64727247413293,-7.709894463915655],[109.6468851845994,-7.7095321528050595],[109.64664585823327,-7.709437591534967],[109.64660567521612,-7.709371701078628],[109.64661414189709,-7.709268070566225],[109.64665612859609,-7.709182648915005],[109.64683706256544,-7.709166795566743],[109.64726270321644,-7.706716739869754],[109.65310613231989,-7.706199852472947],[109.65329314904027,-7.706684919708046],[109.65309628252407,-7.7091499832407235]]]]}},{"type":"Feature","properties":{"Id":0,"Dusun":"Perna","RW":3,"Luas":136929.107999,"centroid":[109.65140510062366,-7.705290908342771]},"geometry":{"type":"MultiPolygon","coordinates":[[[[109.65309628252407,-7.7091499832407235],[109.65329314904027,-7.706684919708046],[109.65310613231989,-7.706199852472947],[109.64726270321644,-7.706716739869754],[109.64794508666593,-7.703467136966219],[109.64807029307046,-7.7031447339819055],[109.65158112304196,-7.702901404579925],[109.65162638905704,-7.701663840346514],[109.65258828602994,-7.701566059766362],[109.6525930929388,-7.701432236383178],[109.65337570876422,-7.7013466596223115],[109.65376981731373,-7.701487696089396],[109.65442335269601,-7.703144155753938],[109.65466465225613,-7.703117883132026],[109.65462326412147,-7.703760493853034],[109.65494182699297,-7.704503447883347],[109.65524947796466,-7.704436882372657],[109.65524680629673,-7.706078368802195],[109.65504501555391,-7.707805753112377],[109.65490504346558,-7.7078225300913505],[109.65479675220169,-7.708971783644324],[109.65309628252407,-7.7091499832407235]]]]}}]}
+;
+</script>
+
+<script>
+  const map = L.map('map').setView([-7.6998, 109.6520], 15);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 20,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  function umkmIcon() {
+    return L.divIcon({
+      html: '<div style="background:#e63946;width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 3px rgba(0,0,0,0.5)"></div>',
+      className: '', iconSize: [14,14], iconAnchor: [7,7]
+    });
+  }
+  function rtIcon() {
+    return L.divIcon({
+      html: '<div style="background:#457b9d;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 3px rgba(0,0,0,0.5)"></div>',
+      className: '', iconSize: [12,12], iconAnchor: [6,6]
+    });
+  }
+  function rwIcon() {
+    return L.divIcon({
+      html: '<div style="background:#264653;width:17px;height:17px;border-radius:3px;border:2px solid #fff;box-shadow:0 0 3px rgba(0,0,0,0.5)"></div>',
+      className: '', iconSize: [17,17], iconAnchor: [8,8]
+    });
+  }
+
+  // ---------- LAYER BATAS DESA (paling bawah) ----------
+  const desaLayer = L.geoJSON(DESA_DATA, {
+    style: { color: '#e76f51', weight: 3, fillColor: '#e76f51', fillOpacity: 0.08, dashArray: '6 4' },
+    onEachFeature: (feature, layer) => {
+      const p = feature.properties;
+      layer.bindPopup(`
+        <div class="popup-title">🗺️ Desa ${p.nama_desa}</div>
+        <div class="popup-row"><b>Kecamatan:</b> ${p.kecamatan || '-'}</div>
+        <div class="popup-row"><b>Kabupaten:</b> ${p.kabupaten || '-'}</div>
+        <div class="popup-row"><b>Provinsi:</b> ${p.provinsi || '-'}</div>
+        <div class="popup-row"><b>Luas:</b> ${p.luas_km2 ? p.luas_km2 + ' km²' : '-'}</div>
+        <div class="popup-row"><b>Sumber:</b> ${p.sumber || '-'}</div>
+      `);
+    }
+  }).addTo(map);
+
+  // ---------- LAYER BATAS DUSUN / RW ----------
+  const dusunColors = ['#7209b7', '#f3722c', '#43aa8b', '#577590', '#f94144', '#90be6d', '#277da1', '#f8961e'];
+  const dusunLayer = L.geoJSON(DUSUN_DATA, {
+    style: (feature) => {
+      const idx = feature.properties.RW % dusunColors.length;
+      const c = dusunColors[idx];
+      return { color: c, weight: 2, fillColor: c, fillOpacity: 0.15 };
+    },
+    onEachFeature: (feature, layer) => {
+      const p = feature.properties;
+      const luasHa = (p.Luas / 10000).toFixed(2);
+      layer.bindPopup(`
+        <div class="popup-title">📍 RW ${String(p.RW).padStart(2,'0')} - Dusun ${p.Dusun}</div>
+        <div class="popup-row"><b>Nama Dusun:</b> ${p.Dusun}</div>
+        <div class="popup-row"><b>Wilayah:</b> RW ${String(p.RW).padStart(2,'0')}</div>
+        <div class="popup-row"><b>Luas:</b> ${luasHa} ha</div>
+      `);
+    }
+  }).addTo(map);
+
+  // Label permanen (nama dusun + RW) di tengah tiap wilayah
+  const dusunLabelLayer = L.layerGroup();
+  DUSUN_DATA.features.forEach(f => {
+    const p = f.properties;
+    const [lon, lat] = p.centroid;
+    const label = L.marker([lat, lon], {
+      icon: L.divIcon({
+        className: '',
+        html: `<div class="dusun-label"><span class="label-rw">RW ${String(p.RW).padStart(2,'0')}</span><span class="label-nama">Dusun ${p.Dusun}</span></div>`,
+        iconSize: null,
+        iconAnchor: [30, 15]
+      }),
+      interactive: false
+    });
+    dusunLabelLayer.addLayer(label);
+  });
+  dusunLabelLayer.addTo(map);
+
+  // ---------- LAYER UMKM ----------
+  const umkmLayer = L.geoJSON(UMKM_DATA, {
+    pointToLayer: (feature, latlng) => L.marker(latlng, { icon: umkmIcon() }),
+    onEachFeature: (feature, layer) => {
+      const p = feature.properties;
+      const coords = feature.geometry.coordinates;
+      layer.bindPopup(`
+        <div class="popup-title">🏪 ${p.nama_umkm}</div>
+        <div class="popup-row"><b>Jenis Usaha:</b> ${p.jenis_usaha || '-'}</div>
+        <div class="popup-row"><b>Kategori:</b> ${p.kategori || '-'}</div>
+        <div class="popup-row"><b>Alamat:</b> ${p.alamat || '-'}</div>
+        <div class="popup-row"><b>Pemilik:</b> ${p.pemilik || '-'}</div>
+        <div class="popup-row"><b>Kontak:</b> ${p.no_hp || '-'}</div>
+        <div class="popup-row"><b>Jam Operasional:</b> ${p.jam_operasional || '-'}</div>
+        <div class="popup-row"><b>Koordinat:</b> ${coords[1].toFixed(6)}, ${coords[0].toFixed(6)}</div>
+        ${p.deskripsi ? `<div class="popup-row">${p.deskripsi}</div>` : ''}
+      `);
+    }
+  }).addTo(map);
+
+  // ---------- LAYER RT & RW ----------
+  const rtFeatures = { type: 'FeatureCollection', features: RTRW_DATA.features.filter(f => f.properties.jenis === 'RT') };
+  const rwFeatures = { type: 'FeatureCollection', features: RTRW_DATA.features.filter(f => f.properties.jenis === 'RW') };
+
+  const rtLayer = L.geoJSON(rtFeatures, {
+    pointToLayer: (feature, latlng) => L.marker(latlng, { icon: rtIcon() }),
+    onEachFeature: (feature, layer) => {
+      const p = feature.properties;
+      layer.bindPopup(`
+        <div class="popup-title">🏠 Ketua ${p.wilayah}</div>
+        <div class="popup-row"><b>Nama:</b> ${p.nama_ketua || '(belum ada data)'}</div>
+        <div class="popup-row"><b>Jabatan:</b> ${p.jabatan}</div>
+        <div class="popup-row"><b>Alamat:</b> ${p.alamat || '-'}</div>
+        <div class="popup-row"><b>Kontak:</b> ${p.no_hp || '-'}</div>
+      `);
+    }
+  }).addTo(map);
+
+  const rwLayer = L.geoJSON(rwFeatures, {
+    pointToLayer: (feature, latlng) => L.marker(latlng, { icon: rwIcon() }),
+    onEachFeature: (feature, layer) => {
+      const p = feature.properties;
+      layer.bindPopup(`
+        <div class="popup-title">🏛️ Ketua ${p.wilayah}</div>
+        <div class="popup-row"><b>Nama:</b> ${p.nama_ketua || '(belum ada data)'}</div>
+        <div class="popup-row"><b>Jabatan:</b> ${p.jabatan}</div>
+        <div class="popup-row"><b>Jumlah RT dibawahnya:</b> ${p.jumlah_rt || '-'}</div>
+        <div class="popup-row"><b>Alamat:</b> ${p.alamat || '-'}</div>
+        <div class="popup-row"><b>Kontak:</b> ${p.no_hp || '-'}</div>
+      `);
+    }
+  }).addTo(map);
+
+  // ---------- TOGGLE LAYER ----------
+  document.getElementById('chk-desa').addEventListener('change', e => {
+    e.target.checked ? map.addLayer(desaLayer) : map.removeLayer(desaLayer);
+  });
+  document.getElementById('chk-dusun').addEventListener('change', e => {
+    if (e.target.checked) {
+      map.addLayer(dusunLayer);
+      map.addLayer(dusunLabelLayer);
+    } else {
+      map.removeLayer(dusunLayer);
+      map.removeLayer(dusunLabelLayer);
+    }
+  });
+  document.getElementById('chk-umkm').addEventListener('change', e => {
+    e.target.checked ? map.addLayer(umkmLayer) : map.removeLayer(umkmLayer);
+  });
+  document.getElementById('chk-rt').addEventListener('change', e => {
+    e.target.checked ? map.addLayer(rtLayer) : map.removeLayer(rtLayer);
+  });
+  document.getElementById('chk-rw').addEventListener('change', e => {
+    e.target.checked ? map.addLayer(rwLayer) : map.removeLayer(rwLayer);
+  });
+</script>
+</body>
+</html>

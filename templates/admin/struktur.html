@@ -12,22 +12,25 @@
         <span>Administrator</span>
     </div>
 </div>
-<div class="flex gap-2">
+<div class="flex gap-2 flex-wrap">
     <a href="{{ url_for('admin.download_struktur_template') }}" class="btn btn-outline text-sm">
-        📥 Download Template CSV
+        <span class="btn-label">📥 Download Template CSV</span>
+        <span class="hidden max-[480px]:inline">📥</span>
     </a>
     <button onclick="document.getElementById('importModal').classList.remove('hidden')" class="btn btn-outline text-sm">
-        📤 Import CSV
+        <span class="btn-label">📤 Import CSV</span>
+        <span class="hidden max-[480px]:inline">📤</span>
     </button>
     <a href="{{ url_for('admin.export_struktur') }}" class="btn btn-outline text-sm">
-        📤 Export CSV
+        <span class="btn-label">📤 Export CSV</span>
+        <span class="hidden max-[480px]:inline">📤</span>
     </a>
     <a href="{{ url_for('admin.add_struktur_route') }}" class="btn btn-primary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        Tambah Personil
+        <span class="btn-label">Tambah Personil</span>
     </a>
 </div>
 {% endblock %}

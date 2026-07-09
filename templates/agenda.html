@@ -8,219 +8,384 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        .timeline-line {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: linear-gradient(to bottom, #155C1B, #73AA0F);
-            transform: translateX(-50%);
-        }
-        @media (max-width: 768px) {
-            .timeline-line {
-                left: 20px;
-            }
-        }
-    </style>
 </head>
-<body class="bg-gray-50 font-['Inter']">
+<body class="bg-gray-50 font-['Inter']" x-data="agendaCalendar()">
     {% include 'partials/navbar.html' %}
 
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-[#155C1B] to-[#2A6726] text-white py-12 md:py-16">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center">
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm mb-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    Agenda Kegiatan
-                </div>
-                <h1 class="text-3xl md:text-4xl font-bold mb-3">Agenda Kegiatan Desa</h1>
-                <p class="text-green-100 max-w-2xl mx-auto">Jadwal kegiatan dan agenda Pemerintahan Desa Kedungwinangun</p>
-            </div>
+    <section class="bg-[#155C1B] text-white py-10 md:py-12">
+        <div class="container-lg mx-auto px-4 text-center">
+            <h1 class="text-2xl md:text-3xl font-bold mb-2">Agenda Kegiatan</h1>
+            <p class="text-green-200 text-sm">Kalender kegiatan Pemerintahan Desa</p>
         </div>
     </section>
 
-    <!-- Filters -->
-    <section class="max-w-7xl mx-auto px-4 py-6">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <form method="GET" action="{{ url_for('public.agenda') }}" class="flex flex-wrap gap-4 items-center">
-                <div class="flex items-center gap-2">
-                    <label class="text-sm font-medium text-gray-600">Tahun:</label>
-                    <select name="tahun" class="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent text-sm">
-                        <option value="">Semua Tahun</option>
-                        {% for t in tahun_list %}
-                        <option value="{{ t }}" {% if tahun_filter == t %}selected{% endif %}>{{ t }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="flex items-center gap-2">
-                    <label class="text-sm font-medium text-gray-600">Status:</label>
-                    <select name="status" class="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent text-sm">
-                        <option value="">Semua</option>
-                        {% for key, label in status_labels.items() %}
-                        <option value="{{ key }}" {% if status_filter == key %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <button type="submit" class="bg-[#155C1B] text-white px-4 py-2 rounded-lg hover:bg-[#2A6726] transition-colors text-sm font-medium">
-                    Filter
-                </button>
-                <a href="{{ url_for('public.agenda') }}" class="text-gray-500 hover:text-gray-700 text-sm">Reset</a>
-            </form>
-        </div>
-    </section>
+    <section class="container-lg mx-auto px-4 py-8">
+        <div class="flex flex-col lg:flex-row gap-6">
 
-    <!-- Main Content - Timeline -->
-    <section class="max-w-7xl mx-auto px-4 py-6 pb-16">
-        {% if agenda_list %}
-        
-        <!-- Upcoming Events -->
-        {% if upcoming %}
-        <div class="mb-12">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                <span class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-lg">📅</span>
-                Agenda Mendatang
-                <span class="text-sm font-normal text-gray-500">({{ upcoming|length }} kegiatan)</span>
-            </h2>
-            
-            <div class="relative">
-                <div class="timeline-line hidden md:block"></div>
-                
-                <div class="space-y-8">
-                    {% for agenda in upcoming %}
-                    <div class="relative">
-                        <!-- Timeline dot -->
-                        <div class="absolute left-1/2 -translate-x-1/2 -translate-y-1 w-5 h-5 bg-[#155C1B] rounded-full border-4 border-white shadow-lg z-10 hidden md:block"></div>
-                        
-                        <!-- Card -->
-                        <div class="md:ml-[60px] md:mr-0 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-                            <div class="md:flex">
-                                <!-- Date Box -->
-                                <div class="md:w-32 bg-gradient-to-br from-[#155C1B] to-[#2A6726] text-white p-4 flex flex-col items-center justify-center md:border-r border-white/10">
-                                    <div class="text-center">
-                                        {% if agenda.tanggal_mulai %}
-                                        {% set tgl = agenda.tanggal_mulai %}
-                                        {% set day = tgl[8:10] if tgl|length >= 10 else '-' %}
-                                        {% set month = tgl[5:7] if tgl|length >= 7 else '' %}
-                                        {% set year = tgl[0:4] if tgl|length >= 4 else '' %}
-                                        {% set month_names = {'01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'Mei','06':'Jun','07':'Jul','08':'Agt','09':'Sep','10':'Okt','11':'Nov','12':'Des'} %}
-                                        <span class="text-3xl font-bold">{{ day }}</span>
-                                        <span class="block text-sm">{{ month_names.get(month, month) }}</span>
-                                        <span class="text-xs opacity-80">{{ year }}</span>
-                                        {% else %}
-                                        <span class="text-3xl font-bold">-</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                
-                                <!-- Content -->
-                                <div class="flex-1 p-5">
-                                    <div class="flex items-start justify-between mb-3">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-2xl">{{ agenda.icon or '📅' }}</span>
-                                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-semibold">
-                                                {{ status_labels.get(agenda.status, agenda.status) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <h3 class="font-bold text-gray-800 text-lg mb-2">{{ agenda.judul }}</h3>
-                                    {% if agenda.deskripsi %}
-                                    <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ agenda.deskripsi }}</p>
-                                    {% endif %}
-                                    
-                                    <div class="flex flex-wrap gap-4 text-sm text-gray-500">
-                                        {% if agenda.waktu %}
-                                        <div class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                            {{ agenda.waktu }}
-                                        </div>
-                                        {% endif %}
-                                        {% if agenda.lokasi %}
-                                        <div class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                            </svg>
-                                            {{ agenda.lokasi }}
-                                        </div>
-                                        {% endif %}
-                                        {% if agenda.penanggung_jawab %}
-                                        <div class="flex items-center gap-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                            </svg>
-                                            {{ agenda.penanggung_jawab }}
-                                        </div>
-                                        {% endif %}
-                                    </div>
+            {# ─── CALENDAR ─── #}
+            <div class="flex-1">
+                {# Month Navigation #}
+                <div class="flex items-center justify-between mb-4">
+                    <button @click="prevMonth()"
+                        class="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-gray-500 hover:text-[#155C1B]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <h2 class="text-lg md:text-xl font-bold text-gray-800" x-text="monthYearText"></h2>
+                    <button @click="nextMonth()"
+                        class="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-gray-500 hover:text-[#155C1B]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+
+                {# Today Button #}
+                <div class="mb-3">
+                    <button @click="goToToday()"
+                        class="px-4 py-1.5 text-sm font-medium rounded-lg border border-[#155C1B] text-[#155C1B] hover:bg-[#155C1B] hover:text-white transition-colors">
+                        Hari Ini
+                    </button>
+                </div>
+
+                {# Calendar Grid #}
+                <div class="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+                    {# Day Headers #}
+                    <div class="grid grid-cols-7 bg-[#155C1B] text-white text-xs md:text-sm font-semibold">
+                        <template x-for="day in dayHeaders" :key="day">
+                            <div class="py-3 text-center" x-text="day"></div>
+                        </template>
+                    </div>
+                    {# Day Cells #}
+                    <div class="grid grid-cols-7">
+                        <template x-for="(cell, idx) in calendarCells" :key="idx">
+                            <div @click="selectDate(cell.date)"
+                                class="min-h-[85px] md:min-h-[105px] border-b border-r border-gray-100 p-1.5 cursor-pointer transition-colors relative"
+                                :class="{
+                                    'bg-green-50/60': cell.isCurrentMonth && !cell.isToday,
+                                    'bg-green-100 ring-1 ring-[#155C1B]/20 ring-inset': cell.isToday,
+                                    'opacity-40 bg-gray-50': !cell.isCurrentMonth,
+                                    'hover:bg-green-50': cell.isCurrentMonth,
+                                }">
+                                <span class="inline-flex items-center justify-center text-xs md:text-sm font-semibold w-6 h-6 md:w-7 md:h-7 rounded-full"
+                                    :class="{
+                                        'bg-[#155C1B] text-white': cell.isToday,
+                                        'text-gray-400': !cell.isCurrentMonth,
+                                        'text-gray-700': cell.isCurrentMonth && !cell.isToday
+                                    }"
+                                    x-text="cell.day"></span>
+                                {# Events #}
+                                <div class="mt-1 space-y-0.5">
+                                    <template x-for="evt in cell.events.slice(0, 3)" :key="evt.id">
+                                        <div class="text-[10px] md:text-xs px-1.5 py-0.5 rounded font-medium truncate cursor-pointer"
+                                            :class="getEventBgClass(evt.kategori)"
+                                            @click.stop="selectDate(cell.date)"
+                                            x-text="evt.judul"></div>
+                                    </template>
+                                    <div x-show="cell.events.length > 3"
+                                        class="text-[10px] text-gray-400 pl-1.5 font-medium"
+                                        x-text="'+' + (cell.events.length - 3) + ' lagi'"></div>
                                 </div>
                             </div>
-                        </div>
+                        </template>
                     </div>
-                    {% endfor %}
+                </div>
+
+                {# Legend #}
+                <div class="flex flex-wrap gap-3 mt-4 text-xs text-gray-500">
+                    <template x-for="(color, cat) in categoryColors" :key="cat">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded" :style="'background-color:' + color"></span>
+                            <span x-text="categoryLabels[cat] || cat"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            {# ─── SIDEBAR: Selected Date Events ─── #}
+            <div class="lg:w-96 shrink-0">
+                <div class="bg-white rounded-xl border border-neutral-200 shadow-sm p-4 md:p-5 sticky top-20">
+                    <template x-if="selectedDate">
+                        <div>
+                            <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+                                <div>
+                                    <h3 class="font-bold text-gray-800" x-text="selectedDateDay"></h3>
+                                    <p class="text-sm text-gray-500" x-text="selectedDateFull"></p>
+                                </div>
+                                <button @click="selectedDate = null"
+                                    class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <template x-if="selectedDateEvents.length > 0">
+                                <div class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                                    <template x-for="evt in selectedDateEvents" :key="evt.id">
+                                        <div class="p-3 rounded-lg border border-gray-100 hover:shadow-sm transition-shadow">
+                                            <div class="flex items-start gap-3">
+                                                <span class="text-xl shrink-0" x-text="evt.icon || '📅'"></span>
+                                                <div class="flex-1 min-w-0">
+                                                    <h4 class="font-semibold text-gray-800 text-sm" x-text="evt.judul"></h4>
+                                                    <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                                                            :class="getStatusClass(evt.status)"
+                                                            x-text="statusLabels[evt.status]"></span>
+                                                        <span class="text-xs"
+                                                            :class="'text-[' + getCategoryColor(evt.kategori) + ']'"
+                                                            :style="'color:' + getCategoryColor(evt.kategori)"
+                                                            x-text="categoryLabels[evt.kategori] || evt.kategori"></span>
+                                                    </div>
+                                                    <div class="mt-2 space-y-1 text-xs text-gray-500">
+                                                        <div x-show="evt.waktu" class="flex items-center gap-1">
+                                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                            </svg>
+                                                            <span x-text="evt.waktu"></span>
+                                                        </div>
+                                                        <div x-show="evt.lokasi" class="flex items-center gap-1">
+                                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                            </svg>
+                                                            <span x-text="evt.lokasi"></span>
+                                                        </div>
+                                                        <div x-show="evt.tanggal_selesai && evt.tanggal_selesai !== evt.tanggal_mulai" class="flex items-center gap-1">
+                                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                            </svg>
+                                                            <span x-text="'Sampai ' + formatDate(evt.tanggal_selesai)"></span>
+                                                        </div>
+                                                    </div>
+                                                    <p x-show="evt.deskripsi" class="text-xs text-gray-600 mt-2 leading-relaxed" x-text="evt.deskripsi"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <template x-if="selectedDateEvents.length === 0">
+                                <div class="text-center py-8">
+                                    <span class="text-3xl block mb-2">📭</span>
+                                    <p class="text-gray-400 text-sm">Tidak ada agenda</p>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template x-if="!selectedDate">
+                        <div class="text-center py-8">
+                            <span class="text-4xl block mb-3">📅</span>
+                            <p class="text-gray-400 text-sm">Klik tanggal untuk lihat agenda</p>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
-        {% endif %}
 
-        <!-- Past Events -->
-        {% if past %}
-        <div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                <span class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-lg">📋</span>
-                Agenda Sebelumnya
-                <span class="text-sm font-normal text-gray-500">({{ past|length }} kegiatan)</span>
-            </h2>
-            
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {% for agenda in past %}
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 opacity-75 hover:opacity-100 transition-opacity">
-                    <div class="flex items-start gap-3">
-                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                            {% if agenda.tanggal_mulai %}
-                            {% set tgl = agenda.tanggal_mulai %}
-                            {% set day = tgl[8:10] if tgl|length >= 10 else '-' %}
-                            {% set month = tgl[5:7] if tgl|length >= 7 else '' %}
-                            {% set month_names = {'01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'Mei','06':'Jun','07':'Jul','08':'Agt','09':'Sep','10':'Okt','11':'Nov','12':'Des'} %}
-                            <span class="text-lg font-bold text-gray-700">{{ day }}</span>
-                            <span class="text-[10px] text-gray-500">{{ month_names.get(month, '') }}</span>
-                            {% else %}
-                            <span class="text-lg">📅</span>
-                            {% endif %}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-semibold text-gray-700 text-sm mb-1 line-clamp-2">{{ agenda.judul }}</h3>
-                            {% if agenda.lokasi %}
-                            <p class="text-xs text-gray-500 truncate">{{ agenda.lokasi }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+        {# Empty State #}
+        <div x-show="totalEvents === 0" class="text-center py-16">
+            <span class="text-5xl block mb-4">📭</span>
+            <p class="text-gray-500 text-lg">Belum ada agenda</p>
+            <p class="text-gray-400 text-sm mt-1">Agenda akan muncul di kalender setelah ditambahkan</p>
         </div>
-        {% endif %}
-
-        {% else %}
-        <div class="text-center py-16 bg-white rounded-xl">
-            <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-gray-600 mb-2">Belum Ada Agenda</h3>
-            <p class="text-gray-500">Agenda kegiatan desa akan ditampilkan di sini</p>
-        </div>
-        {% endif %}
     </section>
 
     {% include 'partials/footer.html' %}
     {% include 'partials/chatbot.html' %}
     <script src="{{ url_for('static', filename='dark-mode.js') }}"></script>
+    <script>
+        function agendaCalendar() {
+            return {
+                allEvents: {{ agenda_list | tojson }},
+
+                currentYear: new Date().getFullYear(),
+                currentMonth: new Date().getMonth(),
+                selectedDate: null,
+
+                monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                dayHeaders: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                statusLabels: {{ status_labels | tojson }},
+                categoryLabels: {
+                    'kegiatan': 'Kegiatan',
+                    'rapat': 'Rapat',
+                    'musyawarah': 'Musyawarah',
+                    'pembangunan': 'Pembangunan',
+                    'kesehatan': 'Kesehatan',
+                    'pendidikan': 'Pendidikan',
+                    'umum': 'Umum',
+                },
+                categoryColors: {
+                    'kegiatan': '#2563EB',
+                    'rapat': '#7C3AED',
+                    'musyawarah': '#D97706',
+                    'pembangunan': '#DC2626',
+                    'kesehatan': '#059669',
+                    'pendidikan': '#0891B2',
+                    'umum': '#4B5563',
+                },
+
+                get monthYearText() {
+                    return this.monthNames[this.currentMonth] + ' ' + this.currentYear;
+                },
+
+                get eventsByDate() {
+                    const map = {};
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    this.allEvents.forEach(evt => {
+                        const start = evt.tanggal_mulai ? evt.tanggal_mulai.substring(0, 10) : null;
+                        if (!start) return;
+                        const end = evt.tanggal_selesai ? evt.tanggal_selesai.substring(0, 10) : start;
+                        let current = new Date(start + 'T00:00:00');
+                        const endDate = new Date(end + 'T00:00:00');
+                        while (current <= endDate) {
+                            const key = current.getFullYear() + '-' +
+                                String(current.getMonth() + 1).padStart(2, '0') + '-' +
+                                String(current.getDate()).padStart(2, '0');
+                            if (!map[key]) map[key] = [];
+                            map[key].push(evt);
+                            current.setDate(current.getDate() + 1);
+                        }
+                    });
+                    return map;
+                },
+
+                get totalEvents() {
+                    return this.allEvents.length;
+                },
+
+                get calendarCells() {
+                    const year = this.currentYear;
+                    const month = this.currentMonth;
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+                    const startDayOfWeek = new Date(year, month, 1).getDay(); // 0=Sun
+
+                    const today = new Date();
+                    const todayStr = today.getFullYear() + '-' +
+                        String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                        String(today.getDate()).padStart(2, '0');
+
+                    const cells = [];
+
+                    // Previous month padding
+                    const prevMonth = month === 0 ? 11 : month - 1;
+                    const prevYear = month === 0 ? year - 1 : year;
+                    const prevDays = new Date(prevYear, prevMonth + 1, 0).getDate();
+                    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+                        const day = prevDays - i;
+                        const dateStr = prevYear + '-' +
+                            String(prevMonth + 1).padStart(2, '0') + '-' +
+                            String(day).padStart(2, '0');
+                        cells.push({
+                            day, date: dateStr,
+                            isCurrentMonth: false,
+                            isToday: dateStr === todayStr,
+                            events: this.eventsByDate[dateStr] || []
+                        });
+                    }
+
+                    // Current month
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const dateStr = year + '-' +
+                            String(month + 1).padStart(2, '0') + '-' +
+                            String(day).padStart(2, '0');
+                        cells.push({
+                            day, date: dateStr,
+                            isCurrentMonth: true,
+                            isToday: dateStr === todayStr,
+                            events: this.eventsByDate[dateStr] || []
+                        });
+                    }
+
+                    // Next month padding
+                    const remaining = 42 - cells.length;
+                    const nextMonth = month === 11 ? 0 : month + 1;
+                    const nextYear = month === 11 ? year + 1 : year;
+                    for (let day = 1; day <= remaining; day++) {
+                        const dateStr = nextYear + '-' +
+                            String(nextMonth + 1).padStart(2, '0') + '-' +
+                            String(day).padStart(2, '0');
+                        cells.push({
+                            day, date: dateStr,
+                            isCurrentMonth: false,
+                            isToday: dateStr === todayStr,
+                            events: this.eventsByDate[dateStr] || []
+                        });
+                    }
+                    return cells;
+                },
+
+                get selectedDateDay() {
+                    if (!this.selectedDate) return '';
+                    const d = parseInt(this.selectedDate.split('-')[2]);
+                    return d;
+                },
+                get selectedDateFull() {
+                    if (!this.selectedDate) return '';
+                    const [y, m, d] = this.selectedDate.split('-');
+                    return this.monthNames[parseInt(m) - 1] + ' ' + y;
+                },
+                get selectedDateEvents() {
+                    if (!this.selectedDate) return [];
+                    return this.eventsByDate[this.selectedDate] || [];
+                },
+
+                prevMonth() {
+                    if (this.currentMonth === 0) { this.currentMonth = 11; this.currentYear--; }
+                    else { this.currentMonth--; }
+                    this.selectedDate = null;
+                },
+                nextMonth() {
+                    if (this.currentMonth === 11) { this.currentMonth = 0; this.currentYear++; }
+                    else { this.currentMonth++; }
+                    this.selectedDate = null;
+                },
+                goToToday() {
+                    const today = new Date();
+                    this.currentYear = today.getFullYear();
+                    this.currentMonth = today.getMonth();
+                    const dateStr = this.currentYear + '-' +
+                        String(this.currentMonth + 1).padStart(2, '0') + '-' +
+                        String(today.getDate()).padStart(2, '0');
+                    this.selectedDate = dateStr;
+                },
+                selectDate(dateStr) {
+                    this.selectedDate = this.selectedDate === dateStr ? null : dateStr;
+                },
+
+                getCategoryColor(kategori) {
+                    return this.categoryColors[kategori] || '#6B7280';
+                },
+                getEventBgClass(kategori) {
+                    const baseMap = {
+                        'kegiatan': 'bg-blue-100 text-blue-800',
+                        'rapat': 'bg-purple-100 text-purple-800',
+                        'musyawarah': 'bg-amber-100 text-amber-800',
+                        'pembangunan': 'bg-red-100 text-red-800',
+                        'kesehatan': 'bg-emerald-100 text-emerald-800',
+                        'pendidikan': 'bg-cyan-100 text-cyan-800',
+                        'umum': 'bg-gray-100 text-gray-700',
+                    };
+                    return baseMap[kategori] || 'bg-gray-100 text-gray-600';
+                },
+                getStatusClass(status) {
+                    const classes = {
+                        'akan_datang': 'bg-blue-100 text-blue-700',
+                        'sedang_berlangsung': 'bg-yellow-100 text-yellow-700',
+                        'selesai': 'bg-green-100 text-green-700',
+                        'dibatalkan': 'bg-red-100 text-red-700'
+                    };
+                    return classes[status] || 'bg-gray-100 text-gray-600';
+                },
+                formatDate(dateStr) {
+                    if (!dateStr) return '';
+                    const [y, m, d] = dateStr.substring(0, 10).split('-');
+                    return parseInt(d) + ' ' + this.monthNames[parseInt(m) - 1] + ' ' + y;
+                }
+            };
+        }
+    </script>
 </body>
 </html>

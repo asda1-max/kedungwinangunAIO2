@@ -6,10 +6,10 @@
     <title>Peta Interaktif - {{ site_name }}</title>
     <link rel="icon" href="{{ url_for('static', filename='images/kebumen.png') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -23,521 +23,863 @@
         }
     </script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; }
-        #map { height: 65vh; min-height: 450px; border-radius: 16px; z-index: 1; }
-        .leaflet-popup-content-wrapper { border-radius: 12px; }
-        .leaflet-popup-content { font-family: 'Inter', sans-serif; margin: 12px; }
-        .legend { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
-        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-        .legend-color { width: 20px; height: 20px; border-radius: 50%; }
-        .legend-line { width: 24px; height: 4px; border-radius: 2px; }
-        .search-input { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; width: 100%; transition: all 0.2s; }
-        .search-input:focus { outline: none; border-color: #155C1B; box-shadow: 0 0 0 4px rgba(21, 92, 27, 0.1); }
-        .tab-btn { padding: 10px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 2px solid #e2e8f0; background: white; }
-        .tab-btn:hover { border-color: #155C1B; }
-        .tab-btn.active { background: #155C1B; color: white; border-color: #155C1B; }
-        .category-btn { padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; background: white; border: 2px solid #e2e8f0; }
-        .category-btn:hover { border-color: #155C1B; }
-        .category-btn.active { background: #155C1B; color: white; border-color: #155C1B; }
-        .umkm-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); transition: all 0.3s; cursor: pointer; }
-        .umkm-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
-        .umkm-card.hidden { display: none; }
-        .stats-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .stats-number { font-size: 32px; font-weight: 800; color: #155C1B; }
-        .rt-card { background: white; border-radius: 12px; padding: 12px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); transition: all 0.2s; cursor: pointer; }
-        .rt-card:hover { border: 2px solid #155C1B; }
-        .rt-card.hidden { display: none; }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; }
+        #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 1; }
+
+        #title-bar {
+            position: absolute; top: 0; left: 0; right: 0; z-index: 900;
+            background: #1b4332; color: #fff; padding: 10px 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+        #title-bar h1 { font-size: 16px; margin: 0; font-weight: 600; }
+        #title-bar span { font-size: 12px; opacity: 0.85; }
+
+        /* ===== SIDEBAR ===== */
+        #sidebar {
+            position: absolute; top: 48px; left: 0; bottom: 0; z-index: 900;
+            width: 320px; background: #fff;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+            display: flex; flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+        #sidebar.hidden { transform: translateX(-100%); }
+        #sidebar-toggle {
+            position: absolute; top: 60px; left: 320px; z-index: 901;
+            background: #fff; border: none; border-radius: 0 8px 8px 0;
+            padding: 12px 8px; cursor: pointer; box-shadow: 2px 2px 6px rgba(0,0,0,0.15);
+            transition: left 0.3s ease;
+        }
+        #sidebar-toggle.hidden { left: 0; }
+        #sidebar-toggle svg { transition: transform 0.3s ease; }
+        #sidebar-toggle.rotated svg { transform: rotate(180deg); }
+
+        .sidebar-header {
+            padding: 12px 14px; background: #1b4332; color: #fff;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sidebar-header h2 { font-size: 15px; font-weight: 600; margin: 0; }
+
+        .cat-tabs {
+            display: flex; background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
+            overflow-x: auto; flex-shrink: 0;
+        }
+        .cat-tab {
+            padding: 10px 14px; font-size: 12px; font-weight: 500; color: #64748b;
+            cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .cat-tab:hover { color: #1b4332; }
+        .cat-tab.active { color: #1b4332; border-bottom-color: #1b4332; background: #fff; }
+
+        .sidebar-search {
+            padding: 10px 12px; border-bottom: 1px solid #e2e8f0;
+        }
+        .sidebar-search input {
+            width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px;
+            font-size: 13px; outline: none;
+        }
+        .sidebar-search input:focus { border-color: #1b4332; }
+
+        .sidebar-list { flex: 1; overflow-y: auto; padding: 8px; }
+        
+        .list-section-header {
+            font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase;
+            letter-spacing: 0.5px; padding: 8px 8px 4px; border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 4px;
+        }
+        
+        .list-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 8px; cursor: pointer;
+            transition: background 0.15s; margin-bottom: 4px;
+        }
+        .list-item:hover { background: #f1f5f9; }
+        .list-item.active { background: #dcfce7; border: 1px solid #86efac; }
+        .list-item-icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+        }
+        .list-item-info { flex: 1; min-width: 0; }
+        .list-item-title { font-size: 13px; font-weight: 500; color: #1e293b; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .list-item-sub { font-size: 11px; color: #64748b; margin-top: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .list-item-badge {
+            font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500;
+        }
+
+        /* Detail Panel */
+        #detail-panel {
+            position: absolute; top: 48px; right: 10px; z-index: 900;
+            width: 320px; background: #fff; border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden;
+            max-height: calc(100vh - 70px);
+        }
+        .detail-header {
+            padding: 14px 16px; background: #1b4332; color: #fff;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .detail-header-icon { font-size: 28px; }
+        .detail-header h3 { font-size: 16px; font-weight: 600; margin: 0; flex: 1; }
+        .detail-close {
+            background: rgba(255,255,255,0.2); border: none; border-radius: 6px;
+            width: 28px; height: 28px; color: #fff; cursor: pointer; font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .detail-close:hover { background: rgba(255,255,255,0.3); }
+        
+        .detail-body { padding: 14px 16px; overflow-y: auto; max-height: calc(100vh - 180px); }
+        .detail-section { margin-bottom: 14px; }
+        .detail-section-title {
+            font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 6px;
+        }
+        .detail-row { display: flex; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+        .detail-label { color: #64748b; min-width: 80px; }
+        .detail-value { color: #1e293b; flex: 1; }
+        
+        .detail-image {
+            width: 100%; border-radius: 8px; margin-top: 8px;
+            max-height: 180px; object-fit: cover; background: #f1f5f9;
+        }
+        .detail-image-placeholder {
+            width: 100%; height: 120px; border-radius: 8px; background: #f1f5f9;
+            display: flex; align-items: center; justify-content: center;
+            color: #94a3b8; font-size: 13px; margin-top: 8px;
+        }
+        
+        .detail-coords {
+            background: #f1f5f9; border-radius: 6px; padding: 8px 10px;
+            font-size: 12px; font-family: monospace; color: #475569;
+            display: flex; align-items: center; gap: 6px;
+        }
+        
+        .detail-link {
+            display: inline-flex; align-items: center; gap: 4px;
+            color: #1b4332; font-size: 13px; font-weight: 500;
+            text-decoration: none; margin-top: 6px;
+        }
+        .detail-link:hover { text-decoration: underline; }
+
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px 20px; color: #94a3b8; text-align: center;
+        }
+        .empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.5; }
+        .empty-state p { font-size: 13px; }
+
+        #legend {
+            position: absolute; bottom: 20px; right: 10px; z-index: 900;
+            background: #fff; border-radius: 10px; padding: 10px 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); font-size: 12px; max-width: 220px;
+        }
+        #legend h3 { margin: 0 0 6px 0; font-size: 12px; color: #1b4332; }
+        .legend-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 1px solid #333; }
+
+        .dusun-label {
+            background: rgba(255,255,255,0.92); border: 1.5px solid #7209b7;
+            border-radius: 6px; padding: 2px 7px; font-size: 11px; font-weight: 700;
+            color: #3c096c; white-space: nowrap; box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+            text-align: center; line-height: 1.3;
+        }
+
+        .leaflet-popup-content-wrapper { border-radius: 10px; }
+
+        .counter-badge {
+            font-size: 10px; background: #e2e8f0; color: #64748b; 
+            padding: 2px 6px; border-radius: 10px; font-weight: 500;
+        }
+        
+        /* Scrollbar styling */
+        .sidebar-list::-webkit-scrollbar { width: 6px; }
+        .sidebar-list::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        
+        /* ===== LAYER TOGGLE PANEL ===== */
+        #layer-toggle {
+            position: absolute; bottom: 20px; left: 10px; z-index: 900;
+            background: #fff; border-radius: 10px; padding: 10px 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); font-size: 12px; min-width: 180px;
+        }
+        #layer-toggle h3 { margin: 0 0 8px 0; font-size: 12px; color: #1b4332; display: flex; align-items: center; gap: 6px; }
+        .layer-toggle-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 4px 0; cursor: pointer;
+        }
+        .layer-toggle-item:hover { color: #1b4332; }
+        .layer-toggle-item input { cursor: pointer; accent-color: #1b4332; }
+        .layer-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     </style>
 </head>
-<body class="bg-gray-50" x-data>
-    {% include 'partials/navbar.html' %}
+<body x-data="mapApp()" x-init="init()">
 
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-[#155C1B] to-[#228B22] text-white py-10 md:py-12">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center text-3xl">🗺️</div>
-                <div>
-                    <h1 class="text-3xl md:text-4xl font-extrabold">Peta Interaktif</h1>
-                    <p class="text-green-100 mt-1">Eksplorasi wilayah {{ site_name }}</p>
-                </div>
-            </div>
+<!-- Title Bar -->
+<div id="title-bar">
+    <h1>🗺️ Peta Interaktif {{ site_name }}</h1>
+    <span>Klirong, Kebumen</span>
+</div>
+
+<!-- Sidebar Toggle Button -->
+<button id="sidebar-toggle" onclick="toggleSidebar()" :class="{ 'hidden': !sidebarOpen }">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6"/>
+    </svg>
+</button>
+
+<!-- Left Sidebar -->
+<div id="sidebar" :class="{ 'hidden': !sidebarOpen }">
+    <div class="sidebar-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <h2>Data Desa</h2>
+        <a href="/" class="ml-auto bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1 rounded-lg flex items-center gap-1 transition">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Kembali
+        </a>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="cat-tabs">
+        <div class="cat-tab" :class="{ 'active': activeCategory === 'umkm' }" @click="setCategory('umkm')">
+            🏪 UMKM <span class="counter-badge" x-text="counts.umkm"></span>
         </div>
-    </section>
-
-    <!-- Main Content with Alpine.js State -->
-    <main class="max-w-7xl mx-auto px-4 py-8" x-data="{ mapMode: 'umkm' }">
-    
-    <!-- Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="stats-card">
-                <div class="stats-number">{{ desa.jumlah_dusun or 6 }}</div>
-                <div class="text-gray-500 text-sm">Dusun</div>
-            </div>
-            <div class="stats-card">
-                <div class="stats-number">{{ umkm_list|length }}</div>
-                <div class="text-gray-500 text-sm">UMKM</div>
-            </div>
-            <div class="stats-card">
-                <div class="stats-number">{{ umkm_geojson.features|length }}</div>
-                <div class="text-gray-500 text-sm">Lokasi Terplot</div>
-            </div>
-            <div class="stats-card">
-                <div class="stats-number">847</div>
-                <div class="text-gray-500 text-sm">Hektare</div>
-            </div>
+        <div class="cat-tab" :class="{ 'active': activeCategory === 'perangkat' }" @click="setCategory('perangkat')">
+            👔 Perangkat <span class="counter-badge" x-text="counts.perangkat"></span>
         </div>
-
-        <!-- Mode Tabs -->
-        <div class="bg-white rounded-2xl p-4 shadow-md mb-6">
-            <div class="flex flex-wrap gap-3">
-                <button @click="mapMode = 'umkm'; switchMapMode()" :class="mapMode === 'umkm' ? 'active' : ''" class="tab-btn flex items-center gap-2">
-                    🏪 Mode UMKM
-                </button>
-                <button @click="mapMode = 'rtrw'; switchMapMode()" :class="mapMode === 'rtrw' ? 'active' : ''" class="tab-btn flex items-center gap-2">
-                    🏘️ Mode Informasi Desa
-                </button>
-            </div>
+        <div class="cat-tab" :class="{ 'active': activeCategory === 'bpd' }" @click="setCategory('bpd')">
+            📋 BPD <span class="counter-badge" x-text="counts.bpd"></span>
         </div>
-
-        <!-- Search & Filter (UMKM Mode) -->
-        <div x-show="mapMode === 'umkm'" x-transition class="bg-white rounded-2xl p-5 shadow-md mb-6">
-            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div class="relative w-full md:w-80">
-                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input type="text" id="search-umkm" class="search-input pl-12" placeholder="Cari UMKM...">
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="filterUMKM('all')" class="category-btn active" id="btn-all">Semua</button>
-                    {% for key, label in kategori_labels.items() %}
-                    <button onclick="filterUMKM('{{ key }}')" class="category-btn" id="btn-{{ key }}">{{ label }}</button>
-                    {% endfor %}
-                </div>
-            </div>
+        <div class="cat-tab" :class="{ 'active': activeCategory === 'pkk' }" @click="setCategory('pkk')">
+            👩 PKK <span class="counter-badge" x-text="counts.pkk"></span>
         </div>
+        <div class="cat-tab" :class="{ 'active': activeCategory === 'karang_taruna' }" @click="setCategory('karang_taruna')">
+            🧑 K.Taruna <span class="counter-badge" x-text="counts.karang_taruna"></span>
+        </div>
+        <div class="cat-tab" :class="{ 'active': activeCategory === 'rt' }" @click="setCategory('rt')">
+            🏠 RT <span class="counter-badge" x-text="counts.rt"></span>
+        </div>
+        <div class="cat-tab" :class="{ 'active': activeCategory === 'rw' }" @click="setCategory('rw')">
+            🏛️ RW <span class="counter-badge" x-text="counts.rw"></span>
+        </div>
+    </div>
 
-        <!-- Map Container -->
-        <div class="grid lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2">
-                <div class="relative rounded-2xl overflow-hidden shadow-lg">
-                    <div id="map"></div>
-                    <!-- Legend Dynamic -->
-                    <div class="absolute top-4 right-4 z-[1000] legend max-w-[200px]" id="legend">
-                        <h4 class="font-bold text-gray-700 mb-3 text-sm">📍 Legenda</h4>
-                        <div x-show="mapMode === 'umkm'" x-transition>
-                            {% for key, label in kategori_labels.items() %}
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #155C1B;"></div>
-                                <span class="text-sm text-gray-600">{{ label }}</span>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <div x-show="mapMode === 'rtrw'" x-transition>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #E65100;"></div>
-                                <span class="text-sm text-gray-600">RW</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #1565C0;"></div>
-                                <span class="text-sm text-gray-600">RT</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #7B1FA2;"></div>
-                                <span class="text-sm text-gray-600">Perangkat Desa</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #00838F;"></div>
-                                <span class="text-sm text-gray-600">BPD</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #C62828;"></div>
-                                <span class="text-sm text-gray-600">PKK</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #2E7D32;"></div>
-                                <span class="text-sm text-gray-600">Karang Taruna</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-line" style="background: #155C1B;"></div>
-                                <span class="text-sm text-gray-600">Batas Desa</span>
-                            </div>
-                        </div>
+    <!-- Search -->
+    <div class="sidebar-search">
+        <input type="text" :placeholder="'Cari ' + categoryLabels[activeCategory] + '...'" 
+               x-model="searchQuery" @input="filterList()">
+    </div>
+
+    <!-- List -->
+    <div class="sidebar-list">
+        <!-- UMKM List -->
+        <template x-if="activeCategory === 'umkm'">
+            <div>
+                <template x-if="filteredItems.length === 0">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        <p>Tidak ada UMKM ditemukan</p>
                     </div>
-                </div>
-            </div>
-
-            <!-- Sidebar Dynamic -->
-            <div class="space-y-4 max-h-[calc(65vh+80px)] overflow-y-auto pr-2">
-                <!-- UMKM List -->
-                <div x-show="mapMode === 'umkm'" x-transition>
-                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
-                        🏪 UMKM Terdekat
-                        <span class="text-gray-400 font-normal">({{ umkm_list|length }})</span>
-                    </h3>
-                    {% for item in umkm_list %}
-                    <div class="umkm-card" onclick="focusUMKM({{ item.latitude }}, {{ item.longitude }}, '{{ item.nama|replace("'", "\\'") }}')" 
-                         data-kategori="{{ item.kategori }}" data-nama="{{ item.nama|lower }}">
-                        <div class="flex items-start gap-3">
-                            {% if item.foto_url %}
-                            <img src="{{ item.foto_url }}" alt="{{ item.nama }}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
-                            {% else %}
-                            <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center text-white text-2xl flex-shrink-0">
-                                🏪
-                            </div>
-                            {% endif %}
-                            <div class="min-w-0 flex-1">
-                                <span class="px-2 py-0.5 bg-[#73AA0F]/10 text-[#155C1B] text-xs font-medium rounded-full">
-                                    {{ kategori_labels.get(item.kategori, item.kategori|title) }}
-                                </span>
-                                <h4 class="font-bold text-gray-800 mt-1 truncate">{{ item.nama }}</h4>
-                                {% if item.pemiliki_nama %}
-                                <p class="text-gray-500 text-sm">👤 {{ item.pemiliki_nama }}</p>
-                                {% endif %}
-                                {% if item.dusun %}
-                                <p class="text-gray-400 text-xs">📍 {{ item.dusun }}{% if item.rt %} RT {{ item.rt }}{% endif %}</p>
-                                {% endif %}
-                            </div>
+                </template>
+                <template x-for="item in filteredItems" :key="item.properties.id">
+                    <div class="list-item" :class="{ 'active': selectedId === item.properties.id && selectedType === 'umkm' }"
+                         @click="selectItem(item, 'umkm')">
+                        <div class="list-item-icon" :style="'background:' + getUmkmColor(item.properties.kategori) + '20; color:' + getUmkmColor(item.properties.kategori)">
+                            🏪
                         </div>
+                        <div class="list-item-info">
+                            <div class="list-item-title" x-text="item.properties.nama || 'UMKM'"></div>
+                            <div class="list-item-sub" x-text="item.properties.kategori || item.properties.pemilik || '-'"></div>
+                        </div>
+                        <span class="list-item-badge" :style="'background:' + getUmkmColor(item.properties.kategori) + '20; color:' + getUmkmColor(item.properties.kategori)"
+                              x-text="item.properties.kategori || '-'"></span>
                     </div>
-                    {% else %}
-                    <div class="text-center py-8 text-gray-500">
-                        <div class="text-4xl mb-2">🏪</div>
-                        <p>Belum ada data UMKM</p>
-                    </div>
-                    {% endfor %}
-                </div>
+                </template>
+            </div>
+        </template>
 
-                <!-- RT/RW List -->
-                <div x-show="mapMode === 'rtrw'" x-transition>
-                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
-                        🏘️ Daftar RT/RW
-                        <span class="text-gray-400 font-normal" id="rtrw-count"></span>
-                    </h3>
-                    <div id="rtrw-list"></div>
-                </div>
+        <!-- Location List (RT, RW, Perangkat, BPD, PKK, Karang Taruna) -->
+        <template x-if="activeCategory !== 'umkm'">
+            <div>
+                <template x-if="filteredItems.length === 0">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                        </svg>
+                        <p>Tidak ada data ditemukan</p>
+                    </div>
+                </template>
+                <template x-for="item in filteredItems" :key="item.properties.id">
+                    <div class="list-item" :class="{ 'active': selectedId === item.properties.id && selectedType === 'lokasi' }"
+                         @click="selectItem(item, 'lokasi')">
+                        <div class="list-item-icon" :style="'background:' + getLocationColor(item.properties.jenis) + '20; color:' + getLocationColor(item.properties.jenis)">
+                            <span x-text="getLocationIcon(item.properties.jenis)"></span>
+                        </div>
+                        <div class="list-item-info">
+                            <div class="list-item-title" x-text="item.properties.nama || item.properties.nama_ketua || item.properties.wilayah || item.properties.jenis"></div>
+                            <div class="list-item-sub" x-text="item.properties.jabatan || getLocationLabel(item.properties.jenis)"></div>
+                        </div>
+                        <span class="list-item-badge" :style="'background:' + getLocationColor(item.properties.jenis) + '15; color:' + getLocationColor(item.properties.jenis)"
+                              x-text="getLocationLabel(item.properties.jenis)"></span>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+</div>
+
+<!-- Right Detail Panel -->
+<div id="detail-panel" x-show="showDetail" x-transition>
+    <div class="detail-header">
+        <span class="detail-header-icon" x-text="detailIcon"></span>
+        <h3 x-text="detailTitle"></h3>
+        <button class="detail-close" @click="closeDetail()">&times;</button>
+    </div>
+    <div class="detail-body">
+        <!-- Image -->
+        <template x-if="detailImage">
+            <img :src="detailImage" class="detail-image" @error="$el.style.display='none'">
+        </template>
+        <template x-if="!detailImage">
+            <div class="detail-image-placeholder">
+                <span x-text="detailIcon + ' Tidak ada foto'"></span>
+            </div>
+        </template>
+
+        <!-- Coordinates -->
+        <div class="detail-section" x-show="detailCoords">
+            <div class="detail-section-title">📍 Koordinat</div>
+            <div class="detail-coords">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span x-text="detailCoords"></span>
             </div>
         </div>
 
-        <!-- Info Section -->
-        <div class="mt-8 bg-white rounded-2xl p-6 shadow-md">
-            <h3 class="font-bold text-gray-800 text-lg mb-4">ℹ️ Tentang Peta Interaktif</h3>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <h4 class="font-semibold text-[#155C1B] mb-2">🗺️ Fitur Peta</h4>
-                    <ul class="text-gray-600 text-sm space-y-1">
-                        <li>• <strong>Mode UMKM:</strong> Lihat lokasi bisnis & filter berdasarkan kategori</li>
-                        <li>• <strong>Mode RT/RW:</strong> Lihat pembagian wilayah administrasi</li>
-                        <li>• Klik marker untuk melihat detail</li>
-                        <li>• Navigasi zoom dan pan</li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-semibold text-[#155C1B] mb-2">📍 Data GeoJSON (Ilma)</h4>
-                    <p class="text-gray-600 text-sm">Data GeoJSON peta batas desa dan fasilitas berasal dari hasil survei bersama tim geomatika untuk akurasi lokasi yang tepat.</p>
-                </div>
+        <!-- Info Rows -->
+        <template x-for="row in detailRows" :key="row.label">
+            <div class="detail-section" x-show="row.value">
+                <div class="detail-section-title" x-text="row.label"></div>
+                <div class="detail-value" x-text="row.value || '-'"></div>
             </div>
-        </div>
-    </main>
+        </template>
 
-    {% include 'partials/footer.html' %}
+        <!-- Action Links -->
+        <template x-if="detailLink">
+            <a :href="detailLink" class="detail-link" target="_blank">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+                Lihat di Google Maps
+            </a>
+        </template>
+    </div>
+</div>
 
-    <script>
-        // Alpine.js state
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('mapApp', () => ({
-                mapMode: 'umkm',
-                switchMapMode() {
-                    // This is called from HTML onclick
-                }
-            }));
-        });
+<!-- Layer Toggle Panel -->
+<div id="layer-toggle" x-data="layerToggle()" x-init="init()">
+    <h3>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
+        </svg>
+        Layer Peta
+    </h3>
+    <div class="layer-toggle-item" @click="toggleLayer('umkm')">
+        <input type="checkbox" x-model="activeLayers.umkm" readonly>
+        <span class="layer-dot" style="background:#e63946"></span>
+        UMKM
+    </div>
+    <div class="layer-toggle-item" @click="toggleLayer('perangkat')">
+        <input type="checkbox" x-model="activeLayers.perangkat" readonly>
+        <span class="layer-dot" style="background:#1b4332"></span>
+        Perangkat Desa
+    </div>
+    <div class="layer-toggle-item" @click="toggleLayer('bpd')">
+        <input type="checkbox" x-model="activeLayers.bpd" readonly>
+        <span class="layer-dot" style="background:#7c3aed"></span>
+        BPD
+    </div>
+    <div class="layer-toggle-item" @click="toggleLayer('pkk')">
+        <input type="checkbox" x-model="activeLayers.pkk" readonly>
+        <span class="layer-dot" style="background:#ec4899"></span>
+        PKK
+    </div>
+    <div class="layer-toggle-item" @click="toggleLayer('karang_taruna')">
+        <input type="checkbox" x-model="activeLayers.karang_taruna" readonly>
+        <span class="layer-dot" style="background:#f59e0b"></span>
+        Karang Taruna
+    </div>
+    <div class="layer-toggle-item" @click="toggleLayer('rt')">
+        <input type="checkbox" x-model="activeLayers.rt" readonly>
+        <span class="layer-dot" style="background:#457b9d"></span>
+        Rumah RT
+    </div>
+    <div class="layer-toggle-item" @click="toggleLayer('rw')">
+        <input type="checkbox" x-model="activeLayers.rw" readonly>
+        <span class="layer-dot" style="background:#264653"></span>
+        Rumah RW
+    </div>
+    <div class="layer-toggle-item" @click="toggleLayer('desa')">
+        <input type="checkbox" x-model="activeLayers.desa" readonly>
+        <span style="width:12px;height:8px;border:2px solid #e76f51;background:rgba(231,111,81,0.15);display:inline-block"></span>
+        Batas Desa
+    </div>
+    <div class="layer-toggle-item" @click="toggleLayer('dusun')">
+        <input type="checkbox" x-model="activeLayers.dusun" readonly>
+        <span style="width:12px;height:8px;border:2px solid #7209b7;background:rgba(114,9,183,0.15);display:inline-block"></span>
+        Batas RW/Dusun
+    </div>
+</div>
 
-        // Initialize map
-        const map = L.map('map').setView([-7.7004775, 109.6432848], 15);
+<div id="map"></div>
 
-        // Base layers
-        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        });
-        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: '© Esri'
-        });
+<script>
+// ========== DATA FROM SERVER ==========
+const umkmData = {{ umkm_geojson|tojson }};
+const locationsData = {{ all_locations_geojson|tojson }};
+</script>
 
-        osmLayer.addTo(map);
+<script>
+// ========== MAP INITIALIZATION ==========
+const map = L.map('map').setView([-7.6998, 109.6520], 15);
 
-        // Base maps object
-        const baseMaps = {
-            "OpenStreetMap": osmLayer,
-            "Satellite": satelliteLayer
-        };
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 20,
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
 
-        // Layer groups
-        const batasDesaLayer = L.layerGroup();
-        const rtrwLayer = L.layerGroup();
-        const umkmLayer = L.layerGroup();
+// ========== ICONS ==========
+const LOCATION_COLORS = {
+    'perangkat': '#1b4332',
+    'bpd': '#7c3aed',
+    'pkk': '#ec4899',
+    'karang_taruna': '#f59e0b',
+    'rt': '#457b9d',
+    'rw': '#264653',
+    'RT': '#457b9d',
+    'RW': '#264653',
+    'lembaga': '#6366f1',
+};
 
-        // Load village boundary GeoJSON
+const LOCATION_ICONS = {
+    'perangkat': '👔',
+    'bpd': '📋',
+    'pkk': '👩',
+    'karang_taruna': '🧑',
+    'rt': '🏠',
+    'rw': '🏛️',
+    'RT': '🏠',
+    'RW': '🏛️',
+    'lembaga': '🏢',
+};
+
+const LOCATION_LABELS = {
+    'perangkat': 'Perangkat',
+    'bpd': 'BPD',
+    'pkk': 'PKK',
+    'karang_taruna': 'K.Taruna',
+    'rt': 'RT',
+    'rw': 'RW',
+    'RT': 'RT',
+    'RW': 'RW',
+    'lembaga': 'Lembaga',
+};
+
+function createMarkerIcon(color, type) {
+    const icon = LOCATION_ICONS[type] || '📍';
+    const size = type === 'rw' || type === 'RW' ? 17 : 14;
+    return L.divIcon({
+        html: `<div style="background:${color};width:${size}px;height:${size}px;border-radius:${type === 'RT' || type === 'rt' ? '50%' : '4px'};border:2px solid #fff;box-shadow:0 0 3px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:${size/2}px"></div>`,
+        className: '', iconSize: [size, size], iconAnchor: [size/2, size/2]
+    });
+}
+
+function umkmIcon() {
+    return L.divIcon({
+        html: '<div style="background:#e63946;width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 3px rgba(0,0,0,0.5)"></div>',
+        className: '', iconSize: [14,14], iconAnchor: [7,7]
+    });
+}
+
+// ========== LAYER: BATAS DESA ==========
+let desaLayer;
+
+fetch('/geojson/batas_desa_wgs84.geojson')
+    .then(res => res.json())
+    .then(data => {
+        desaLayer = L.geoJSON(data, {
+            style: { color: '#e76f51', weight: 3, fillColor: '#e76f51', fillOpacity: 0.08, dashArray: '6 4' }
+        }).addTo(map);
+    })
+    .catch(err => {
         fetch('/geojson/batas_desa.geojson')
-            .then(res => res.json())
+            .then(r => r.json())
             .then(data => {
-                L.geoJSON(data, {
-                    style: {
-                        color: '#155C1B',
-                        weight: 3,
-                        fillOpacity: 0.1,
-                        fillColor: '#73AA0F'
-                    }
-                }).addTo(batasDesaLayer);
-            })
-            .catch(err => console.log('Village boundary not loaded:', err));
+                desaLayer = L.geoJSON(data, {
+                    style: { color: '#e76f51', weight: 3, fillColor: '#e76f51', fillOpacity: 0.08, dashArray: '6 4' }
+                }).addTo(map);
+            });
+    });
 
-        // Load RT/RW from database (injected by server)
-        const rtrwMarkers = [];
-        const rtrwData = {{ rtrw_geojson|tojson }};
+// ========== LAYER: BATAS DUSUN / RW ==========
+let dusunLayer, dusunLabelLayer;
+
+fetch('/geojson/DusunRWKedungwinangun_wgs84.geojson')
+    .then(res => res.json())
+    .then(data => {
+        dusunLayer = L.geoJSON(data, {
+            style: { color: '#7209b7', weight: 2, fillColor: '#7209b7', fillOpacity: 0.1 }
+        }).addTo(map);
+
+        dusunLabelLayer = L.layerGroup();
+        data.features.forEach(f => {
+            const p = f.properties;
+            const centroid = p.centroid || p.Centroid;
+            if (centroid && centroid.length === 2) {
+                const [lon, lat] = centroid;
+                const label = L.marker([lat, lon], {
+                    icon: L.divIcon({
+                        className: '',
+                        html: `<div style="background:rgba(255,255,255,0.92);border:1.5px solid #7209b7;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;color:#3c096c;text-align:center;line-height:1.3"><div>RW ${String(p.RW).padStart(2,'0')}</div><div style="font-size:10px;font-weight:500;color:#5a189a">Dusun ${p.Dusun}</div></div>`,
+                        iconSize: null,
+                        iconAnchor: [40, 15]
+                    }),
+                    interactive: false
+                });
+                dusunLabelLayer.addLayer(label);
+            }
+        });
+        dusunLabelLayer.addTo(map);
+    })
+    .catch(err => console.log('Batas dusun tidak bisa dimuat:', err));
+
+// ========== SEPARATE LAYERS FOR TOGGLING ==========
+let umkmLayer, rtLayer, rwLayer, perangkatLayer, bpdLayer, pkkLayer, karangTarunaLayer;
+const allLayers = {};
+let allMarkers = {};
+
+// UMKM Layer
+umkmLayer = L.geoJSON(umkmData, {
+    pointToLayer: (feature, latlng) => {
+        const marker = L.marker(latlng, { icon: umkmIcon() });
+        allMarkers[`umkm_${feature.properties.id}`] = marker;
+        return marker;
+    },
+    onEachFeature: (feature, layer) => {
+        layer.on('click', () => window.mapAppData && window.mapAppData.selectItem(feature, 'umkm'));
+    }
+}).addTo(map);
+allLayers.umkm = umkmLayer;
+
+// Helper function to create category-specific layers
+function createLocationLayer(category) {
+    const features = {
+        type: 'FeatureCollection',
+        features: locationsData.features.filter(f => {
+            const jenis = (f.properties.jenis || '').toLowerCase();
+            if (category === 'perangkat') return jenis === 'perangkat' || jenis === 'perangkat desa';
+            if (category === 'rt') return jenis === 'rt';
+            if (category === 'rw') return jenis === 'rw';
+            if (category === 'bpd') return jenis === 'bpd';
+            if (category === 'pkk') return jenis === 'pkk';
+            if (category === 'karang_taruna') return jenis === 'karang_taruna';
+            return false;
+        })
+    };
+    
+    const color = LOCATION_COLORS[category] || '#6c757d';
+    const layer = L.geoJSON(features, {
+        pointToLayer: (feature, latlng) => {
+            const marker = L.marker(latlng, { icon: createMarkerIcon(color, category) });
+            const id = feature.properties.id;
+            allMarkers[`lokasi_${id}`] = marker;
+            return marker;
+        },
+        onEachFeature: (feature, layer) => {
+            layer.on('click', () => window.mapAppData && window.mapAppData.selectItem(feature, 'lokasi'));
+        }
+    }).addTo(map);
+    
+    allLayers[category] = layer;
+    return layer;
+}
+
+// Create all location layers
+createLocationLayer('perangkat');
+createLocationLayer('bpd');
+createLocationLayer('pkk');
+createLocationLayer('karang_taruna');
+createLocationLayer('rt');
+createLocationLayer('rw');
+
+// ========== SIDEBAR TOGGLE ==========
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const toggle = document.getElementById('sidebar-toggle');
+    sidebar.classList.toggle('hidden');
+    toggle.classList.toggle('hidden');
+    toggle.classList.toggle('rotated');
+}
+
+// ========== LAYER TOGGLE ALPINE COMPONENT ==========
+function layerToggle() {
+    return {
+        activeLayers: {
+            umkm: true,
+            perangkat: true,
+            bpd: true,
+            pkk: true,
+            karang_taruna: true,
+            rt: true,
+            rw: true,
+            desa: true,
+            dusun: true
+        },
         
-        const features = rtrwData.features || [];
-        const rtrwList = document.getElementById('rtrw-list');
-        const rtrwCount = document.getElementById('rtrw-count');
-        if (rtrwCount) rtrwCount.textContent = `(${features.length})`;
+        init() {
+            window.layerToggleData = this;
+        },
+        
+        toggleLayer(layer) {
+            // Toggle the state
+            this.activeLayers[layer] = !this.activeLayers[layer];
+            
+            // Update map layer
+            if (layer === 'desa') {
+                if (desaLayer) {
+                    this.activeLayers.desa ? map.addLayer(desaLayer) : map.removeLayer(desaLayer);
+                }
+            } else if (layer === 'dusun') {
+                if (dusunLayer) {
+                    this.activeLayers.dusun ? map.addLayer(dusunLayer) : map.removeLayer(dusunLayer);
+                }
+                if (dusunLabelLayer) {
+                    this.activeLayers.dusun ? map.addLayer(dusunLabelLayer) : map.removeLayer(dusunLabelLayer);
+                }
+            } else if (allLayers[layer]) {
+                this.activeLayers[layer] ? map.addLayer(allLayers[layer]) : map.removeLayer(allLayers[layer]);
+            }
+        }
+    };
+}
+
+// ========== ALPINE APP ==========
+function mapApp() {
+    return {
+        sidebarOpen: true,
+        activeCategory: 'umkm',
+        searchQuery: '',
+        
+        allItems: [],
+        filteredItems: [],
+        counts: { umkm: 0, perangkat: 0, bpd: 0, pkk: 0, karang_taruna: 0, rt: 0, rw: 0 },
+        
+        showDetail: false,
+        selectedId: null,
+        selectedType: null,
+        
+        detailIcon: '',
+        detailTitle: '',
+        detailImage: '',
+        detailCoords: '',
+        detailRows: [],
+        detailLink: '',
+        
+        categoryLabels: {
+            umkm: 'UMKM',
+            perangkat: 'Perangkat Desa',
+            bpd: 'BPD',
+            pkk: 'PKK',
+            karang_taruna: 'Karang Taruna',
+            rt: 'RT',
+            rw: 'RW'
+        },
+        
+        umkmColors: {
+            makanan: '#e63946',
+            minuman: '#457b9d',
+            kerajinan: '#f8961e',
+            jasa: '#2a9d8f',
+            pertanian: '#6a994e',
+            peternakan: '#bc6c25',
+            perikanan: '#48cae4',
+            umum: '#6c757d'
+        },
+        
+        init() {
+            window.mapAppData = this;
+            
+            // Process umkm data
+            this.allUmkm = umkmData.features || [];
+            
+            // Process locations data (RT, RW, Perangkat, BPD, PKK, dll)
+            this.allLocations = locationsData.features || [];
+            
+            // Count by category (case-insensitive, handle variations)
+            this.counts.umkm = this.allUmkm.length;
+            this.counts.perangkat = this.allLocations.filter(f => {
+                const j = (f.properties.jenis || '').toLowerCase();
+                return j === 'perangkat' || j === 'perangkat desa';
+            }).length;
+            this.counts.bpd = this.allLocations.filter(f => 
+                (f.properties.jenis || '').toLowerCase() === 'bpd'
+            ).length;
+            this.counts.pkk = this.allLocations.filter(f => 
+                (f.properties.jenis || '').toLowerCase() === 'pkk'
+            ).length;
+            this.counts.karang_taruna = this.allLocations.filter(f => 
+                (f.properties.jenis || '').toLowerCase() === 'karang_taruna'
+            ).length;
+            this.counts.rt = this.allLocations.filter(f => 
+                (f.properties.jenis || '').toLowerCase() === 'rt'
+            ).length;
+            this.counts.rw = this.allLocations.filter(f => 
+                (f.properties.jenis || '').toLowerCase() === 'rw'
+            ).length;
+            
+            this.filterList();
+        },
+        
+        setCategory(cat) {
+            this.activeCategory = cat;
+            this.searchQuery = '';
+            this.filterList();
+        },
+        
+        filterList() {
+            const q = this.searchQuery.toLowerCase();
+            
+            if (this.activeCategory === 'umkm') {
+                if (q) {
+                    this.filteredItems = this.allUmkm.filter(i => 
+                        (i.properties.nama || '').toLowerCase().includes(q) ||
+                        (i.properties.kategori || '').toLowerCase().includes(q) ||
+                        (i.properties.pemilik || '').toLowerCase().includes(q)
+                    );
+                } else {
+                    this.filteredItems = [...this.allUmkm];
+                }
+            } else {
+                const cat = this.activeCategory;
+                let filtered = this.allLocations.filter(i => {
+                    const jenis = (i.properties.jenis || '').toLowerCase();
+                    // Handle Perangkat/Perangkat Desa
+                    if (cat === 'perangkat') return jenis === 'perangkat' || jenis === 'perangkat desa';
+                    // Handle RT
+                    if (cat === 'rt') return jenis === 'rt';
+                    // Handle RW
+                    if (cat === 'rw') return jenis === 'rw';
+                    return jenis === cat;
+                });
                 
-                if (rtrwList) {
-                    features.forEach((feature, idx) => {
-                        const props = feature.properties || {};
-                        const jenis = props.jenis || '';
-                        
-                        // Build label based on jenis
-                        let label = '';
-                        if (jenis === 'RT' && props.rt && props.rw) {
-                            label = `RT ${props.rt} / RW ${props.rw}`;
-                        } else if (jenis === 'RW' && props.rw) {
-                            label = `RW ${props.rw}`;
-                        } else if (jenis === 'Perangkat Desa') {
-                            label = props.nama_ketua || 'Perangkat Desa';
-                        } else if (jenis === 'BPD') {
-                            label = props.nama_ketua || 'BPD';
-                        } else if (jenis === 'PKK') {
-                            label = props.nama_ketua || 'PKK';
-                        } else if (jenis === 'Karang Taruna') {
-                            label = props.nama_ketua || 'Karang Taruna';
-                        } else {
-                            label = props.nama_ketua || jenis || `Area ${idx + 1}`;
-                        }
-                        
-                        // Get coordinates
-                        let lat = null, lng = null;
-                        if (feature.geometry.type === 'Point') {
-                            [lng, lat] = feature.geometry.coordinates;
-                        }
-                        
-                        // Icon colors and labels by jenis
-                        const iconConfig = {
-                            'RW': { color: '#E65100', text: 'RW', icon: '🏢' },
-                            'RT': { color: '#1565C0', text: 'RT', icon: '🏠' },
-                            'Perangkat Desa': { color: '#7B1FA2', text: 'PD', icon: '🏛️' },
-                            'BPD': { color: '#00838F', text: 'BPD', icon: '🏛️' },
-                            'PKK': { color: '#C62828', text: 'PKK', icon: '👩' },
-                            'Karang Taruna': { color: '#2E7D32', text: 'KT', icon: '👥' },
-                        };
-                        const config = iconConfig[jenis] || { color: '#757575', text: jenis.slice(0,2).toUpperCase(), icon: '📍' };
-                        
-                        const card = document.createElement('div');
-                        card.className = 'rt-card mb-2';
-                        card.innerHTML = `
-                            <div class="flex items-center justify-between">
-                                <div class="min-w-0 flex-1">
-                                    <span class="px-2 py-0.5 rounded text-xs font-bold" style="background:${config.color}20;color:${config.color}">${jenis}</span>
-                                    <p class="font-semibold text-gray-800 text-sm mt-1">${label}</p>
-                                    ${props.jabatan ? `<p class="text-gray-500 text-xs truncate">📋 ${props.jabatan}</p>` : ''}
-                                </div>
-                                <span class="text-xl flex-shrink-0 ml-2">${config.icon}</span>
-                            </div>
-                        `;
-                        
-                        if (lat && lng) {
-                            card.onclick = () => {
-                                map.setView([lat, lng], 18);
-                                rtrwMarkers.forEach(m => {
-                                    if (Math.abs(m.getLatLng().lat - lat) < 0.0001) {
-                                        m.openPopup();
-                                    }
-                                });
-                            };
-                        }
-                        
-                        rtrwList.appendChild(card);
-                        
-                        // Create marker
-                        if (feature.geometry.type === 'Point' && lat && lng) {
-                            const icon = L.divIcon({
-                                html: `<div style="background:${config.color};color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${config.text}</div>`,
-                                className: 'custom-marker',
-                                iconSize: [36, 36],
-                                iconAnchor: [18, 18]
-                            });
-                            
-                            const popupContent = `
-                                <div class="text-sm min-w-[180px]">
-                                    <h4 class="font-bold text-gray-800 mb-1">${label}</h4>
-                                    <p class="text-xs font-semibold" style="color:${config.color}">${jenis}</p>
-                                    ${props.nama_ketua ? `<p class="text-gray-600 mt-1">👤 ${props.nama_ketua}</p>` : ''}
-                                    ${props.jabatan ? `<p class="text-gray-500">📋 ${props.jabatan}</p>` : ''}
-                                    ${props.wilayah ? `<p class="text-gray-500">📍 ${props.wilayah}</p>` : ''}
-                                    ${props.no_hp ? `<p class="text-gray-500">📞 ${props.no_hp}</p>` : ''}
-                                </div>
-                            `;
-                            
-                            const marker = L.marker([lat, lng], {icon: icon})
-                                .bindPopup(popupContent)
-                                .addTo(rtrwLayer);
-                            
-                            rtrwMarkers.push(marker);
-                        }
-                    });
+                if (q) {
+                    filtered = filtered.filter(i =>
+                        (i.properties.nama || '').toLowerCase().includes(q) ||
+                        (i.properties.jabatan || '').toLowerCase().includes(q) ||
+                        (i.properties.wilayah || '').toLowerCase().includes(q) ||
+                        (i.properties.nama_ketua || '').toLowerCase().includes(q)
+                    );
                 }
-
-        // UMKM markers
-        const umkmMarkers = [];
-        const umkmData = {{ umkm_geojson|tojson }};
-
-        umkmData.features.forEach(feature => {
-            if (feature.geometry && feature.geometry.coordinates) {
-                const props = feature.properties;
-                const icon = L.divIcon({
-                    html: `<div style="background:#155C1B;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.3);">🏪</div>`,
-                    className: 'custom-marker',
-                    iconSize: [36, 36],
-                    iconAnchor: [18, 18]
-                });
-
-                const marker = L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], {icon: icon})
-                    .addTo(umkmLayer);
-
-                const popupContent = `
-                    <div style="min-width:200px">
-                        ${props.foto ? `<img src="${props.foto}" style="width:100%;height:120px;object-cover;border-radius:8px;margin-bottom:8px">` : ''}
-                        <h3 style="font-weight:bold;font-size:16px;margin-bottom:4px">${props.nama}</h3>
-                        <p style="color:#73AA0F;font-size:14px;margin-bottom:8px">${props.kategori || ''}</p>
-                        ${props.pemilik ? `<p style="font-size:13px;color:#666">👤 ${props.pemilik}</p>` : ''}
-                        ${props.alamat ? `<p style="font-size:13px;color:#666">📍 ${props.alamat}</p>` : ''}
-                        ${props.kontak ? `<p style="font-size:13px;color:#666">📞 ${props.kontak}</p>` : ''}
-                    </div>
-                `;
-
-                marker.bindPopup(popupContent);
-                marker.category = props.kategori || 'umum';
-                marker.nama = (props.nama || '').toLowerCase();
-                umkmMarkers.push(marker);
+                this.filteredItems = filtered;
             }
-        });
-
-        // Layer control
-        L.control.layers(baseMaps).addTo(map);
-
-        // Default: show UMKM mode
-        batasDesaLayer.addTo(map);
-        umkmLayer.addTo(map);
-
-        // Mode switching function
-        function switchMapMode() {
-            // Get current mode from Alpine
-            const mainEl = document.querySelector('main[x-data]');
-            let mode = 'umkm';
-            if (mainEl && mainEl._x_dataStack) {
-                const data = mainEl._x_dataStack[0];
-                mode = data.mapMode || 'umkm';
-            }
-            
-            // Remove all mode layers from map
-            if (map.hasLayer(rtrwLayer)) map.removeLayer(rtrwLayer);
-            if (map.hasLayer(umkmLayer)) map.removeLayer(umkmLayer);
-            
-            // Always show batas desa
-            if (!map.hasLayer(batasDesaLayer)) batasDesaLayer.addTo(map);
-            
-            // Show mode-specific layer
-            if (mode === 'umkm') {
-                umkmLayer.addTo(map);
-            } else if (mode === 'rtrw') {
-                rtrwLayer.addTo(map);
-            }
-        }
+        },
         
-        // Set up Alpine.js watcher
-        document.addEventListener('alpine:initialized', () => {
-            const mainEl = document.querySelector('main[x-data]');
-            if (mainEl) {
-                const unwatch = mainEl.__x.$watch('mapMode', () => {
-                    switchMapMode();
-                });
+        getUmkmColor(kategori) {
+            return this.umkmColors[kategori] || '#6c757d';
+        },
+        
+        getLocationColor(jenis) {
+            return LOCATION_COLORS[jenis] || '#6c757d';
+        },
+        
+        getLocationIcon(jenis) {
+            return LOCATION_ICONS[jenis] || '📍';
+        },
+        
+        getLocationLabel(jenis) {
+            return LOCATION_LABELS[jenis] || jenis;
+        },
+        
+        selectItem(item, type) {
+            this.selectedId = item.properties.id;
+            this.selectedType = type;
+            this.showDetail = true;
+            
+            const p = item.properties;
+            const coords = item.geometry.coordinates;
+            const lat = coords[1].toFixed(6);
+            const lng = coords[0].toFixed(6);
+            
+            this.detailCoords = `${lat}, ${lng}`;
+            this.detailLink = `https://www.google.com/maps?q=${lat},${lng}`;
+            
+            if (type === 'umkm') {
+                this.detailIcon = '🏪';
+                this.detailTitle = p.nama || 'UMKM';
+                this.detailImage = p.foto || p.foto_url || '';
+                this.detailRows = [
+                    { label: '📋 Kategori', value: p.kategori },
+                    { label: '👤 Pemilik', value: p.pemilik },
+                    { label: '📍 Alamat', value: p.alamat || p.dusun },
+                    { label: '📞 Kontak', value: p.no_hp || p.kontak },
+                    { label: '📝 Deskripsi', value: p.deskripsi }
+                ];
+            } else {
+                // Location type (RT, RW, Perangkat, BPD, PKK, dll)
+                this.detailIcon = this.getLocationIcon(p.jenis);
+                this.detailTitle = p.nama || p.nama_ketua || p.wilayah || this.getLocationLabel(p.jenis);
+                this.detailImage = p.foto_url || '';
+                
+                const rows = [];
+                rows.push({ label: '🏷️ Jenis', value: this.getLocationLabel(p.jenis) });
+                
+                if (p.jabatan) rows.push({ label: '💼 Jabatan', value: p.jabatan });
+                if (p.nik) rows.push({ label: '📋 NIK', value: p.nik });
+                if (p.nama_ketua) rows.push({ label: '👤 Nama', value: p.nama_ketua });
+                if (p.wilayah) rows.push({ label: '📍 Wilayah', value: p.wilayah });
+                if (p.alamat) rows.push({ label: '🏠 Alamat', value: p.alamat });
+                if (p.no_hp) rows.push({ label: '📞 No. HP', value: p.no_hp });
+                if (p.telepon) rows.push({ label: '📞 Telepon', value: p.telepon });
+                if (p.email) rows.push({ label: '📧 Email', value: p.email });
+                if (p.rw) rows.push({ label: '🏛️ RW', value: p.rw });
+                if (p.rt) rows.push({ label: '🏠 RT', value: p.rt });
+                
+                this.detailRows = rows;
             }
-        });
-
-        // Also expose function globally for onclick
-        window.switchMapMode = switchMapMode;
-
-        // Filter function
-        function filterUMKM(category) {
-            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn-' + category).classList.add('active');
-
-            umkmMarkers.forEach(marker => {
-                if (category === 'all' || marker.category === category) {
-                    if (!umkmLayer.hasLayer(marker)) umkmLayer.addLayer(marker);
-                } else {
-                    umkmLayer.removeLayer(marker);
-                }
-            });
-
-            // Filter sidebar cards
-            document.querySelectorAll('.umkm-card').forEach(card => {
-                if (category === 'all' || card.dataset.kategori === category) {
-                    card.classList.remove('hidden');
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
+            
+            // Fly to marker
+            const markerKey = `${type}_${p.id}`;
+            if (allMarkers[markerKey]) {
+                map.flyTo(allMarkers[markerKey].getLatLng(), 17, { duration: 0.8 });
+            } else {
+                map.flyTo([lat, lng], 17, { duration: 0.8 });
+            }
+        },
+        
+        closeDetail() {
+            this.showDetail = false;
+            this.selectedId = null;
+            this.selectedType = null;
         }
+    };
+}
+</script>
 
-        // Focus on specific UMKM
-        function focusUMKM(lat, lng, nama) {
-            map.setView([lat, lng], 18);
-            umkmMarkers.forEach(marker => {
-                if (marker.nama.includes(nama.toLowerCase())) {
-                    marker.openPopup();
-                }
-            });
-        }
-
-        // Search functionality
-        document.getElementById('search-umkm')?.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.umkm-card');
-
-            cards.forEach(card => {
-                const nama = card.dataset.nama;
-                if (nama.includes(searchTerm)) {
-                    card.classList.remove('hidden');
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
-
-            umkmMarkers.forEach(marker => {
-                if (marker.nama.includes(searchTerm)) {
-                    if (!umkmLayer.hasLayer(marker)) umkmLayer.addLayer(marker);
-                } else {
-                    umkmLayer.removeLayer(marker);
-                }
-            });
-        });
-
-        // If no umkm data, show default village center
-        {% if not umkm_geojson.features %}
-        map.setView([-7.7004775, 109.6432848], 15);
-        {% endif %}
-    </script>
 </body>
 </html>

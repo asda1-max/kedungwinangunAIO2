@@ -25,39 +25,23 @@
 <body class="bg-gray-50 min-h-screen">
     {% include 'partials/navbar.html' %}
 
-    <!-- Hero -->
-    <section class="bg-gradient-to-br from-[#155C1B] to-[#228B22] text-white py-12">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h1 class="text-4xl font-bold mb-2">💬 Kritik dan Saran</h1>
-            <p class="text-green-100">Sampaikan pendapat Anda untuk membangun desa yang lebih baik</p>
+    <!-- Hero - Minimalist -->
+    <section class="bg-[#155C1B] text-white py-10 md:py-12">
+        <div class="container-lg mx-auto px-4 text-center">
+            <h1 class="text-2xl md:text-3xl font-bold mb-2">Kritik dan Saran</h1>
+            <p class="text-green-200 text-sm">Sampaikan pendapat Anda untuk membangun desa yang lebih baik</p>
         </div>
     </section>
 
-    <!-- Main Content -->
-    <main class="max-w-4xl mx-auto px-4 py-10">
+    <!-- Main Content - Minimalist -->
+    <main class="container-lg mx-auto px-4 py-10">
         
-        <!-- Info Card -->
-        <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-2xl p-6 mb-8 border border-blue-100">
-            <div class="flex items-start gap-4">
-                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span class="text-2xl">ℹ️</span>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-gray-800 mb-1">Votre opinion compte!</h3>
-                    <p class="text-gray-600 text-sm">
-                        Kami menghargai setiap masukan dari warga. Kritik dan saran Anda akan membantu kami 
-                        meningkatkan kualitas pelayanan desa. Semua pesan akan kami baca dan respon sesuai kebutuhan.
-                    </p>
-                </div>
-            </div>
-        </div>
-
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         <div class="mb-6">
             {% for category, message in messages %}
-            <div class="p-4 rounded-xl mb-2 {% if category == 'success' %}bg-green-100 text-green-800 border border-green-200{% elif category == 'error' %}bg-red-100 text-red-800 border border-red-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}">
+            <div class="p-3 rounded-lg mb-2 {% if category == 'success' %}bg-green-100 text-green-800{% elif category == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
                 {{ message }}
             </div>
             {% endfor %}
@@ -66,116 +50,79 @@
         {% endwith %}
 
         <!-- Form -->
-        <div class="bg-white rounded-2xl shadow-lg p-8">
-            <form method="POST" action="{{ url_for('public.kritik_saran') }}" class="space-y-6">
+        <div class="bg-white rounded-xl border border-neutral-200 shadow-sm p-5">
+            <form method="POST" action="{{ url_for('public.kritik_saran') }}" class="space-y-4">
                 
                 <!-- Kategori -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <span class="flex items-center gap-2">
-                            <span>📌</span> Jenis Masukan
-                        </span>
-                    </label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-[#155C1B] transition-colors has-[:checked]:border-[#155C1B] has-[:checked]:bg-green-50">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Masukan</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-2 p-3 border-2 border-neutral-200 rounded-lg cursor-pointer hover:border-[#155C1B] has-[:checked]:border-[#155C1B] has-[:checked]:bg-green-50 transition-colors">
                             <input type="radio" name="kategori" value="kritik" checked
-                                   class="w-5 h-5 text-[#155C1B] focus:ring-[#155C1B]">
-                            <div>
-                                <span class="font-medium text-gray-800">📝 Kritik</span>
-                                <p class="text-xs text-gray-500">Masukan untuk perbaikan</p>
-                            </div>
+                                   class="w-4 h-4 text-[#155C1B] focus:ring-[#155C1B]">
+                            <span class="font-medium text-gray-800">Kritik</span>
                         </label>
-                        <label class="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-[#155C1B] transition-colors has-[:checked]:border-[#155C1B] has-[:checked]:bg-green-50">
+                        <label class="flex items-center gap-2 p-3 border-2 border-neutral-200 rounded-lg cursor-pointer hover:border-[#155C1B] has-[:checked]:border-[#155C1B] has-[:checked]:bg-green-50 transition-colors">
                             <input type="radio" name="kategori" value="saran"
-                                   class="w-5 h-5 text-[#155C1B] focus:ring-[#155C1B]">
-                            <div>
-                                <span class="font-medium text-gray-800">💡 Saran</span>
-                                <p class="text-xs text-gray-500">Ide dan masukan konstruktif</p>
-                            </div>
+                                   class="w-4 h-4 text-[#155C1B] focus:ring-[#155C1B]">
+                            <span class="font-medium text-gray-800">Saran</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- Nama -->
                 <div>
-                    <label for="nama" class="block text-sm font-medium text-gray-700 mb-2">
-                        <span class="flex items-center gap-2">
-                            <span>👤</span> Nama Lengkap <span class="text-red-500">*</span>
-                        </span>
+                    <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">
+                        Nama Lengkap <span class="text-red-500">*</span>
                     </label>
                     <input type="text" id="nama" name="nama" required
-                           placeholder="Masukkan nama lengkap Anda"
-                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#155C1B] focus:ring-0 transition-colors">
+                           placeholder="Nama lengkap"
+                           class="w-full px-3 py-2 border-2 border-neutral-200 rounded-lg focus:border-[#155C1B] focus:ring-4 focus:ring-[#155C1B]/10 transition-colors">
                 </div>
 
                 <!-- Email & Telepon -->
-                <div class="grid md:grid-cols-2 gap-4">
+                <div class="grid md:grid-cols-2 gap-3">
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                            <span class="flex items-center gap-2">
-                                <span>📧</span> Email
-                            </span>
-                        </label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <input type="email" id="email" name="email"
                                placeholder="email@contoh.com (opsional)"
-                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#155C1B] focus:ring-0 transition-colors">
+                               class="w-full px-3 py-2 border-2 border-neutral-200 rounded-lg focus:border-[#155C1B] transition-colors">
                     </div>
                     <div>
-                        <label for="telepon" class="block text-sm font-medium text-gray-700 mb-2">
-                            <span class="flex items-center gap-2">
-                                <span>📱</span> No. Telepon
-                            </span>
-                        </label>
+                        <label for="telepon" class="block text-sm font-medium text-gray-700 mb-1">No. Telepon</label>
                         <input type="tel" id="telepon" name="telepon"
                                placeholder="08xxxxxxxxxx (opsional)"
-                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#155C1B] focus:ring-0 transition-colors">
+                               class="w-full px-3 py-2 border-2 border-neutral-200 rounded-lg focus:border-[#155C1B] transition-colors">
                     </div>
                 </div>
 
                 <!-- Subjek -->
                 <div>
-                    <label for="subjek" class="block text-sm font-medium text-gray-700 mb-2">
-                        <span class="flex items-center gap-2">
-                            <span>📋</span> Subjek <span class="text-red-500">*</span>
-                        </span>
+                    <label for="subjek" class="block text-sm font-medium text-gray-700 mb-1">
+                        Subjek <span class="text-red-500">*</span>
                     </label>
                     <input type="text" id="subjek" name="subjek" required
-                           placeholder="Judul singkat kritik/saran Anda"
-                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#155C1B] focus:ring-0 transition-colors">
+                           placeholder="Judul singkat"
+                           class="w-full px-3 py-2 border-2 border-neutral-200 rounded-lg focus:border-[#155C1B] transition-colors">
                 </div>
 
                 <!-- Isi -->
                 <div>
-                    <label for="isi" class="block text-sm font-medium text-gray-700 mb-2">
-                        <span class="flex items-center gap-2">
-                            <span>📄</span> Isi Kritik/Saran <span class="text-red-500">*</span>
-                        </span>
+                    <label for="isi" class="block text-sm font-medium text-gray-700 mb-1">
+                        Isi Kritik/Saran <span class="text-red-500">*</span>
                     </label>
-                    <textarea id="isi" name="isi" rows="6" required
-                              placeholder="Tulis kritik dan saran Anda secara detail di sini..."
-                              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#155C1B] focus:ring-0 transition-colors resize-none"></textarea>
-                    <p class="text-xs text-gray-500 mt-1">Minimal 10 karakter</p>
+                    <textarea id="isi" name="isi" rows="5" required
+                              placeholder="Tulis kritik dan saran Anda..."
+                              class="w-full px-3 py-2 border-2 border-neutral-200 rounded-lg focus:border-[#155C1B] focus:ring-4 focus:ring-[#155C1B]/10 transition-colors resize-none"></textarea>
                 </div>
 
                 <!-- Submit -->
-                <div class="pt-4">
-                    <button type="submit" 
-                            class="w-full md:w-auto px-8 py-4 bg-[#155C1B] text-white font-semibold rounded-xl hover:bg-[#2A6726] transition-colors flex items-center justify-center gap-2">
-                        <span class="text-xl">📤</span>
-                        Kirim Kritik dan Saran
-                    </button>
-                </div>
+                <button type="submit" 
+                        class="w-full md:w-auto px-6 py-2.5 bg-[#155C1B] text-white font-semibold rounded-lg hover:bg-[#2A6726] transition-colors">
+                    Kirim Kritik dan Saran
+                </button>
             </form>
         </div>
-
-        <!-- Privacy Note -->
-        <div class="mt-8 p-4 bg-gray-100 rounded-xl">
-            <p class="text-sm text-gray-600 text-center">
-                🔒 Data pribadi Anda aman bersama kami. Informasi hanya digunakan untuk keperluan komunikasi 
-                terkait kritik dan saran yang Anda sampaikan.
-            </p>
-        </div>
-
     </main>
 
     {% include 'partials/footer.html' %}

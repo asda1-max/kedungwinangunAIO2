@@ -1,0 +1,258 @@
+{
+ "type": "FeatureCollection",
+ "name": "umkm_kedungwinangun",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "Halalmart DC Kedungwinangun Klirong",
+    "jenis_usaha": "Toko Kelontong/Sembako",
+    "kategori": "Retail",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.651742,
+     -7.698188
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "SRC ZAHRA",
+    "jenis_usaha": "Toko Kelontong/Sembako",
+    "kategori": "Retail",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.652227,
+     -7.698972
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "SRC Setia Hati",
+    "jenis_usaha": "Toko Kelontong/Sembako",
+    "kategori": "Retail",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.651342,
+     -7.697644
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "Toko Sejahtera",
+    "jenis_usaha": "Toko Kelontong/Sembako",
+    "kategori": "Retail",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.651721,
+     -7.697039
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "Toko FIANTI Sembako",
+    "jenis_usaha": "Toko Kelontong/Sembako",
+    "kategori": "Retail",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.651231,
+     -7.700886
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "SRC Buah Hati",
+    "jenis_usaha": "Toko Kelontong/Sembako",
+    "kategori": "Retail",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.651054,
+     -7.704494
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "Enggal Buah",
+    "jenis_usaha": "Toko Buah",
+    "kategori": "Retail",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.651198,
+     -7.702141
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "Mie Ayam Tarom",
+    "jenis_usaha": "Warung Makan",
+    "kategori": "Kuliner",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.654405,
+     -7.700533
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "Mie Ayam Rizky",
+    "jenis_usaha": "Warung Makan",
+    "kategori": "Kuliner",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.652474,
+     -7.700108
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "Warung Mie Ayam \"PAHALA\"",
+    "jenis_usaha": "Warung Makan",
+    "kategori": "Kuliner",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.651518,
+     -7.699815
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "Bakso Urat Mie Ayam Bu Purwa",
+    "jenis_usaha": "Warung Makan",
+    "kategori": "Kuliner",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.652967,
+     -7.699975
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "nama_umkm": "Warung Mie Ayam Tirto Roso",
+    "jenis_usaha": "Warung Makan",
+    "kategori": "Kuliner",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "pemilik": "",
+    "no_hp": "",
+    "jam_operasional": "",
+    "foto": "",
+    "deskripsi": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.652595,
+     -7.698273
+    ]
+   }
+  }
+ ]
+}

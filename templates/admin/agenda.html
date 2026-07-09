@@ -3,144 +3,142 @@
 {% block title %}Agenda - Admin Panel{% endblock %}
 
 {% block content %}
-<div class="p-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Manajemen Agenda</h1>
-            <p class="text-gray-600">Kelola agenda dan kegiatan desa</p>
+<!-- Header -->
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Manajemen Agenda</h1>
+        <p class="text-gray-600">Kelola agenda dan kegiatan desa</p>
+    </div>
+    <a href="{{ url_for('admin.add_agenda_route') }}" 
+        class="bg-green-700 text-white font-semibold py-2.5 px-5 rounded-lg hover:bg-green-800 transition-colors flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span class="btn-label">Tambah Agenda</span>
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+    <form method="GET" class="flex flex-wrap gap-3 items-center">
+        <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-gray-600">Tahun:</label>
+            <select name="tahun" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-600 focus:border-transparent">
+                <option value="">Semua</option>
+                {% for t in range(2020, 2031) %}
+                <option value="{{ t }}" {% if tahun_filter == t %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+            </select>
         </div>
-        <a href="{{ url_for('admin.add_agenda_route') }}" 
-            class="bg-green-700 text-white font-semibold py-2.5 px-5 rounded-lg hover:bg-green-800 transition-colors flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Tambah Agenda
-        </a>
-    </div>
+        <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-gray-600">Status:</label>
+            <select name="status" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-600 focus:border-transparent">
+                <option value="">Semua</option>
+                <option value="akan_datang" {% if status_filter == 'akan_datang' %}selected{% endif %}>Akan Datang</option>
+                <option value="sedang_berlangsung" {% if status_filter == 'sedang_berlangsung' %}selected{% endif %}>Sedang Berlangsung</option>
+                <option value="selesai" {% if status_filter == 'selesai' %}selected{% endif %}>Selesai</option>
+                <option value="dibatalkan" {% if status_filter == 'dibatalkan' %}selected{% endif %}>Dibatalkan</option>
+            </select>
+        </div>
+        <button type="submit" class="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition-colors text-sm font-medium">
+            Filter
+        </button>
+        <a href="{{ url_for('admin.agenda') }}" class="text-gray-500 hover:text-gray-700 text-sm">Reset</a>
+    </form>
+</div>
 
-    <!-- Filters -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-        <form method="GET" class="flex flex-wrap gap-4 items-center">
-            <div class="flex items-center gap-2">
-                <label class="text-sm font-medium text-gray-600">Tahun:</label>
-                <select name="tahun" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-600 focus:border-transparent">
-                    <option value="">Semua</option>
-                    {% for t in range(2020, 2031) %}
-                    <option value="{{ t }}" {% if tahun_filter == t %}selected{% endif %}>{{ t }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="flex items-center gap-2">
-                <label class="text-sm font-medium text-gray-600">Status:</label>
-                <select name="status" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-600 focus:border-transparent">
-                    <option value="">Semua</option>
-                    <option value="akan_datang" {% if status_filter == 'akan_datang' %}selected{% endif %}>Akan Datang</option>
-                    <option value="sedang_berlangsung" {% if status_filter == 'sedang_berlangsung' %}selected{% endif %}>Sedang Berlangsung</option>
-                    <option value="selesai" {% if status_filter == 'selesai' %}selected{% endif %}>Selesai</option>
-                    <option value="dibatalkan" {% if status_filter == 'dibatalkan' %}selected{% endif %}>Dibatalkan</option>
-                </select>
-            </div>
-            <button type="submit" class="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition-colors text-sm font-medium">
-                Filter
-            </button>
-            <a href="{{ url_for('admin.agenda') }}" class="text-gray-500 hover:text-gray-700 text-sm">Reset</a>
-        </form>
-    </div>
-
-    <!-- Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-50 border-b border-gray-100">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Judul</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Lokasi</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    {% for item in agenda_list %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-green-100 rounded-lg flex flex-col items-center justify-center">
-                                    {% if item.tanggal_mulai %}
-                                    {% set tgl = item.tanggal_mulai|string_to_date %}
-                                    <span class="text-lg font-bold text-green-700">{{ tgl.day }}</span>
-                                    <span class="text-[10px] text-green-600">{{ tgl.strftime('%b') }}</span>
-                                    {% else %}
-                                    <span class="text-lg">📅</span>
-                                    {% endif %}
-                                </div>
+<!-- Table -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Judul</th>
+                    <th class="hidden md:table-cell">Lokasi</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set bln_map = {'01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'Mei','06':'Jun','07':'Jul','08':'Agt','09':'Sep','10':'Okt','11':'Nov','12':'Des'} %}
+                {% for item in agenda_list %}
+                <tr class="hover:bg-gray-50">
+                    <td class="whitespace-nowrap">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex flex-col items-center justify-center">
+                                {% if item.tanggal_mulai and item.tanggal_mulai|length >= 10 %}
+                                <span class="text-lg font-bold text-green-700">{{ item.tanggal_mulai[8:10] }}</span>
+                                <span class="text-[10px] text-green-600">{{ bln_map.get(item.tanggal_mulai[5:7], '') }}</span>
+                                {% else %}
+                                <span class="text-lg">📅</span>
+                                {% endif %}
                             </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xl">{{ item.icon or '📅' }}</span>
-                                <div>
-                                    <p class="font-medium text-gray-800">{{ item.judul }}</p>
-                                    {% if item.penanggung_jawab %}
-                                    <p class="text-xs text-gray-500">PJ: {{ item.penanggung_jawab }}</p>
-                                    {% endif %}
-                                </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">{{ item.icon or '📅' }}</span>
+                            <div>
+                                <p class="font-medium text-gray-800">{{ item.judul }}</p>
+                                {% if item.penanggung_jawab %}
+                                <p class="text-xs text-gray-500">PJ: {{ item.penanggung_jawab }}</p>
+                                {% endif %}
                             </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <p class="text-sm text-gray-600">{{ item.lokasi or '-' }}</p>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if item.status == 'akan_datang' %}
-                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">Akan Datang</span>
-                            {% elif item.status == 'sedang_berlangsung' %}
-                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium">Berlangsung</span>
-                            {% elif item.status == 'selesai' %}
-                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">Selesai</span>
-                            {% elif item.status == 'dibatalkan' %}
-                            <span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">Dibatalkan</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <div class="flex items-center justify-center gap-2">
-                                <a href="{{ url_for('admin.edit_agenda_route', agenda_id=item.id) }}" 
-                                    class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors" title="Edit">
+                        </div>
+                    </td>
+                    <td class="hidden md:table-cell">
+                        <p class="text-sm text-gray-600">{{ item.lokasi or '-' }}</p>
+                    </td>
+                    <td class="whitespace-nowrap">
+                        {% if item.status == 'akan_datang' %}
+                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">Akan Datang</span>
+                        {% elif item.status == 'sedang_berlangsung' %}
+                        <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium">Berlangsung</span>
+                        {% elif item.status == 'selesai' %}
+                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">Selesai</span>
+                        {% elif item.status == 'dibatalkan' %}
+                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">Dibatalkan</span>
+                        {% endif %}
+                    </td>
+                    <td class="whitespace-nowrap text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <a href="{{ url_for('admin.edit_agenda_route', agenda_id=item.id) }}" 
+                                class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors" title="Edit">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </a>
+                            <form method="POST" action="{{ url_for('admin.toggle_agenda_route', agenda_id=item.id) }}" class="inline">
+                                <button type="submit" class="p-2 {% if item.aktif %}bg-yellow-100 text-yellow-600 hover:bg-yellow-200{% else %}bg-green-100 text-green-600 hover:bg-green-200{% endif %} rounded-lg transition-colors" title="Toggle Aktif">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                                     </svg>
-                                </a>
-                                <form method="POST" action="{{ url_for('admin.toggle_agenda_route', agenda_id=item.id) }}" class="inline">
-                                    <button type="submit" class="p-2 {% if item.aktif %}bg-yellow-100 text-yellow-600 hover:bg-yellow-200{% else %}bg-green-100 text-green-600 hover:bg-green-200{% endif %} rounded-lg transition-colors" title="Toggle Aktif">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-                                        </svg>
-                                    </button>
-                                </form>
-                                <form method="POST" action="{{ url_for('admin.delete_agenda_route', agenda_id=item.id) }}" 
-                                      onsubmit="return confirm('Yakin hapus agenda ini?')" class="inline">
-                                    <button type="submit" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors" title="Hapus">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="px-6 py-12 text-center text-gray-500">
-                            <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                            <p>Belum ada agenda</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.delete_agenda_route', agenda_id=item.id) }}" 
+                                  onsubmit="return confirm('Yakin hapus agenda ini?')" class="inline">
+                                <button type="submit" class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors" title="Hapus">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p>Belum ada agenda</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

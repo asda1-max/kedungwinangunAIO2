@@ -1,0 +1,574 @@
+{
+ "type": "FeatureCollection",
+ "name": "rtrw_kedungwinangun",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 4,
+    "rw": 5,
+    "wilayah": "RT 04 / RW 05",
+    "nama_ketua": "PARYONO",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.656276,
+     -7.702729
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RW",
+    "rt": null,
+    "rw": 5,
+    "wilayah": "RW 05",
+    "nama_ketua": "AHMAD MU'ALIM",
+    "jabatan": "Ketua RW",
+    "jumlah_rt": 4,
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.657039,
+     -7.702704
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 3,
+    "rw": 5,
+    "wilayah": "RT 03 / RW 05",
+    "nama_ketua": "RASBAN",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.657771,
+     -7.705952
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 2,
+    "rw": 5,
+    "wilayah": "RT 02 / RW 05",
+    "nama_ketua": "MUHAIMIN",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.657324,
+     -7.707528
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 1,
+    "rw": 5,
+    "wilayah": "RT 01 / RW 05",
+    "nama_ketua": "M.IDRIS",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.656062,
+     -7.710364
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 1,
+    "rw": 4,
+    "wilayah": "RT 01 / RW 04",
+    "nama_ketua": "AHMAD NASRULLOH",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.64916,
+     -7.707879
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RW",
+    "rt": null,
+    "rw": 4,
+    "wilayah": "RW 04",
+    "nama_ketua": "SUDIBYO",
+    "jabatan": "Ketua RW",
+    "jumlah_rt": 2,
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.646933,
+     -7.706413
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 2,
+    "rw": 4,
+    "wilayah": "RT 02 / RW 04",
+    "nama_ketua": "AGUS STYAWAN",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.647081,
+     -7.705701
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 2,
+    "rw": 3,
+    "wilayah": "RT 02 / RW 03",
+    "nama_ketua": "ANGGA",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.654459,
+     -7.7039
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RW",
+    "rt": null,
+    "rw": 3,
+    "wilayah": "RW 03",
+    "nama_ketua": "MAFUDIN",
+    "jabatan": "Ketua RW",
+    "jumlah_rt": 2,
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.652449,
+     -7.701586
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 1,
+    "rw": 3,
+    "wilayah": "RT 01 / RW 03",
+    "nama_ketua": "NAIMUN",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.652198,
+     -7.701227
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RW",
+    "rt": null,
+    "rw": 6,
+    "wilayah": "RW 06",
+    "nama_ketua": "",
+    "jabatan": "Ketua RW",
+    "jumlah_rt": 3,
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.654668,
+     -7.698161
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 3,
+    "rw": 6,
+    "wilayah": "RT 03 / RW 06",
+    "nama_ketua": "SLAMET WAHYUDI",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.655761,
+     -7.700277
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 2,
+    "rw": 6,
+    "wilayah": "RT 02 / RW 06",
+    "nama_ketua": "MARYONO",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.655674,
+     -7.700594
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RW",
+    "rt": null,
+    "rw": 2,
+    "wilayah": "RW 02",
+    "nama_ketua": "SYARIF TOYIB",
+    "jabatan": "Ketua RW",
+    "jumlah_rt": 2,
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.651394,
+     -7.699031
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 3,
+    "rw": 1,
+    "wilayah": "RT 03 / RW 01",
+    "nama_ketua": "TOKHANI",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.652532,
+     -7.697009
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 1,
+    "rw": 2,
+    "wilayah": "RT 01 / RW 02",
+    "nama_ketua": "TAMSIR",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.65296,
+     -7.697599
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 2,
+    "rw": 1,
+    "wilayah": "RT 02 / RW 01",
+    "nama_ketua": "SLAMET HARTADI",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.65247,
+     -7.692632
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 1,
+    "rw": 1,
+    "wilayah": "RT 01 / RW 01",
+    "nama_ketua": "JOKO PRANOWO",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.652077,
+     -7.692679
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RW",
+    "rt": null,
+    "rw": 1,
+    "wilayah": "RW 01",
+    "nama_ketua": "WAWAN SETIAWAN",
+    "jabatan": "Ketua RW",
+    "jumlah_rt": 3,
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.651635,
+     -7.692586
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RW",
+    "rt": null,
+    "rw": 8,
+    "wilayah": "RW 08",
+    "nama_ketua": "TUSIRAN",
+    "jabatan": "Ketua RW",
+    "jumlah_rt": 2,
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.656083,
+     -7.69083
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 2,
+    "rw": 8,
+    "wilayah": "RT 02 / RW 08",
+    "nama_ketua": "AHMAD FAUZI",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.656237,
+     -7.690718
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 1,
+    "rw": 8,
+    "wilayah": "RT 01 / RW 08",
+    "nama_ketua": "AGUS TRIYONO",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.655768,
+     -7.690983
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 2,
+    "rw": 7,
+    "wilayah": "RT 02 / RW 07",
+    "nama_ketua": "SLAMET SUTRISNO",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.65369,
+     -7.692342
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 2,
+    "rw": 2,
+    "wilayah": "RT 02 / RW 02",
+    "nama_ketua": "AGUS WIDODO",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.651833,
+     -7.699277
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 1,
+    "rw": 6,
+    "wilayah": "RT 01 / RW 06",
+    "nama_ketua": "HARSONO",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.655187,
+     -7.702948
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RT",
+    "rt": 1,
+    "rw": 7,
+    "wilayah": "RT 01 / RW 07",
+    "nama_ketua": "TRIYONO",
+    "jabatan": "Ketua RT",
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.653675,
+     -7.696072
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "jenis": "RW",
+    "rt": null,
+    "rw": 7,
+    "wilayah": "RW 07",
+    "nama_ketua": "ZAHID NUR MUBAROK",
+    "jabatan": "Ketua RW",
+    "jumlah_rt": 2,
+    "alamat": "Kedungwinangun, Klirong, Kebumen",
+    "no_hp": ""
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     109.653135,
+     -7.695705
+    ]
+   }
+  }
+ ]
+}

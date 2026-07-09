@@ -19,7 +19,7 @@
         <line x1="20" y1="8" x2="20" y2="14"/>
         <line x1="23" y1="11" x2="17" y2="11"/>
     </svg>
-    Tambah Akun
+    <span class="btn-label">Tambah Akun</span>
 </a>
 {% endblock %}
 
@@ -87,18 +87,18 @@
 
 <!-- Filters & Search -->
 <div class="card animate-in" style="animation-delay: 0.1s;">
-    <div class="card-header">
+    <div class="card-header flex-wrap gap-3">
         <h3>Daftar Akun</h3>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 flex-wrap">
             <!-- Role Filter -->
-            <select onchange="window.location.href='{{ url_for('admin.account_center') }}?role=' + this.value + '&status={{ status_filter }}&search={{ search }}'" class="px-3 py-2 border border-gray-200 rounded-lg text-sm" style="min-width: 120px;">
+            <select onchange="window.location.href='{{ url_for('admin.account_center') }}?role=' + this.value + '&status={{ status_filter }}&search={{ search }}'" class="px-3 py-2 border border-gray-200 rounded-lg text-sm" style="min-width: 110px;">
                 <option value="all" {{ 'selected' if role_filter == 'all' else '' }}>Semua Role</option>
                 <option value="admin" {{ 'selected' if role_filter == 'admin' else '' }}>Admin</option>
                 <option value="dinas" {{ 'selected' if role_filter == 'dinas' else '' }}>Dinas</option>
                 <option value="penduduk" {{ 'selected' if role_filter == 'penduduk' else '' }}>Warga</option>
             </select>
             <!-- Status Filter -->
-            <select onchange="window.location.href='{{ url_for('admin.account_center') }}?role={{ role_filter }}&status=' + this.value + '&search={{ search }}'" class="px-3 py-2 border border-gray-200 rounded-lg text-sm" style="min-width: 120px;">
+            <select onchange="window.location.href='{{ url_for('admin.account_center') }}?role={{ role_filter }}&status=' + this.value + '&search={{ search }}'" class="px-3 py-2 border border-gray-200 rounded-lg text-sm" style="min-width: 110px;">
                 <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>Semua Status</option>
                 <option value="approved" {{ 'selected' if status_filter == 'approved' else '' }}>Approved</option>
                 <option value="pending" {{ 'selected' if status_filter == 'pending' else '' }}>Pending</option>
@@ -106,20 +106,20 @@
             </select>
         </div>
     </div>
-    <div class="p-4 border-b border-gray-100">
-        <form method="GET" action="{{ url_for('admin.account_center') }}" class="flex gap-3">
+    <div class="p-3 md:p-4 border-b border-gray-100">
+        <form method="GET" action="{{ url_for('admin.account_center') }}" class="flex gap-2 flex-wrap">
             <input type="hidden" name="role" value="{{ role_filter }}">
             <input type="hidden" name="status" value="{{ status_filter }}">
-            <div style="position: relative; flex: 1;">
+            <div style="position: relative; flex: 1; min-width: 180px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #9ca3af;">
                     <circle cx="11" cy="11" r="8"/>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <input type="text" name="search" value="{{ search }}" placeholder="Cari NIK, nama, atau email..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg" style="padding-left: 40px;">
+                <input type="text" name="search" value="{{ search }}" placeholder="Cari NIK, nama, atau email..." style="padding-left: 40px;" class="w-full py-2 border border-gray-200 rounded-lg">
             </div>
-            <button type="submit" class="btn btn-outline" style="padding: 8px 16px;">Cari</button>
+            <button type="submit" class="btn btn-outline btn-sm">Cari</button>
             {% if search %}
-            <a href="{{ url_for('admin.account_center') }}?role={{ role_filter }}&status={{ status_filter }}" class="btn btn-outline" style="padding: 8px 16px;">Reset</a>
+            <a href="{{ url_for('admin.account_center') }}?role={{ role_filter }}&status={{ status_filter }}" class="btn btn-outline btn-sm">Reset</a>
             {% endif %}
         </form>
     </div>
@@ -184,12 +184,12 @@
                     <td>
                         <div class="flex items-center gap-2">
                             <a href="{{ url_for('admin.account_detail', user_id=user.id) }}" class="btn btn-outline btn-sm" style="padding: 6px 10px;">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                    <circle cx="12" cy="12" r="3"/>
-                                </svg>
-                                Detail
-                            </a>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    <span class="btn-label">Detail</span>
+                                </a>
                             {% if user.id != session.user_id %}
                             <form action="{{ url_for('admin.account_delete', user_id=user.id) }}" method="POST" onsubmit="return confirm('Hapus akun {{ user.nama_lengkap }}?')">
                                 <button type="submit" class="btn btn-delete btn-sm" style="padding: 6px 10px;">

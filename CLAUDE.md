@@ -152,7 +152,7 @@ app.register_blueprint(admin_rtrw_bp) # RT/RW: /admin/rtrw/*
 | `/berita` | berita.html | News listing with pagination |
 | `/berita/<id>` | detail_berita.html | News detail + comments |
 | `/sejarah` | sejarah.html | Village history timeline |
-| `/info-kependudukan` | info_kependimento.html | Demographics with charts |
+| `/info-kependudukan` | info_kependudukan.html | Demographics with charts |
 | `/struktur` | struktur.html | Village organization chart |
 | `/struktur/<id>` | struktur_detail.html | Person detail page |
 | `/galeri` | galeri.html | Photo gallery |

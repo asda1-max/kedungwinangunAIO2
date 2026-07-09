@@ -28,9 +28,20 @@ def set_nav_active(page_key, request_path=None):
     """
     Set active nav link based on page key.
     If page_key is 'Lainnya', checks if request_path is in LAINNYA_PAGES.
+    Uses prefix matching so /struktur/123 matches /struktur.
     """
-    # Check if we should highlight "Lainnya"
-    highlight_lainnya = page_key == "Lainnya" and request_path and request_path in LAINNYA_PAGES
+    from config import LAINNYA_PAGES
+    
+    def matches_lainnya(path):
+        """Check if path matches any LAINNYA_PAGES entry (prefix matching)"""
+        if not path:
+            return False
+        for lp in LAINNYA_PAGES:
+            if '<' in lp:
+                continue
+            if path == lp or path.startswith(lp + '/'):
+                return True
+        return False
     
     result = []
     for n in NAV_LINKS:
@@ -38,7 +49,7 @@ def set_nav_active(page_key, request_path=None):
             result.append({
                 "label": n["label"],
                 "href": n["href"],
-                "active": highlight_lainnya,
+                "active": page_key == "Lainnya" and matches_lainnya(request_path),
                 "is_dropdown": True
             })
         else:
@@ -146,12 +157,11 @@ def peta_interaktif():
         desa_info = get_desa_info_with_maps()
         custom_pages = get_all_pages()
 
-        # Get UMKM data
-        umkm_list = get_all_umkm(aktif=1)
-        umkm_geojson = get_umkm_for_geojson(aktif=1)
+        # Get unified location data (RT/RW + Perangkat Desa + BPD + PKK + dll)
+        all_locations_geojson = get_all_locations_geojson(aktif=1)
         
-        # Get RT/RW locations from database
-        rtrw_geojson = get_lokasi_rtrw_geojson()
+        # Get UMKM data
+        umkm_geojson = get_umkm_for_geojson(aktif=1)
 
         # Kategori labels
         kategori_labels = {
@@ -165,6 +175,16 @@ def peta_interaktif():
             'umum': '🏪 Umum',
         }
 
+        # Location kategori labels
+        lokasi_labels = {
+            'RT': '🏠 Rumah RT',
+            'RW': '🏛️ Rumah RW',
+            'perangkat': '👔 Perangkat Desa',
+            'bpd': '📋 BPD',
+            'pkk': '👩 PKK',
+            'karang_taruna': '🧑 Karang Taruna',
+        }
+
         return render_template(
             "peta_interaktif.html",
             page={"title": "Peta Interaktif"},
@@ -175,9 +195,9 @@ def peta_interaktif():
             site_tagline=desa_info['tagline'],
             site_description=desa_info['deskripsi'],
             custom_pages=custom_pages,
-            umkm_list=umkm_list,
             umkm_geojson=umkm_geojson,
-            rtrw_geojson=rtrw_geojson,
+            all_locations_geojson=all_locations_geojson,
+            lokasi_labels=lokasi_labels,
             kategori_labels=kategori_labels,
         )
     except Exception as e:

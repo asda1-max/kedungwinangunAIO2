@@ -70,14 +70,18 @@ NAV_LINKS = [
 ]
 
 # Pages inside "Lainnya" dropdown - used to highlight Lainnya when active
+# NOTE: Only pages that are NOT in NAV_LINKS as separate nav links should be here.
+# Pages like Pengumuman, Galeri, Kependudukan exist as nav links, so they use their own labels.
 LAINNYA_PAGES = [
-    "/aduan", "/aduan/cek",
-    "/kritik-saran",
-    "/program-kerja",
-    "/agenda",
-    "/peta-interaktif",
-    "/transparansi",
-    "/struktur",
+    # Pages in dropdown but NOT in NAV_LINKS (these should highlight "Lainnya")
+    "/struktur", "/struktur/",  # Struktur Organisasi
+    "/transparansi",          # Transparansi APBDes
+    "/kritik-saran",          # Kritik & Saran
+    "/peta-interaktif",       # Peta Interaktif
+    "/aduan", "/aduan/cek",   # Aduan
+    "/program-kerja",         # Program Kerja
+    "/agenda",                # Agenda
+    # Custom pages (dynamic slug matching)
 ]
 
 # ── Data Static ────────────────────────────────────────────────────────
