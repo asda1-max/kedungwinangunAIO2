@@ -1,0 +1,120 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Tambah Lokasi RT/RW - Admin Panel{% endblock %}
+{% block page_title %}Tambah Lokasi RT/RW{% endblock %}
+{% block page_subtitle %}Tambah titik lokasi baru di peta{% endblock %}
+
+{% block content %}
+<div class="form-container animate-in">
+    <form action="{{ url_for('admin_rtrw.add') }}" method="POST" class="form">
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📋 Data RT/RW</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="jenis">Jenis <span class="text-red-500">*</span></label>
+                    <select id="jenis" name="jenis" required>
+                        <option value="">-- Pilih --</option>
+                        <option value="RW">RW</option>
+                        <option value="RT">RT</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rw">RW</label>
+                    <input type="text" id="rw" name="rw" placeholder="Contoh: 05">
+                </div>
+                <div class="form-group">
+                    <label for="rt">RT</label>
+                    <input type="text" id="rt" name="rt" placeholder="Contoh: 01">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">👤 Data Ketua</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nama_ketua">Nama Ketua</label>
+                    <input type="text" id="nama_ketua" name="nama_ketua" placeholder="Nama lengkap">
+                </div>
+                <div class="form-group">
+                    <label for="jabatan">Jabatan</label>
+                    <input type="text" id="jabatan" name="jabatan" placeholder="Contoh: Ketua RW 05">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="no_hp">No. HP</label>
+                <input type="text" id="no_hp" name="no_hp" placeholder="Contoh: 081234567890">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📍 Lokasi</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="wilayah">Wilayah</label>
+                    <input type="text" id="wilayah" name="wilayah" placeholder="Contoh: RT 01 / RW 05">
+                </div>
+                <div class="form-group">
+                    <label for="alamat">Alamat</label>
+                    <input type="text" id="alamat" name="alamat" placeholder="Alamat lengkap">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">🗺️ Koordinat Peta</h3>
+            <p class="text-sm text-gray-500 mb-4">Klik pada peta untuk memilih lokasi, atau isi koordinat manually.</p>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="latitude">Latitude</label>
+                    <input type="text" id="latitude" name="latitude" placeholder="-7.7004" step="any">
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude</label>
+                    <input type="text" id="longitude" name="longitude" placeholder="109.6432" step="any">
+                </div>
+            </div>
+            <div id="map-picker" style="height: 400px; border-radius: 12px; margin-top: 16px;"></div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin_rtrw.index') }}" class="btn-secondary">← Kembali</a>
+            <button type="submit" class="btn-primary">💾 Simpan</button>
+        </div>
+    </form>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const map = L.map('map-picker').setView([-7.7004775, 109.6432848], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let marker = null;
+    
+    // Click to place marker
+    map.on('click', function(e) {
+        document.getElementById('latitude').value = e.latlng.lat.toFixed(6);
+        document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
+        
+        if (marker) map.removeLayer(marker);
+        marker = L.marker(e.latlng).addTo(map);
+    });
+
+    // Sync from input fields
+    document.getElementById('latitude').addEventListener('change', updateMarker);
+    document.getElementById('longitude').addEventListener('change', updateMarker);
+    
+    function updateMarker() {
+        const lat = parseFloat(document.getElementById('latitude').value);
+        const lng = parseFloat(document.getElementById('longitude').value);
+        if (!isNaN(lat) && !isNaN(lng)) {
+            if (marker) map.removeLayer(marker);
+            marker = L.marker([lat, lng]).addTo(map);
+            map.setView([lat, lng], 17);
+        }
+    }
+</script>
+{% endblock %}

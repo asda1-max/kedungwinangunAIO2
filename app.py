@@ -57,10 +57,11 @@ def inject_custom_pages():
     return {'custom_pages_nav': get_all_pages()}
 
 # ── Register Blueprints ───────────────────────────────────────────────
-from routes import public_bp, admin_bp
+from routes import public_bp, admin_bp, admin_rtrw_bp
 
 app.register_blueprint(public_bp)    # Public routes: /, /berita, /berita/<id>
 app.register_blueprint(admin_bp)      # Admin routes: /admin/*
+app.register_blueprint(admin_rtrw_bp) # Admin RT/RW routes: /admin/rtrw/*
 
 
 # ── Error Handlers ────────────────────────────────────────────────────
@@ -274,6 +275,33 @@ def uploaded_file(filename):
     if not os.path.exists(file_path):
         abort(404)
     return send_from_directory(upload_folder, filename)
+
+
+# ── GeoJSON Files ──────────────────────────────────────────────────────
+
+@app.route("/geojson/<path:filename>")
+def serve_geojson(filename):
+    """Serve GeoJSON files for map layers"""
+    from flask import abort, Response
+    import os
+    import json
+    
+    geojson_folder = 'geojson'
+    file_path = os.path.join(geojson_folder, filename)
+    
+    if not os.path.exists(file_path):
+        abort(404)
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return Response(
+            json.dumps(data),
+            mimetype='application/geo+json',
+            headers={'Access-Control-Allow-Origin': '*'}
+        )
+    except Exception as e:
+        abort(500)
 
 
 # ── Chatbot API (Server-side OpenRouter) ──────────────────────────────

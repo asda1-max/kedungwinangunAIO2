@@ -8,7 +8,7 @@ from datetime import datetime
 from models import (
     get_desa_info, get_all_pages, get_all_kependudukan, get_all_pengumuman,
     get_all_umkm, get_umkm_for_geojson, get_apbdes_by_tahun, get_apbdes_summary,
-    get_available_tahun
+    get_available_tahun, get_lokasi_rtrw_geojson
 )
 from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA, LAINNYA_PAGES
 import logging
@@ -149,6 +149,9 @@ def peta_interaktif():
         # Get UMKM data
         umkm_list = get_all_umkm(aktif=1)
         umkm_geojson = get_umkm_for_geojson(aktif=1)
+        
+        # Get RT/RW locations from database
+        rtrw_geojson = get_lokasi_rtrw_geojson()
 
         # Kategori labels
         kategori_labels = {
@@ -174,12 +177,13 @@ def peta_interaktif():
             custom_pages=custom_pages,
             umkm_list=umkm_list,
             umkm_geojson=umkm_geojson,
+            rtrw_geojson=rtrw_geojson,
             kategori_labels=kategori_labels,
         )
     except Exception as e:
         logger.error(f"Error loading peta interaktif page: {str(e)}")
         flash('Terjadi kesalahan saat memuat halaman peta', 'error')
-        return redirect(url_for('public.index'))
+        return redirect('/')
 
 
 @public_bp.route("/api/umkm/geojson")

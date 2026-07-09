@@ -1,0 +1,97 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Lokasi RT/RW - Admin Panel{% endblock %}
+{% block page_title %}Lokasi RT/RW{% endblock %}
+{% block page_subtitle %}Kelola titik lokasi RT dan RW di peta interaktif{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <a href="{{ url_for('admin_rtrw.add') }}" class="btn-primary">
+        ➕ Tambah Lokasi
+    </a>
+    <div class="text-sm text-gray-500">
+        Total: {{ locations|length }} lokasi
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="mb-4">
+    {% for category, message in messages %}
+    <div class="flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Jenis</th>
+                    <th>RW</th>
+                    <th>RT</th>
+                    <th>Nama Ketua</th>
+                    <th>Wilayah</th>
+                    <th>Koordinat</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loc in locations %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        <span class="px-2 py-1 rounded text-xs font-bold {% if loc.jenis == 'RW' %}bg-orange-100 text-orange-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                            {{ loc.jenis }}
+                        </span>
+                    </td>
+                    <td>{{ loc.rw or '-' }}</td>
+                    <td>{{ loc.rt or '-' }}</td>
+                    <td>{{ loc.nama_ketua or '-' }}</td>
+                    <td>{{ loc.wilayah or '-' }}</td>
+                    <td class="text-xs">
+                        {% if loc.latitude and loc.longitude %}
+                        {{ "%.4f"|format(loc.latitude) }}, {{ "%.4f"|format(loc.longitude) }}
+                        {% else %}
+                        <span class="text-gray-400">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if loc.aktif %}
+                        <span class="badge-success">Aktif</span>
+                        {% else %}
+                        <span class="badge-danger">Nonaktif</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{{ url_for('admin_rtrw.edit', id=loc.id) }}" class="btn-sm btn-edit" title="Edit">
+                                ✏️
+                            </a>
+                            <a href="{{ url_for('admin_rtrw.toggle', id=loc.id) }}" class="btn-sm {% if loc.aktif %}btn-warning{% else %}btn-success{% endif %}" title="Toggle Status">
+                                {% if loc.aktif %}👁️{% else %}👁️‍🗨️{% endif %}
+                            </a>
+                            <a href="{{ url_for('admin_rtrw.delete', id=loc.id) }}" class="btn-sm btn-danger" title="Hapus" onclick="return confirm('Yakin hapus?')">
+                                🗑️
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center py-8 text-gray-500">
+                        <div class="text-4xl mb-2">📍</div>
+                        <p>Belum ada data lokasi RT/RW</p>
+                        <a href="{{ url_for('admin_rtrw.add') }}" class="text-green-600 hover:underline">Tambah sekarang</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

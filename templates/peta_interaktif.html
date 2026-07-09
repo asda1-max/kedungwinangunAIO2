@@ -31,23 +31,26 @@
         .legend { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
         .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
         .legend-color { width: 20px; height: 20px; border-radius: 50%; }
+        .legend-line { width: 24px; height: 4px; border-radius: 2px; }
         .search-input { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; width: 100%; transition: all 0.2s; }
         .search-input:focus { outline: none; border-color: #155C1B; box-shadow: 0 0 0 4px rgba(21, 92, 27, 0.1); }
-        .layer-btn { background: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; cursor: pointer; transition: all 0.2s; font-size: 14px; }
-        .layer-btn:hover { border-color: #155C1B; }
-        .layer-btn.active { background: #155C1B; color: white; border-color: #155C1B; }
-        .stats-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .stats-number { font-size: 32px; font-weight: 800; color: #155C1B; }
+        .tab-btn { padding: 10px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 2px solid #e2e8f0; background: white; }
+        .tab-btn:hover { border-color: #155C1B; }
+        .tab-btn.active { background: #155C1B; color: white; border-color: #155C1B; }
         .category-btn { padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; background: white; border: 2px solid #e2e8f0; }
         .category-btn:hover { border-color: #155C1B; }
         .category-btn.active { background: #155C1B; color: white; border-color: #155C1B; }
-        .umkm-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); transition: all 0.3s; }
+        .umkm-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); transition: all 0.3s; cursor: pointer; }
         .umkm-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); }
-        .marker-animate { animation: bounce 1s infinite; }
+        .umkm-card.hidden { display: none; }
+        .stats-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .stats-number { font-size: 32px; font-weight: 800; color: #155C1B; }
+        .rt-card { background: white; border-radius: 12px; padding: 12px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); transition: all 0.2s; cursor: pointer; }
+        .rt-card:hover { border: 2px solid #155C1B; }
+        .rt-card.hidden { display: none; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50" x-data>
     {% include 'partials/navbar.html' %}
 
     <!-- Hero Section -->
@@ -63,10 +66,11 @@
         </div>
     </section>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <!-- Main Content with Alpine.js State -->
+    <main class="max-w-7xl mx-auto px-4 py-8" x-data="{ mapMode: 'umkm' }">
+    
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div class="stats-card">
                 <div class="stats-number">{{ desa.jumlah_dusun or 6 }}</div>
                 <div class="text-gray-500 text-sm">Dusun</div>
@@ -85,14 +89,26 @@
             </div>
         </div>
 
-        <!-- Search & Layer Controls -->
-        <div class="bg-white rounded-2xl p-5 shadow-md mb-6">
+        <!-- Mode Tabs -->
+        <div class="bg-white rounded-2xl p-4 shadow-md mb-6">
+            <div class="flex flex-wrap gap-3">
+                <button @click="mapMode = 'umkm'; switchMapMode()" :class="mapMode === 'umkm' ? 'active' : ''" class="tab-btn flex items-center gap-2">
+                    🏪 Mode UMKM
+                </button>
+                <button @click="mapMode = 'rtrw'; switchMapMode()" :class="mapMode === 'rtrw' ? 'active' : ''" class="tab-btn flex items-center gap-2">
+                    🏘️ Mode RT/RW
+                </button>
+            </div>
+        </div>
+
+        <!-- Search & Filter (UMKM Mode) -->
+        <div x-show="mapMode === 'umkm'" x-transition class="bg-white rounded-2xl p-5 shadow-md mb-6">
             <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div class="relative w-full md:w-80">
                     <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    <input type="text" id="search-input" class="search-input pl-12" placeholder="Cari UMKM...">
+                    <input type="text" id="search-umkm" class="search-input pl-12" placeholder="Cari UMKM...">
                 </div>
                 <div class="flex flex-wrap gap-2">
                     <button onclick="filterUMKM('all')" class="category-btn active" id="btn-all">Semua</button>
@@ -108,55 +124,84 @@
             <div class="lg:col-span-2">
                 <div class="relative rounded-2xl overflow-hidden shadow-lg">
                     <div id="map"></div>
-                    <!-- Legend -->
+                    <!-- Legend Dynamic -->
                     <div class="absolute top-4 right-4 z-[1000] legend max-w-[200px]" id="legend">
                         <h4 class="font-bold text-gray-700 mb-3 text-sm">📍 Legenda</h4>
-                        {% for key, label in kategori_labels.items() %}
-                        <div class="legend-item">
-                            <div class="legend-color" style="background: #155C1B;"></div>
-                            <span class="text-sm text-gray-600">{{ label }}</span>
+                        <div x-show="mapMode === 'umkm'" x-transition>
+                            {% for key, label in kategori_labels.items() %}
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #155C1B;"></div>
+                                <span class="text-sm text-gray-600">{{ label }}</span>
+                            </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
+                        <div x-show="mapMode === 'rtrw'" x-transition>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #E65100;"></div>
+                                <span class="text-sm text-gray-600">RW</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #1565C0;"></div>
+                                <span class="text-sm text-gray-600">RT</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-line" style="background: #155C1B;"></div>
+                                <span class="text-sm text-gray-600">Batas Desa</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Sidebar - UMKM List -->
+            <!-- Sidebar Dynamic -->
             <div class="space-y-4 max-h-[calc(65vh+80px)] overflow-y-auto pr-2">
-                <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
-                    🏪 UMKM Terdekat
-                    <span class="text-gray-400 font-normal">({{ umkm_list|length }})</span>
-                </h3>
-                {% for item in umkm_list %}
-                <div class="umkm-card cursor-pointer" onclick="focusUMKM({{ item.latitude }}, {{ item.longitude }}, '{{ item.nama|replace("'", "\\'") }}')" data-kategori="{{ item.kategori }}" data-nama="{{ item.nama|lower }}">
-                    <div class="flex items-start gap-3">
-                        {% if item.foto_url %}
-                        <img src="{{ item.foto_url }}" alt="{{ item.nama }}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
-                        {% else %}
-                        <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center text-white text-2xl flex-shrink-0">
-                            🏪
-                        </div>
-                        {% endif %}
-                        <div class="min-w-0 flex-1">
-                            <span class="px-2 py-0.5 bg-[#73AA0F]/10 text-[#155C1B] text-xs font-medium rounded-full">
-                                {{ kategori_labels.get(item.kategori, item.kategori|title) }}
-                            </span>
-                            <h4 class="font-bold text-gray-800 mt-1 truncate">{{ item.nama }}</h4>
-                            {% if item.pemiliki_nama %}
-                            <p class="text-gray-500 text-sm">👤 {{ item.pemiliki_nama }}</p>
+                <!-- UMKM List -->
+                <div x-show="mapMode === 'umkm'" x-transition>
+                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                        🏪 UMKM Terdekat
+                        <span class="text-gray-400 font-normal">({{ umkm_list|length }})</span>
+                    </h3>
+                    {% for item in umkm_list %}
+                    <div class="umkm-card" onclick="focusUMKM({{ item.latitude }}, {{ item.longitude }}, '{{ item.nama|replace("'", "\\'") }}')" 
+                         data-kategori="{{ item.kategori }}" data-nama="{{ item.nama|lower }}">
+                        <div class="flex items-start gap-3">
+                            {% if item.foto_url %}
+                            <img src="{{ item.foto_url }}" alt="{{ item.nama }}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
+                            {% else %}
+                            <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-[#155C1B] to-[#73AA0F] flex items-center justify-center text-white text-2xl flex-shrink-0">
+                                🏪
+                            </div>
                             {% endif %}
-                            {% if item.dusun %}
-                            <p class="text-gray-400 text-xs">📍 {{ item.dusun }}{% if item.rt %} RT {{ item.rt }}{% endif %}</p>
-                            {% endif %}
+                            <div class="min-w-0 flex-1">
+                                <span class="px-2 py-0.5 bg-[#73AA0F]/10 text-[#155C1B] text-xs font-medium rounded-full">
+                                    {{ kategori_labels.get(item.kategori, item.kategori|title) }}
+                                </span>
+                                <h4 class="font-bold text-gray-800 mt-1 truncate">{{ item.nama }}</h4>
+                                {% if item.pemiliki_nama %}
+                                <p class="text-gray-500 text-sm">👤 {{ item.pemiliki_nama }}</p>
+                                {% endif %}
+                                {% if item.dusun %}
+                                <p class="text-gray-400 text-xs">📍 {{ item.dusun }}{% if item.rt %} RT {{ item.rt }}{% endif %}</p>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
+                    {% else %}
+                    <div class="text-center py-8 text-gray-500">
+                        <div class="text-4xl mb-2">🏪</div>
+                        <p>Belum ada data UMKM</p>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% else %}
-                <div class="text-center py-8 text-gray-500">
-                    <div class="text-4xl mb-2">🏪</div>
-                    <p>Belum ada data UMKM</p>
+
+                <!-- RT/RW List -->
+                <div x-show="mapMode === 'rtrw'" x-transition>
+                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                        🏘️ Daftar RT/RW
+                        <span class="text-gray-400 font-normal" id="rtrw-count"></span>
+                    </h3>
+                    <div id="rtrw-list"></div>
                 </div>
-                {% endfor %}
             </div>
         </div>
 
@@ -167,9 +212,9 @@
                 <div>
                     <h4 class="font-semibold text-[#155C1B] mb-2">🗺️ Fitur Peta</h4>
                     <ul class="text-gray-600 text-sm space-y-1">
-                        <li>• Klik marker untuk melihat detail UMKM</li>
-                        <li>• Filter berdasarkan kategori usaha</li>
-                        <li>• Pencarian UMKM by nama</li>
+                        <li>• <strong>Mode UMKM:</strong> Lihat lokasi bisnis & filter berdasarkan kategori</li>
+                        <li>• <strong>Mode RT/RW:</strong> Lihat pembagian wilayah administrasi</li>
+                        <li>• Klik marker untuk melihat detail</li>
                         <li>• Navigasi zoom dan pan</li>
                     </ul>
                 </div>
@@ -184,6 +229,16 @@
     {% include 'partials/footer.html' %}
 
     <script>
+        // Alpine.js state
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('mapApp', () => ({
+                mapMode: 'umkm',
+                switchMapMode() {
+                    // This is called from HTML onclick
+                }
+            }));
+        });
+
         // Initialize map
         const map = L.map('map').setView([-7.7004775, 109.6432848], 15);
 
@@ -203,11 +258,116 @@
             "Satellite": satelliteLayer
         };
 
+        // Layer groups
+        const batasDesaLayer = L.layerGroup();
+        const rtrwLayer = L.layerGroup();
+        const umkmLayer = L.layerGroup();
+
+        // Load village boundary GeoJSON
+        fetch('/geojson/batas_desa.geojson')
+            .then(res => res.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: {
+                        color: '#155C1B',
+                        weight: 3,
+                        fillOpacity: 0.1,
+                        fillColor: '#73AA0F'
+                    }
+                }).addTo(batasDesaLayer);
+            })
+            .catch(err => console.log('Village boundary not loaded:', err));
+
+        // Load RT/RW from database (injected by server)
+        const rtrwMarkers = [];
+        const rtrwData = {{ rtrw_geojson|tojson }};
+        
+        const features = rtrwData.features || [];
+        const rtrwList = document.getElementById('rtrw-list');
+        const rtrwCount = document.getElementById('rtrw-count');
+        if (rtrwCount) rtrwCount.textContent = `(${features.length})`;
+                
+                if (rtrwList) {
+                    features.forEach((feature, idx) => {
+                        const props = feature.properties || {};
+                        
+                        // Build label
+                        let label = '';
+                        if (props.rt && props.rw) {
+                            label = `RT ${props.rt} / RW ${props.rw}`;
+                        } else if (props.rw) {
+                            label = `RW ${props.rw}`;
+                        } else if (props.jenis) {
+                            label = props.jenis.charAt(0).toUpperCase() + props.jenis.slice(1);
+                        } else {
+                            label = `Area ${idx + 1}`;
+                        }
+                        
+                        // Get coordinates
+                        let lat = null, lng = null;
+                        if (feature.geometry.type === 'Point') {
+                            [lng, lat] = feature.geometry.coordinates;
+                        }
+                        
+                        const card = document.createElement('div');
+                        card.className = 'rt-card mb-2';
+                        card.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div class="min-w-0 flex-1">
+                                    <span class="font-semibold text-gray-800 text-sm">${label}</span>
+                                    ${props.nama_ketua ? `<p class="text-gray-500 text-xs truncate">👤 ${props.nama_ketua}</p>` : ''}
+                                    ${props.wilayah ? `<p class="text-gray-400 text-xs truncate">📍 ${props.wilayah}</p>` : ''}
+                                </div>
+                                <span class="text-xl flex-shrink-0 ml-2">${props.jenis === 'RW' ? '🏢' : '🏠'}</span>
+                            </div>
+                        `;
+                        
+                        if (lat && lng) {
+                            card.onclick = () => {
+                                map.setView([lat, lng], 18);
+                                rtrwMarkers.forEach(m => {
+                                    if (Math.abs(m.getLatLng().lat - lat) < 0.0001) {
+                                        m.openPopup();
+                                    }
+                                });
+                            };
+                        }
+                        
+                        rtrwList.appendChild(card);
+                        
+                        // Create marker
+                        if (feature.geometry.type === 'Point' && lat && lng) {
+                            const isRW = props.jenis === 'RW';
+                            const icon = L.divIcon({
+                                html: `<div style="background:${isRW ? '#E65100' : '#1565C0'};color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${isRW ? 'RW' : 'RT'}</div>`,
+                                className: 'custom-marker',
+                                iconSize: [36, 36],
+                                iconAnchor: [18, 18]
+                            });
+                            
+                            const popupContent = `
+                                <div class="text-sm min-w-[180px]">
+                                    <h4 class="font-bold text-gray-800 mb-1">${label}</h4>
+                                    ${props.nama_ketua ? `<p class="text-gray-600">👤 ${props.nama_ketua}</p>` : ''}
+                                    ${props.jabatan ? `<p class="text-gray-500">📋 ${props.jabatan}</p>` : ''}
+                                    ${props.wilayah ? `<p class="text-gray-500">📍 ${props.wilayah}</p>` : ''}
+                                    ${props.no_hp ? `<p class="text-gray-500">📞 ${props.no_hp}</p>` : ''}
+                                </div>
+                            `;
+                            
+                            const marker = L.marker([lat, lng], {icon: icon})
+                                .bindPopup(popupContent)
+                                .addTo(rtrwLayer);
+                            
+                            rtrwMarkers.push(marker);
+                        }
+                    });
+                }
+
         // UMKM markers
-        const markers = [];
+        const umkmMarkers = [];
         const umkmData = {{ umkm_geojson|tojson }};
 
-        // Create markers for each UMKM
         umkmData.features.forEach(feature => {
             if (feature.geometry && feature.geometry.coordinates) {
                 const props = feature.properties;
@@ -219,7 +379,7 @@
                 });
 
                 const marker = L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], {icon: icon})
-                    .addTo(map);
+                    .addTo(umkmLayer);
 
                 const popupContent = `
                     <div style="min-width:200px">
@@ -229,40 +389,88 @@
                         ${props.pemilik ? `<p style="font-size:13px;color:#666">👤 ${props.pemilik}</p>` : ''}
                         ${props.alamat ? `<p style="font-size:13px;color:#666">📍 ${props.alamat}</p>` : ''}
                         ${props.kontak ? `<p style="font-size:13px;color:#666">📞 ${props.kontak}</p>` : ''}
-                        ${props.harga ? `<p style="font-size:13px;color:#155C1B;font-weight:500">💰 ${props.harga}</p>` : ''}
                     </div>
                 `;
 
                 marker.bindPopup(popupContent);
                 marker.category = props.kategori || 'umum';
                 marker.nama = (props.nama || '').toLowerCase();
-                markers.push(marker);
+                umkmMarkers.push(marker);
             }
         });
 
         // Layer control
         L.control.layers(baseMaps).addTo(map);
 
+        // Default: show UMKM mode
+        batasDesaLayer.addTo(map);
+        umkmLayer.addTo(map);
+
+        // Mode switching function
+        function switchMapMode() {
+            // Get current mode from Alpine
+            const mainEl = document.querySelector('main[x-data]');
+            let mode = 'umkm';
+            if (mainEl && mainEl._x_dataStack) {
+                const data = mainEl._x_dataStack[0];
+                mode = data.mapMode || 'umkm';
+            }
+            
+            // Remove all mode layers from map
+            if (map.hasLayer(rtrwLayer)) map.removeLayer(rtrwLayer);
+            if (map.hasLayer(umkmLayer)) map.removeLayer(umkmLayer);
+            
+            // Always show batas desa
+            if (!map.hasLayer(batasDesaLayer)) batasDesaLayer.addTo(map);
+            
+            // Show mode-specific layer
+            if (mode === 'umkm') {
+                umkmLayer.addTo(map);
+            } else if (mode === 'rtrw') {
+                rtrwLayer.addTo(map);
+            }
+        }
+        
+        // Set up Alpine.js watcher
+        document.addEventListener('alpine:initialized', () => {
+            const mainEl = document.querySelector('main[x-data]');
+            if (mainEl) {
+                const unwatch = mainEl.__x.$watch('mapMode', () => {
+                    switchMapMode();
+                });
+            }
+        });
+
+        // Also expose function globally for onclick
+        window.switchMapMode = switchMapMode;
+
         // Filter function
         function filterUMKM(category) {
-            // Update button states
             document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('btn-' + category).classList.add('active');
 
-            // Show/hide markers
-            markers.forEach(marker => {
+            umkmMarkers.forEach(marker => {
                 if (category === 'all' || marker.category === category) {
-                    map.addLayer(marker);
+                    if (!umkmLayer.hasLayer(marker)) umkmLayer.addLayer(marker);
                 } else {
-                    map.removeLayer(marker);
+                    umkmLayer.removeLayer(marker);
+                }
+            });
+
+            // Filter sidebar cards
+            document.querySelectorAll('.umkm-card').forEach(card => {
+                if (category === 'all' || card.dataset.kategori === category) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
                 }
             });
         }
 
         // Focus on specific UMKM
         function focusUMKM(lat, lng, nama) {
-            map.setView([lat, lng], 17);
-            markers.forEach(marker => {
+            map.setView([lat, lng], 18);
+            umkmMarkers.forEach(marker => {
                 if (marker.nama.includes(nama.toLowerCase())) {
                     marker.openPopup();
                 }
@@ -270,27 +478,24 @@
         }
 
         // Search functionality
-        document.getElementById('search-input').addEventListener('input', function(e) {
+        document.getElementById('search-umkm')?.addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             const cards = document.querySelectorAll('.umkm-card');
-            const visibleCategories = new Set();
 
             cards.forEach(card => {
                 const nama = card.dataset.nama;
                 if (nama.includes(searchTerm)) {
-                    card.style.display = 'block';
-                    visibleCategories.add(card.dataset.kategori);
+                    card.classList.remove('hidden');
                 } else {
-                    card.style.display = 'none';
+                    card.classList.add('hidden');
                 }
             });
 
-            // Also filter markers
-            markers.forEach(marker => {
+            umkmMarkers.forEach(marker => {
                 if (marker.nama.includes(searchTerm)) {
-                    map.addLayer(marker);
+                    if (!umkmLayer.hasLayer(marker)) umkmLayer.addLayer(marker);
                 } else {
-                    map.removeLayer(marker);
+                    umkmLayer.removeLayer(marker);
                 }
             });
         });

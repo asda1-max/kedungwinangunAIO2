@@ -2470,3 +2470,123 @@ def toggle_agenda_aktif(agenda_id):
     except Exception as e:
         logger.error(f"Error toggling agenda {agenda_id}: {str(e)}")
         return False
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── LOKASI RT/RW HELPERS ──────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_all_lokasi_rtrw(aktif=None):
+    """Ambil semua data lokasi RT/RW"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if aktif is not None:
+            cursor.execute('SELECT * FROM lokasi_rtrw WHERE aktif = ? ORDER BY jenis, rw, rt', (aktif,))
+        else:
+            cursor.execute('SELECT * FROM lokasi_rtrw ORDER BY jenis, rw, rt')
+        results = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in results]
+    except Exception as e:
+        logger.error(f"Error getting lokasi_rtrw: {str(e)}")
+        return []
+
+def get_lokasi_rtrw_by_id(lokasi_id):
+    """Ambil satu lokasi RT/RW by ID"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM lokasi_rtrw WHERE id = ?', (lokasi_id,))
+        result = cursor.fetchone()
+        conn.close()
+        return dict(result) if result else None
+    except Exception as e:
+        logger.error(f"Error getting lokasi_rtrw {lokasi_id}: {str(e)}")
+        return None
+
+def add_lokasi_rtrw(jenis, rw, rt, nama_ketua, jabatan, wilayah, alamat, no_hp, latitude, longitude, aktif=1):
+    """Tambah lokasi RT/RW"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO lokasi_rtrw (jenis, rw, rt, nama_ketua, jabatan, wilayah, alamat, no_hp, latitude, longitude, aktif)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (jenis, rw, rt, nama_ketua, jabatan, wilayah, alamat, no_hp, latitude, longitude, aktif))
+        conn.commit()
+        new_id = cursor.lastrowid
+        conn.close()
+        return new_id
+    except Exception as e:
+        logger.error(f"Error adding lokasi_rtrw: {str(e)}")
+        return None
+
+def update_lokasi_rtrw(lokasi_id, jenis, rw, rt, nama_ketua, jabatan, wilayah, alamat, no_hp, latitude, longitude, aktif):
+    """Update lokasi RT/RW"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE lokasi_rtrw SET jenis=?, rw=?, rt=?, nama_ketua=?, jabatan=?, wilayah=?, 
+            alamat=?, no_hp=?, latitude=?, longitude=?, aktif=?
+            WHERE id=?
+        ''', (jenis, rw, rt, nama_ketua, jabatan, wilayah, alamat, no_hp, latitude, longitude, aktif, lokasi_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating lokasi_rtrw {lokasi_id}: {str(e)}")
+        return False
+
+def delete_lokasi_rtrw(lokasi_id):
+    """Hapus lokasi RT/RW"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM lokasi_rtrw WHERE id = ?', (lokasi_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting lokasi_rtrw {lokasi_id}: {str(e)}")
+        return False
+
+def toggle_lokasi_rtrw_aktif(lokasi_id):
+    """Toggle status aktif lokasi RT/RW"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE lokasi_rtrw SET aktif = NOT aktif WHERE id = ?', (lokasi_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling lokasi_rtrw {lokasi_id}: {str(e)}")
+        return False
+
+def get_lokasi_rtrw_geojson():
+    """Get semua lokasi RT/RW sebagai GeoJSON FeatureCollection"""
+    locations = get_all_lokasi_rtrw(aktif=1)
+    features = []
+    for loc in locations:
+        if loc.get('latitude') and loc.get('longitude'):
+            features.append({
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [float(loc['longitude']), float(loc['latitude'])]
+                },
+                "properties": {
+                    "id": loc['id'],
+                    "jenis": loc.get('jenis', ''),
+                    "rw": loc.get('rw', ''),
+                    "rt": loc.get('rt', ''),
+                    "nama_ketua": loc.get('nama_ketua', ''),
+                    "jabatan": loc.get('jabatan', ''),
+                    "wilayah": loc.get('wilayah', ''),
+                    "alamat": loc.get('alamat', ''),
+                    "no_hp": loc.get('no_hp', '')
+                }
+            })
+    return {"type": "FeatureCollection", "features": features}

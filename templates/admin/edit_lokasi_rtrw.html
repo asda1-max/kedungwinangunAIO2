@@ -1,0 +1,136 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Edit Lokasi RT/RW - Admin Panel{% endblock %}
+{% block page_title %}Edit Lokasi RT/RW{% endblock %}
+{% block page_subtitle %}Edit titik lokasi di peta{% endblock %}
+
+{% block content %}
+<div class="form-container animate-in">
+    <form action="{{ url_for('admin_rtrw.edit', id=location.id) }}" method="POST" class="form">
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📋 Data RT/RW</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="jenis">Jenis <span class="text-red-500">*</span></label>
+                    <select id="jenis" name="jenis" required>
+                        <option value="RW" {% if location.jenis == 'RW' %}selected{% endif %}>RW</option>
+                        <option value="RT" {% if location.jenis == 'RT' %}selected{% endif %}>RT</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rw">RW</label>
+                    <input type="text" id="rw" name="rw" value="{{ location.rw or '' }}" placeholder="Contoh: 05">
+                </div>
+                <div class="form-group">
+                    <label for="rt">RT</label>
+                    <input type="text" id="rt" name="rt" value="{{ location.rt or '' }}" placeholder="Contoh: 01">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">👤 Data Ketua</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nama_ketua">Nama Ketua</label>
+                    <input type="text" id="nama_ketua" name="nama_ketua" value="{{ location.nama_ketua or '' }}" placeholder="Nama lengkap">
+                </div>
+                <div class="form-group">
+                    <label for="jabatan">Jabatan</label>
+                    <input type="text" id="jabatan" name="jabatan" value="{{ location.jabatan or '' }}" placeholder="Contoh: Ketua RW 05">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="no_hp">No. HP</label>
+                <input type="text" id="no_hp" name="no_hp" value="{{ location.no_hp or '' }}" placeholder="Contoh: 081234567890">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📍 Lokasi</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="wilayah">Wilayah</label>
+                    <input type="text" id="wilayah" name="wilayah" value="{{ location.wilayah or '' }}" placeholder="Contoh: RT 01 / RW 05">
+                </div>
+                <div class="form-group">
+                    <label for="alamat">Alamat</label>
+                    <input type="text" id="alamat" name="alamat" value="{{ location.alamat or '' }}" placeholder="Alamat lengkap">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">🗺️ Koordinat Peta</h3>
+            <p class="text-sm text-gray-500 mb-4">Klik pada peta untuk memilih lokasi, atau isi koordinat manually.</p>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="latitude">Latitude</label>
+                    <input type="text" id="latitude" name="latitude" value="{{ location.latitude or '' }}" placeholder="-7.7004" step="any">
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude</label>
+                    <input type="text" id="longitude" name="longitude" value="{{ location.longitude or '' }}" placeholder="109.6432" step="any">
+                </div>
+            </div>
+            <div id="map-picker" style="height: 400px; border-radius: 12px; margin-top: 16px;"></div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">⚙️ Status</h3>
+            <div class="form-group">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="aktif" value="1" {% if location.aktif %}checked{% endif %} class="w-5 h-5 rounded">
+                    <span>Aktif (tampil di peta)</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin_rtrw.index') }}" class="btn-secondary">← Kembali</a>
+            <button type="submit" class="btn-primary">💾 Update</button>
+        </div>
+    </form>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const centerLat = {{ location.latitude if location.latitude else -7.7004775 }};
+    const centerLng = {{ location.longitude if location.longitude else 109.6432848 }};
+    
+    const map = L.map('map-picker').setView([centerLat, centerLng], 17);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Add existing marker if coordinates exist
+    let marker = null;
+    {% if location.latitude and location.longitude %}
+    marker = L.marker([{{ location.latitude }}, {{ location.longitude }}]).addTo(map);
+    {% endif %}
+
+    // Click to place marker
+    map.on('click', function(e) {
+        document.getElementById('latitude').value = e.latlng.lat.toFixed(6);
+        document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
+        
+        if (marker) map.removeLayer(marker);
+        marker = L.marker(e.latlng).addTo(map);
+    });
+
+    // Sync from input fields
+    document.getElementById('latitude').addEventListener('change', updateMarker);
+    document.getElementById('longitude').addEventListener('change', updateMarker);
+    
+    function updateMarker() {
+        const lat = parseFloat(document.getElementById('latitude').value);
+        const lng = parseFloat(document.getElementById('longitude').value);
+        if (!isNaN(lat) && !isNaN(lng)) {
+            if (marker) map.removeLayer(marker);
+            marker = L.marker([lat, lng]).addTo(map);
+            map.setView([lat, lng], 17);
+        }
+    }
+</script>
+{% endblock %}

@@ -28,6 +28,7 @@ from routes.admin_potensi import admin_bp as admin_potensi_bp
 from routes.admin_pengumuman import admin_bp as admin_pengumuman_bp
 from routes.admin_aduan import admin_bp as admin_aduan_bp
 from routes.admin_accounts import admin_bp as admin_accounts_bp
+from routes.admin_rtrw import admin_rtrw_bp
 
 # Legacy imports (for backward compatibility)
 from routes.public import public_bp

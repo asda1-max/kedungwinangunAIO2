@@ -517,13 +517,16 @@ def peta_interaktif():
     from datetime import datetime
 
     try:
-        from models import get_all_pages, get_all_umkm
+        from models import get_all_pages, get_all_umkm, get_lokasi_rtrw_geojson
         desa_info = get_desa_info_with_maps()
         custom_pages = get_all_pages()
 
         # Get UMKM data
         umkm_list = get_all_umkm(aktif=1)
         umkm_geojson = get_umkm_for_geojson(aktif=1)
+        
+        # Get RT/RW locations from database
+        rtrw_geojson = get_lokasi_rtrw_geojson()
 
         # Kategori labels
         kategori_labels = {
@@ -533,7 +536,7 @@ def peta_interaktif():
             'jasa': '🔧 Jasa',
             'pertanian': '🌾 Pertanian',
             'peternakan': '🐔 Peternakan',
-            'perikanan': '🐟 Perikanan',
+            'perikanan': '🐟 Perkins',
             'umum': '🏪 Umum',
         }
 
@@ -549,6 +552,7 @@ def peta_interaktif():
             custom_pages=custom_pages,
             umkm_list=umkm_list,
             umkm_geojson=umkm_geojson,
+            rtrw_geojson=rtrw_geojson,
             kategori_labels=kategori_labels,
         )
     except Exception as e:
