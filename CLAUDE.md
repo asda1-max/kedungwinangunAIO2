@@ -154,6 +154,10 @@ def dashboard():
 | `/struktur/edit/<id>` | admin/edit_struktur.html | Edit structure member |
 | `/struktur/delete/<id>` | - | Delete structure member |
 | `/struktur/toggle/<id>` | - | Toggle member status |
+| `/struktur/import` | - | Batch import dari CSV |
+| `/struktur/export` | - | Export semua data ke CSV |
+| `/struktur/template` | - | Download template CSV |
+| `/umkm/parse-location` | - | Parse Google Maps URL ke koordinat |
 | `/sejarah` | admin/sejarah.html | Village history management |
 | `/sejarah/add` | admin/add_sejarah.html | Add history entry |
 | `/sejarah/edit/<id>` | admin/edit_sejarah.html | Edit history entry |
@@ -286,6 +290,19 @@ add_struktur(kategori, nama, jabatan, deskripsi, nik, alamat, dusun, rt, rw, ...
 update_struktur(id, ...)
 delete_struktur(id)
 toggle_struktur_aktif(id)
+batch_import_struktur(csv_data)  # Batch import dari CSV string
+```
+
+### Batch Import Struktur CSV
+```python
+# CSV format:
+kategori,nama,jabatan,nik,alamat,dusun,rt,rw,telepon,email,status,aktif
+perangkat,Moh. Baequni,Kepala Desa,,,,,001,001,,,Aktif,1
+rw,Wawan Setiawan,Ketua RW 01,,Jl. Rw 01,Kedungwaru,001,001,,,Aktif,1
+rt,Joko Pranowo,Ketua RT 01 RW 01,,Jl. Rt 01,Kedungwaru,001,001,,,Aktif,1
+
+# Kategori valid: perangkat, bpd, pkk, karang_taruna, rt, rw
+# Routes: /admin/struktur/import, /admin/struktur/export, /admin/struktur/template
 ```
 
 ### UMKM
@@ -297,6 +314,28 @@ update_umkm(id, ...)
 delete_umkm(id)
 toggle_umkm_aktif(id)
 get_umkm_for_geojson(aktif=1)  # returns GeoJSON FeatureCollection
+```
+
+### UMKM Google Maps Parser
+```python
+# POST /admin/umkm/parse-location
+# Body: {"maps_url": "https://maps.google.com/..."}
+# Response: {"success": true, "latitude": -7.7004, "longitude": 109.6432, "nama": "Toko Kita"}
+#
+# Supported URL formats:
+# - @lat,lng format: https://maps.google.com/@-7.7004,109.6432,15z
+# - place format: https://maps.google.com/place/Toko+Kita/@...
+# - query format: https://maps.google.com?q=-7.7004,109.6432
+# - Short URLs: https://maps.app.goo.gl/...
+```
+
+### Struktur Foto Upload
+```python
+# Both add_struktur and edit_struktur routes support:
+# - foto_file: Upload file (multipart/form-data)
+# - foto_url: External URL
+# Priority: foto_file > foto_url
+# Upload path: static/uploads/struktur/
 ```
 
 ### Kependudukan
@@ -382,6 +421,13 @@ DEFAULT_USERS = [
 ### Map Embed URL
 ```python
 MAPS_EMBED_URL = "https://maps.google.com/maps?q=Kedungwinangun,+Klirong,+Kebumen&t=&z=13&ie=UTF8&iwloc=&output=embed"
+```
+
+### Default Map Coordinates (Interaktif Peta)
+```python
+MAP_CENTER_LAT = -7.7004775
+MAP_CENTER_LNG = 109.6432848
+MAP_DEFAULT_ZOOM = 15
 ```
 
 ---

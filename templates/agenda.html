@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda - {{ site_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, #155C1B, #73AA0F);
+            transform: translateX(-50%);
+        }
+        @media (max-width: 768px) {
+            .timeline-line {
+                left: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-['Inter']">
+    {% include 'partials/navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-[#155C1B] to-[#2A6726] text-white py-12 md:py-16">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm mb-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Agenda Kegiatan
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold mb-3">Agenda Kegiatan Desa</h1>
+                <p class="text-green-100 max-w-2xl mx-auto">Jadwal kegiatan dan agenda Pemerintahan Desa Kedungwinangun</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="max-w-7xl mx-auto px-4 py-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <form method="GET" action="{{ url_for('public.agenda') }}" class="flex flex-wrap gap-4 items-center">
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium text-gray-600">Tahun:</label>
+                    <select name="tahun" class="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent text-sm">
+                        <option value="">Semua Tahun</option>
+                        {% for t in tahun_list %}
+                        <option value="{{ t }}" {% if tahun_filter == t %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium text-gray-600">Status:</label>
+                    <select name="status" class="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent text-sm">
+                        <option value="">Semua</option>
+                        {% for key, label in status_labels.items() %}
+                        <option value="{{ key }}" {% if status_filter == key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="bg-[#155C1B] text-white px-4 py-2 rounded-lg hover:bg-[#2A6726] transition-colors text-sm font-medium">
+                    Filter
+                </button>
+                <a href="{{ url_for('public.agenda') }}" class="text-gray-500 hover:text-gray-700 text-sm">Reset</a>
+            </form>
+        </div>
+    </section>
+
+    <!-- Main Content - Timeline -->
+    <section class="max-w-7xl mx-auto px-4 py-6 pb-16">
+        {% if agenda_list %}
+        
+        <!-- Upcoming Events -->
+        {% if upcoming %}
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-lg">📅</span>
+                Agenda Mendatang
+                <span class="text-sm font-normal text-gray-500">({{ upcoming|length }} kegiatan)</span>
+            </h2>
+            
+            <div class="relative">
+                <div class="timeline-line hidden md:block"></div>
+                
+                <div class="space-y-8">
+                    {% for agenda in upcoming %}
+                    <div class="relative">
+                        <!-- Timeline dot -->
+                        <div class="absolute left-1/2 -translate-x-1/2 -translate-y-1 w-5 h-5 bg-[#155C1B] rounded-full border-4 border-white shadow-lg z-10 hidden md:block"></div>
+                        
+                        <!-- Card -->
+                        <div class="md:ml-[60px] md:mr-0 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                            <div class="md:flex">
+                                <!-- Date Box -->
+                                <div class="md:w-32 bg-gradient-to-br from-[#155C1B] to-[#2A6726] text-white p-4 flex flex-col items-center justify-center md:border-r border-white/10">
+                                    <div class="text-center">
+                                        {% if agenda.tanggal_mulai %}
+                                        {% set tgl = agenda.tanggal_mulai|string_to_date %}
+                                        <span class="text-3xl font-bold">{{ tgl.day }}</span>
+                                        <span class="block text-sm">{{ tgl.strftime('%b') }}</span>
+                                        <span class="text-xs opacity-80">{{ tgl.year }}</span>
+                                        {% else %}
+                                        <span class="text-3xl font-bold">-</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Content -->
+                                <div class="flex-1 p-5">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-2xl">{{ agenda.icon or '📅' }}</span>
+                                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-semibold">
+                                                {{ status_labels.get(agenda.status, agenda.status) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <h3 class="font-bold text-gray-800 text-lg mb-2">{{ agenda.judul }}</h3>
+                                    {% if agenda.deskripsi %}
+                                    <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ agenda.deskripsi }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+                                        {% if agenda.waktu %}
+                                        <div class="flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            {{ agenda.waktu }}
+                                        </div>
+                                        {% endif %}
+                                        {% if agenda.lokasi %}
+                                        <div class="flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            </svg>
+                                            {{ agenda.lokasi }}
+                                        </div>
+                                        {% endif %}
+                                        {% if agenda.penanggung_jawab %}
+                                        <div class="flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                            </svg>
+                                            {{ agenda.penanggung_jawab }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Past Events -->
+        {% if past %}
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-lg">📋</span>
+                Agenda Sebelumnya
+                <span class="text-sm font-normal text-gray-500">({{ past|length }} kegiatan)</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for agenda in past %}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 opacity-75 hover:opacity-100 transition-opacity">
+                    <div class="flex items-start gap-3">
+                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                            {% if agenda.tanggal_mulai %}
+                            {% set tgl = agenda.tanggal_mulai|string_to_date %}
+                            <span class="text-lg font-bold text-gray-700">{{ tgl.day }}</span>
+                            <span class="text-[10px] text-gray-500">{{ tgl.strftime('%b') }}</span>
+                            {% else %}
+                            <span class="text-lg">📅</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-gray-700 text-sm mb-1 line-clamp-2">{{ agenda.judul }}</h3>
+                            {% if agenda.lokasi %}
+                            <p class="text-xs text-gray-500 truncate">{{ agenda.lokasi }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-16 bg-white rounded-xl">
+            <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">Belum Ada Agenda</h3>
+            <p class="text-gray-500">Agenda kegiatan desa akan ditampilkan di sini</p>
+        </div>
+        {% endif %}
+    </section>
+
+    {% include 'partials/footer.html' %}
+    {% include 'partials/chatbot.html' %}
+    <script src="{{ url_for('static', filename='dark-mode.js') }}"></script>
+</body>
+</html>

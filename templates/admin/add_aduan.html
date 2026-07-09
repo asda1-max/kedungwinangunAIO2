@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Aduan - Admin Panel</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    {% include 'admin/base.html' %}
+
+    <!-- Main Content -->
+    <div class="ml-64 min-h-screen">
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Tambah Aduan</h1>
+                    <p class="text-sm text-gray-500 mt-0.5">Tambah data aduan baru</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="{{ url_for('admin.aduan') }}" class="flex items-center gap-2 px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Kembali
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="p-6">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for category, message in messages %}
+                <div class="px-4 py-3 rounded-lg {% if category == 'error' %}bg-red-100 text-red-700 border border-red-200{% elif category == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- Form -->
+            <form method="POST" action="{{ url_for('admin.add_aduan') }}" class="max-w-3xl">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#155C1B] to-[#2A6726]">
+                        <h2 class="text-lg font-semibold text-white">Form Aduan Baru</h2>
+                        <p class="text-sm text-green-200 mt-0.5">Tambahkan data aduan masyarakat</p>
+                    </div>
+
+                    <div class="p-6 space-y-5">
+                        <!-- Judul -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                Judul Aduan <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="judul" required
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent transition-all"
+                                   placeholder="Masukkan judul aduan">
+                        </div>
+
+                        <!-- Kategori -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                Kategori <span class="text-red-500">*</span>
+                            </label>
+                            <select name="kategori" required
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent transition-all">
+                                <option value="">-- Pilih Kategori --</option>
+                                <option value="infrastruktur">🏗️ Infrastruktur</option>
+                                <option value="lingkungan">🌳 Lingkungan</option>
+                                <option value="pelayanan">🏛️ Pelayanan</option>
+                                <option value="keamanan">🔒 Keamanan</option>
+                                <option value="kebersihan">🧹 Kebersihan</option>
+                                <option value="lainnya">📋 Lainnya</option>
+                            </select>
+                        </div>
+
+                        <!-- Nama Pengirim -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                Nama Pengirim <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="nama_pengirim" required
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent transition-all"
+                                   placeholder="Nama pelapor">
+                        </div>
+
+                        <!-- Kontak -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                                <input type="email" name="email"
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent transition-all"
+                                       placeholder="email@contoh.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Telepon</label>
+                                <input type="text" name="telepon"
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent transition-all"
+                                       placeholder="08xxxxxxxxxx">
+                            </div>
+                        </div>
+
+                        <!-- Lokasi -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Lokasi</label>
+                            <input type="text" name="lokasi"
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent transition-all"
+                                   placeholder="Contoh: Jl. Desa RT 03 RW 01">
+                        </div>
+
+                        <!-- Isi -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                Isi Aduan <span class="text-red-500">*</span>
+                            </label>
+                            <textarea name="isi" required rows="5"
+                                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent transition-all"
+                                      placeholder="Jelaskan pengaduan Anda secara lengkap..."></textarea>
+                        </div>
+
+                        <!-- Status -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
+                            <select name="status"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#155C1B] focus:border-transparent transition-all">
+                                <option value="pending">⏳ Pending</option>
+                                <option value="diproses">🔄 Diproses</option>
+                                <option value="selesai">✅ Selesai</option>
+                                <option value="ditolak">❌ Ditolak</option>
+                            </select>
+                        </div>
+
+                        <!-- Status Tampil -->
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="aktif" id="aktif" value="1" checked
+                                   class="w-5 h-5 text-[#155C1B] border-gray-300 rounded focus:ring-[#155C1B]">
+                            <label for="aktif" class="text-sm font-medium text-gray-700">Tampilkan di Website</label>
+                        </div>
+                    </div>
+
+                    <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
+                        <a href="{{ url_for('admin.aduan') }}" class="px-5 py-2.5 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            Batal
+                        </a>
+                        <button type="submit" class="px-5 py-2.5 bg-[#155C1B] text-white rounded-lg hover:bg-[#0d4214] transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                            Simpan Aduan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- Sidebar Toggle Script -->
+    <script>
+        document.getElementById('toggle-sidebar')?.addEventListener('click', function() {
+            document.getElementById('sidebar')?.classList.toggle('-translate-x-full');
+            document.getElementById('main-content')?.classList.toggle('ml-0');
+            document.getElementById('main-content')?.classList.toggle('ml-64');
+        });
+    </script>
+</body>
+</html>

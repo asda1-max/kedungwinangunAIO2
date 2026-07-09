@@ -76,6 +76,78 @@ def migrate_database():
         cursor.execute("UPDATE users SET nip = nik WHERE role = 'dinas' AND nip IS NULL")
         migrated_dinas = cursor.rowcount
 
+        # ── NEW TABLES MIGRATION ────────────────────────────────────────
+        
+        # Aduan table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS aduan (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nomor_aduan TEXT UNIQUE,
+                nama TEXT NOT NULL,
+                email TEXT,
+                telepon TEXT,
+                nik TEXT,
+                alamat TEXT,
+                dusun TEXT,
+                judul TEXT NOT NULL,
+                kategori TEXT DEFAULT 'infrastruktur',
+                lokasi TEXT,
+                isi TEXT NOT NULL,
+                lampiran TEXT,
+                status TEXT DEFAULT 'pending',
+                tanggapan TEXT,
+                responded_by INTEGER,
+                responded_at TIMESTAMP,
+                aktif INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        logger.info("Table 'aduan' ready")
+
+        # Program Kerja table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS program_kerja (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nama TEXT NOT NULL,
+                kategori TEXT DEFAULT 'pembangunan',
+                tahun INTEGER,
+                tahun_mulai INTEGER,
+                tahun_selesai INTEGER,
+                target TEXT,
+                realiasi TEXT,
+                sasaran TEXT,
+                anggaran INTEGER DEFAULT 0,
+                icon TEXT DEFAULT '📋',
+                deskripsi TEXT,
+                status TEXT DEFAULT 'rencana',
+                progress INTEGER DEFAULT 0,
+                aktif INTEGER DEFAULT 1,
+                urutan INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        logger.info("Table 'program_kerja' ready")
+
+        # Agenda table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS agenda (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                judul TEXT NOT NULL,
+                deskripsi TEXT,
+                tanggal DATE NOT NULL,
+                tanggal_mulai DATE,
+                waktu TEXT,
+                lokasi TEXT,
+                icon TEXT DEFAULT '📅',
+                kategori TEXT DEFAULT 'umum',
+                urutan INTEGER DEFAULT 0,
+                aktif INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        logger.info("Table 'agenda' ready")
+        
         conn.commit()
         conn.close()
 
@@ -331,6 +403,69 @@ def init_database():
                 responded_by INTEGER,
                 responded_at TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            -- Aduan Publik
+            CREATE TABLE IF NOT EXISTS aduan (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nomor_aduan TEXT UNIQUE,
+                nama TEXT NOT NULL,
+                email TEXT,
+                telepon TEXT,
+                nik TEXT,
+                alamat TEXT,
+                dusun TEXT,
+                judul TEXT NOT NULL,
+                kategori TEXT DEFAULT 'infrastruktur',
+                lokasi TEXT,
+                deskripsi TEXT NOT NULL,
+                lampiran_url TEXT,
+                status TEXT DEFAULT 'menunggu',
+                prioritas TEXT DEFAULT 'normal',
+                responded_by INTEGER,
+                responded_at TIMESTAMP,
+                catatan TEXT,
+                aktif INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            -- Program Kerja Desa
+            CREATE TABLE IF NOT EXISTS program_kerja (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                judul TEXT NOT NULL,
+                deskripsi TEXT,
+                kategori TEXT DEFAULT 'pembangunan',
+                tahun INTEGER,
+                target TEXT,
+                realiasi TEXT,
+                anggaran TEXT,
+                icon TEXT DEFAULT '📋',
+                status TEXT DEFAULT 'berlangsung',
+                aktif INTEGER DEFAULT 1,
+                urutan INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            -- Agenda Desa (Timeline)
+            CREATE TABLE IF NOT EXISTS agenda (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                judul TEXT NOT NULL,
+                deskripsi TEXT,
+                kategori TEXT DEFAULT 'kegiatan',
+                tanggal_mulai DATE,
+                tanggal_selesai DATE,
+                waktu TEXT,
+                lokasi TEXT,
+                icon TEXT DEFAULT '📅',
+                penanggung_jawab TEXT,
+                peserta TEXT,
+                status TEXT DEFAULT 'akan_datang',
+                aktif INTEGER DEFAULT 1,
+                urutan INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         ''')
 
@@ -1970,4 +2105,368 @@ def delete_kritik_saran(ks_id):
         return True
     except Exception as e:
         logger.error(f"Error deleting kritik_saran: {str(e)}")
+        return False
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── ADUAN PUBLIK ─────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_all_aduan(aktif=None, status=None):
+    """Ambil semua aduan"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = 'SELECT * FROM aduan WHERE 1=1'
+        params = []
+        if aktif is not None:
+            query += ' AND aktif = ?'
+            params.append(aktif)
+        if status:
+            query += ' AND status = ?'
+            params.append(status)
+        query += ' ORDER BY created_at DESC'
+        cursor.execute(query, params)
+        items = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return items
+    except Exception as e:
+        logger.error(f"Error getting all aduan: {str(e)}")
+        return []
+
+def get_aduan_by_id(aduan_id):
+    """Ambil satu aduan berdasarkan ID"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM aduan WHERE id = ?', (aduan_id,))
+        item = cursor.fetchone()
+        conn.close()
+        return dict(item) if item else None
+    except Exception as e:
+        logger.error(f"Error getting aduan {aduan_id}: {str(e)}")
+        return None
+
+def get_aduan_by_nomor(nomor_aduan):
+    """Ambil aduan berdasarkan nomor"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM aduan WHERE nomor_aduan = ?', (nomor_aduan,))
+        item = cursor.fetchone()
+        conn.close()
+        return dict(item) if item else None
+    except Exception as e:
+        logger.error(f"Error getting aduan by nomor: {str(e)}")
+        return None
+
+def add_aduan(nama, judul, deskripsi, kategori='infrastruktur', email=None, telepon=None, nik=None,
+              alamat=None, dusun=None, lokasi=None, lampiran_url=None):
+    """Tambah aduan baru"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Generate nomor aduan: KDGW-ADUAN-YYYYMMDD-XXXX
+        import uuid
+        from datetime import datetime
+        nomor = f"KDGW-ADUAN-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}"
+        
+        cursor.execute('''
+            INSERT INTO aduan (nomor_aduan, nama, email, telepon, nik, alamat, dusun, judul, 
+                             kategori, lokasi, deskripsi, lampiran_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (nomor, nama, email, telepon, nik, alamat, dusun, judul, kategori, lokasi, deskripsi, lampiran_url))
+        conn.commit()
+        conn.close()
+        return True, nomor
+    except Exception as e:
+        logger.error(f"Error adding aduan: {str(e)}")
+        return False, None
+
+def update_aduan(aduan_id, judul, deskripsi, kategori, lokasi, status, prioritas, catatan):
+    """Update aduan"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE aduan SET judul = ?, deskripsi = ?, kategori = ?, lokasi = ?, 
+                           status = ?, prioritas = ?, catatan = ?, updated_at = ?
+            WHERE id = ?
+        ''', (judul, deskripsi, kategori, lokasi, status, prioritas, catatan, 
+              datetime.now().strftime("%Y-%m-%d %H:%M:%S"), aduan_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating aduan {aduan_id}: {str(e)}")
+        return False
+
+def delete_aduan(aduan_id):
+    """Hapus aduan"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM aduan WHERE id = ?', (aduan_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting aduan {aduan_id}: {str(e)}")
+        return False
+
+def respond_aduan(aduan_id, catatan, responded_by):
+    """Respon aduan"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE aduan SET status = 'ditanggapi', catatan = ?, responded_by = ?, 
+                           responded_at = ?, updated_at = ?
+            WHERE id = ?
+        ''', (catatan, responded_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+              datetime.now().strftime("%Y-%m-%d %H:%M:%S"), aduan_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error responding aduan {aduan_id}: {str(e)}")
+        return False
+
+def get_aduan_stats():
+    """Ambil statistik aduan"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) as total FROM aduan')
+        total = cursor.fetchone()['total'] or 0
+        cursor.execute('SELECT COUNT(*) as menunggu FROM aduan WHERE status = ?', ('menunggu',))
+        menunggu = cursor.fetchone()['menunggu'] or 0
+        cursor.execute('SELECT COUNT(*) as ditanggapi FROM aduan WHERE status = ?', ('ditanggapi',))
+        ditanggapi = cursor.fetchone()['ditanggapi'] or 0
+        cursor.execute('SELECT COUNT(*) as selesai FROM aduan WHERE status = ?', ('selesai',))
+        selesai = cursor.fetchone()['selesai'] or 0
+        conn.close()
+        return {'total': total, 'menunggu': menunggu, 'ditanggapi': ditanggapi, 'selesai': selesai}
+    except Exception as e:
+        logger.error(f"Error getting aduan stats: {str(e)}")
+        return {'total': 0, 'menunggu': 0, 'ditanggapi': 0, 'selesai': 0}
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── PROGRAM KERJA DESA ───────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_all_program_kerja(aktif=None, tahun=None):
+    """Ambil semua program kerja"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = 'SELECT * FROM program_kerja WHERE 1=1'
+        params = []
+        if aktif is not None:
+            query += ' AND aktif = ?'
+            params.append(aktif)
+        if tahun:
+            query += ' AND tahun = ?'
+            params.append(tahun)
+        query += ' ORDER BY urutan ASC, tahun DESC, id DESC'
+        cursor.execute(query, params)
+        items = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return items
+    except Exception as e:
+        logger.error(f"Error getting all program_kerja: {str(e)}")
+        return []
+
+def get_program_kerja_by_id(program_id):
+    """Ambil satu program kerja berdasarkan ID"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM program_kerja WHERE id = ?', (program_id,))
+        item = cursor.fetchone()
+        conn.close()
+        return dict(item) if item else None
+    except Exception as e:
+        logger.error(f"Error getting program_kerja {program_id}: {str(e)}")
+        return None
+
+def add_program_kerja(judul, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif=1):
+    """Tambah program kerja baru"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT MAX(urutan) as max_order FROM program_kerja')
+        row = cursor.fetchone()
+        max_order = (row['max_order'] or 0) + 1
+        
+        cursor.execute('''
+            INSERT INTO program_kerja (judul, deskripsi, kategori, tahun, target, realiasi, 
+                                      anggaran, icon, status, aktif, urutan)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (judul, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif, max_order))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding program_kerja: {str(e)}")
+        return False
+
+def update_program_kerja(program_id, judul, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif, urutan):
+    """Update program kerja"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE program_kerja SET judul = ?, deskripsi = ?, kategori = ?, tahun = ?,
+                                   target = ?, realiasi = ?, anggaran = ?, icon = ?,
+                                   status = ?, aktif = ?, urutan = ?, updated_at = ?
+            WHERE id = ?
+        ''', (judul, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif, urutan,
+              datetime.now().strftime("%Y-%m-%d %H:%M:%S"), program_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating program_kerja {program_id}: {str(e)}")
+        return False
+
+def delete_program_kerja(program_id):
+    """Hapus program kerja"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM program_kerja WHERE id = ?', (program_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting program_kerja {program_id}: {str(e)}")
+        return False
+
+def toggle_program_kerja_aktif(program_id):
+    """Toggle status aktif program kerja"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE program_kerja SET aktif = NOT aktif WHERE id = ?', (program_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling program_kerja {program_id}: {str(e)}")
+        return False
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── AGENDA DESA (TIMELINE) ───────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def get_all_agenda(aktif=None, status=None, tahun=None):
+    """Ambil semua agenda"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = 'SELECT * FROM agenda WHERE 1=1'
+        params = []
+        if aktif is not None:
+            query += ' AND aktif = ?'
+            params.append(aktif)
+        if status:
+            query += ' AND status = ?'
+            params.append(status)
+        if tahun:
+            query += ' AND strftime("%Y", tanggal_mulai) = ?'
+            params.append(str(tahun))
+        query += ' ORDER BY tanggal_mulai ASC, urutan ASC'
+        cursor.execute(query, params)
+        items = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return items
+    except Exception as e:
+        logger.error(f"Error getting all agenda: {str(e)}")
+        return []
+
+def get_agenda_by_id(agenda_id):
+    """Ambil satu agenda berdasarkan ID"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM agenda WHERE id = ?', (agenda_id,))
+        item = cursor.fetchone()
+        conn.close()
+        return dict(item) if item else None
+    except Exception as e:
+        logger.error(f"Error getting agenda {agenda_id}: {str(e)}")
+        return None
+
+def add_agenda(judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi,
+               icon, penanggung_jawab, peserta, status, aktif=1):
+    """Tambah agenda baru"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT MAX(urutan) as max_order FROM agenda')
+        row = cursor.fetchone()
+        max_order = (row['max_order'] or 0) + 1
+        
+        cursor.execute('''
+            INSERT INTO agenda (judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu,
+                              lokasi, icon, penanggung_jawab, peserta, status, aktif, urutan)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi,
+              icon, penanggung_jawab, peserta, status, aktif, max_order))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error adding agenda: {str(e)}")
+        return False
+
+def update_agenda(agenda_id, judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu,
+                  lokasi, icon, penanggung_jawab, peserta, status, aktif, urutan):
+    """Update agenda"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE agenda SET judul = ?, deskripsi = ?, kategori = ?, tanggal_mulai = ?,
+                           tanggal_selesai = ?, waktu = ?, lokasi = ?, icon = ?,
+                           penanggung_jawab = ?, peserta = ?, status = ?, aktif = ?,
+                           urutan = ?, updated_at = ?
+            WHERE id = ?
+        ''', (judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi,
+              icon, penanggung_jawab, peserta, status, aktif, urutan,
+              datetime.now().strftime("%Y-%m-%d %H:%M:%S"), agenda_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating agenda {agenda_id}: {str(e)}")
+        return False
+
+def delete_agenda(agenda_id):
+    """Hapus agenda"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM agenda WHERE id = ?', (agenda_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting agenda {agenda_id}: {str(e)}")
+        return False
+
+def toggle_agenda_aktif(agenda_id):
+    """Toggle status aktif agenda"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE agenda SET aktif = NOT aktif WHERE id = ?', (agenda_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling agenda {agenda_id}: {str(e)}")
         return False

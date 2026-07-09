@@ -1,0 +1,185 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Detail Aduan - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="flex items-center gap-3 mb-2">
+            <a href="{{ url_for('admin.aduan') }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <h1 class="text-2xl font-bold text-gray-800">Detail Aduan</h1>
+        </div>
+        <p class="text-gray-600">Nomor: <span class="font-mono bg-gray-100 px-2 py-1 rounded">{{ item.nomor_aduan }}</span></p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Detail Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-green-700 to-green-800 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold text-white">{{ item.judul }}</h2>
+                        {% if item.status == 'menunggu' %}
+                        <span class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold">Menunggu</span>
+                        {% elif item.status == 'ditanggapi' %}
+                        <span class="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">Ditanggapi</span>
+                        {% elif item.status == 'selesai' %}
+                        <span class="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold">Selesai</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-sm text-gray-500">Kategori</label>
+                                <p class="font-medium text-gray-800 capitalize">{{ item.kategori }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-500">Lokasi</label>
+                                <p class="font-medium text-gray-800">{{ item.lokasi or '-' }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-500">Prioritas</label>
+                                <p class="font-medium text-gray-800 capitalize">{{ item.prioritas }}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-sm text-gray-500">Tanggal Masuk</label>
+                                <p class="font-medium text-gray-800">{{ item.created_at }}</p>
+                            </div>
+                            {% if item.updated_at %}
+                            <div>
+                                <label class="text-sm text-gray-500">Terakhir Diperbarui</label>
+                                <p class="font-medium text-gray-800">{{ item.updated_at }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label class="text-sm text-gray-500 mb-2 block">Deskripsi Aduan</label>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-gray-700 whitespace-pre-wrap">{{ item.deskripsi }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response Section -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                    <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                        </svg>
+                        Berikan Tanggapan
+                    </h3>
+                </div>
+                <form method="POST" class="p-6">
+                    <input type="hidden" name="action" value="respond">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggapan / Solusi</label>
+                            <textarea name="catatan" rows="4" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent resize-none" placeholder="Tulis tanggapan atau solusi untuk aduan ini...">{{ item.catatan or '' }}</textarea>
+                        </div>
+                        <button type="submit" class="bg-green-700 text-white font-semibold py-2.5 px-6 rounded-lg hover:bg-green-800 transition-colors">
+                            Kirim Tanggapan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Pelapor Info -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    Data Pelapor
+                </h3>
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-xs text-gray-500">Nama</p>
+                        <p class="font-medium text-gray-800">{{ item.nama }}</p>
+                    </div>
+                    {% if item.nik %}
+                    <div>
+                        <p class="text-xs text-gray-500">NIK</p>
+                        <p class="font-mono text-sm text-gray-800">{{ item.nik }}</p>
+                    </div>
+                    {% endif %}
+                    {% if item.email %}
+                    <div>
+                        <p class="text-xs text-gray-500">Email</p>
+                        <p class="text-sm text-gray-800">{{ item.email }}</p>
+                    </div>
+                    {% endif %}
+                    {% if item.telepon %}
+                    <div>
+                        <p class="text-xs text-gray-500">Telepon</p>
+                        <p class="text-sm text-gray-800">{{ item.telepon }}</p>
+                    </div>
+                    {% endif %}
+                    {% if item.alamat %}
+                    <div>
+                        <p class="text-xs text-gray-500">Alamat</p>
+                        <p class="text-sm text-gray-800">{{ item.alamat }}</p>
+                    </div>
+                    {% endif %}
+                    {% if item.dusun %}
+                    <div>
+                        <p class="text-xs text-gray-500">Dusun</p>
+                        <p class="text-sm text-gray-800">{{ item.dusun }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Update Status -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="font-bold text-gray-800 mb-4">Update Status</h3>
+                <form method="POST">
+                    <input type="hidden" name="action" value="update_status">
+                    <input type="hidden" name="judul" value="{{ item.judul }}">
+                    <input type="hidden" name="deskripsi" value="{{ item.deskripsi }}">
+                    <input type="hidden" name="kategori" value="{{ item.kategori }}">
+                    <input type="hidden" name="lokasi" value="{{ item.lokasi }}">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select name="status" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                                <option value="menunggu" {% if item.status == 'menunggu' %}selected{% endif %}>Menunggu</option>
+                                <option value="ditanggapi" {% if item.status == 'ditanggapi' %}selected{% endif %}>Ditanggapi</option>
+                                <option value="selesai" {% if item.status == 'selesai' %}selected{% endif %}>Selesai</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prioritas</label>
+                            <select name="prioritas" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                                <option value="rendah" {% if item.prioritas == 'rendah' %}selected{% endif %}>Rendah</option>
+                                <option value="normal" {% if item.prioritas == 'normal' %}selected{% endif %}>Normal</option>
+                                <option value="tinggi" {% if item.prioritas == 'tinggi' %}selected{% endif %}>Tinggi</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            Update Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
