@@ -86,6 +86,9 @@ conn.close()
 | `umkm` | UMKM listings | nama, kategori, pemiliki_nama, alamat, latitude, longitude, foto_url |
 | `kependudukan` | Demographics data | kategori, label, jumlah, satuan, tahun |
 | `potensi_desa` | Village potentials | nama, kategori, deskripsi, gambar_url, icon |
+| `aduan` | Complaint system | nomor_aduan, nama, email, telepon, nik, alamat, judul, kategori, lokasi, isi, status, tanggapan |
+| `program_kerja` | Work programs | nama, kategori, tahun, target, realiasi, anggaran, icon, status, progress |
+| `agenda` | Village events/agenda | judul, deskripsi, tanggal, tanggal_mulai, waktu, lokasi, icon, kategori, penanggung_jawab, peserta, status |
 | `permohonan_acc` | Registration approvals | user_id, status, created_at |
 
 ---
@@ -122,6 +125,10 @@ def dashboard():
 | `/peta-interaktif` | peta_interaktif.html | Interactive map with UMKM markers |
 | `/page/<slug>` | page.html | Dynamic pages |
 | `/api/berita` | - | JSON: all news |
+| `/aduan` | aduan.html | Complaint form + check status |
+| `/aduan/cek` | aduan_cek.html | Check complaint by nomor |
+| `/program-kerja` | program_kerja.html | Work programs listing |
+| `/agenda` | agenda.html | Village agenda/calendar |
 | `/api/berita/<id>/komentar` | - | GET/POST/DELETE comments |
 | `/api/umkm/geojson` | - | GeoJSON for interactive map |
 
@@ -183,6 +190,19 @@ def dashboard():
 | `/potensi/edit/<id>` | admin/edit_potensi.html | Edit potential |
 | `/potensi/delete/<id>` | - | Delete potential |
 | `/potensi/toggle/<id>` | - | Toggle potential status |
+| `/aduan` | admin/aduan.html | Complaint management |
+| `/aduan/<id>` | admin/aduan_detail.html | Complaint detail + response |
+| `/aduan/delete/<id>` | - | Delete complaint |
+| `/program-kerja` | admin/program_kerja.html | Work programs management |
+| `/program-kerja/add` | admin/add_program_kerja.html | Add work program |
+| `/program-kerja/edit/<id>` | admin/edit_program_kerja.html | Edit work program |
+| `/program-kerja/delete/<id>` | - | Delete work program |
+| `/program-kerja/toggle/<id>` | - | Toggle work program status |
+| `/agenda` | admin/agenda.html | Agenda management |
+| `/agenda/add` | admin/add_agenda.html | Add agenda |
+| `/agenda/edit/<id>` | admin/edit_agenda.html | Edit agenda |
+| `/agenda/delete/<id>` | - | Delete agenda |
+| `/agenda/toggle/<id>` | - | Toggle agenda status |
 
 ---
 
@@ -374,6 +394,37 @@ update_config(key, value)
 get_desa_info()               # Returns {nama, tagline, deskripsi, jumlah_dusun, ...}
 ```
 
+### Aduan (Complaints)
+```python
+get_all_aduan(aktif=None, status=None)
+get_aduan_by_id(aduan_id)
+get_aduan_by_nomor(nomor_aduan)
+add_aduan(nama, judul, deskripsi, kategori, email, telepon, nik, ...)
+update_aduan(aduan_id, judul, deskripsi, kategori, lokasi, status, prioritas, catatan)
+delete_aduan(aduan_id)
+get_aduan_stats()
+```
+
+### Program Kerja (Work Programs)
+```python
+get_all_program_kerja(aktif=None, tahun=None)
+get_program_kerja_by_id(program_id)
+add_program_kerja(nama, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status)
+update_program_kerja(program_id, nama, deskripsi, kategori, tahun, target, realiasi, ...)
+delete_program_kerja(program_id)
+toggle_program_kerja_aktif(program_id)
+```
+
+### Agenda
+```python
+get_all_agenda(aktif=None, status=None, tahun=None)
+get_agenda_by_id(agenda_id)
+add_agenda(judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu, lokasi, icon, ...)
+update_agenda(agenda_id, judul, deskripsi, kategori, tanggal, tanggal_mulai, ...)
+delete_agenda(agenda_id)
+toggle_agenda_aktif(agenda_id)
+```
+
 ---
 
 ## Struktur Organisasi Categories
@@ -552,6 +603,55 @@ kategori_labels = {
 ## APBDes Jenis
 ```python
 APBDES_JENIS = ['pendapatan', 'belanja', 'pembiayaan']
+```
+
+## Aduan Categories
+```python
+ADUAN_KATEGORI = {
+    'infrastruktur': '🏗️ Infrastruktur',
+    'lingkungan': '🌿 Lingkungan',
+    'kesehatan': '🏥 Kesehatan',
+    'pendidikan': '📚 Pendidikan',
+    'keamanan': '🔒 Keamanan',
+    'pelecehan': '⚠️ Pelecehan/Kekerasan',
+    'korupsi': '💰 Korupsi',
+    'lainnya': '📝 Lainnya',
+}
+
+ADUAN_STATUS = {
+    'pending': '⏳ Menunggu',
+    'diterima': '📋 Diterima',
+    'dalam_proses': '🔄 Dalam Proses',
+    'selesai': '✅ Selesai',
+    'ditolak': '❌ Ditolak',
+}
+```
+
+## Program Kerja Status
+```python
+PROGRAM_STATUS = {
+    'rencana': '📋 Rencana',
+    'berlangsung': '🔄 Berlangsung',
+    'selesai': '✅ Selesai',
+}
+```
+
+## Agenda Status
+```python
+AGENDA_STATUS = {
+    'akan_datang': '📅 Akan Datang',
+    'sedang_berlangsung': '🔄 Sedang Berlangsung',
+    'selesai': '✅ Selesai',
+    'dibatalkan': '❌ Dibatalkan',
+}
+
+AGENDA_KATEGORI = {
+    'umum': '📅 Umum',
+    'kegiatan': '🎉 Kegiatan',
+    'rapat': '🏛️ Rapat',
+    'pembangunan': '🏗️ Pembangunan',
+    'pertemuan': '👥 Pertemuan',
+}
 ```
 
 ---
