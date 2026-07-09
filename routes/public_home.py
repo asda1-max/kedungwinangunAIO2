@@ -9,7 +9,7 @@ from models import (
     get_desa_info, get_all_berita, get_config, get_all_galeri,
     get_all_potensi, get_all_pengumuman, get_all_struktur, get_all_pages
 )
-from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
+from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA, LAINNYA_PAGES
 import logging
 
 logger = logging.getLogger(__name__)
@@ -21,6 +21,33 @@ def get_desa_info_with_maps():
     info['maps_embed_url'] = MAPS_EMBED_URL
     info['dusun'] = DUSUN_DATA
     return info
+
+
+def set_nav_active(page_key, request_path=None):
+    """
+    Set active nav link based on page key.
+    If page_key is 'Lainnya', checks if request_path is in LAINNYA_PAGES.
+    """
+    # Check if we should highlight "Lainnya"
+    highlight_lainnya = page_key == "Lainnya" and request_path and request_path in LAINNYA_PAGES
+    
+    result = []
+    for n in NAV_LINKS:
+        if n["label"] == "Lainnya":
+            result.append({
+                "label": n["label"],
+                "href": n["href"],
+                "active": highlight_lainnya,
+                "is_dropdown": True
+            })
+        else:
+            result.append({
+                "label": n["label"],
+                "href": n["href"],
+                "active": n["label"] == page_key,
+                "is_dropdown": False
+            })
+    return result
 
 
 @public_bp.route("/")
@@ -91,7 +118,7 @@ def index():
         return render_template(
             "index.html",
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Beranda"),
             featured_list=featured_list,
             berita_list=grid_berita,
             galeri_list=galeri_list,

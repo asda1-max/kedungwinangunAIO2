@@ -37,7 +37,7 @@ from models import (
     get_all_kependudukan,
     add_kritik_saran,
 )
-from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
+from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA, LAINNYA_PAGES
 from errors import safe_handler, flash_error, ValidationError, NotFoundError, json_success_response
 import logging
 
@@ -53,6 +53,33 @@ def get_desa_info_with_maps():
     info['maps_embed_url'] = MAPS_EMBED_URL
     info['dusun'] = DUSUN_DATA
     return info
+
+
+def set_nav_active(page_key, request_path=None):
+    """
+    Set active nav link based on page key.
+    If page_key is 'Lainnya', checks if request_path is in LAINNYA_PAGES.
+    """
+    # Check if we should highlight "Lainnya"
+    highlight_lainnya = page_key == "Lainnya" and request_path and request_path in LAINNYA_PAGES
+    
+    result = []
+    for n in NAV_LINKS:
+        if n["label"] == "Lainnya":
+            result.append({
+                "label": n["label"],
+                "href": n["href"],
+                "active": highlight_lainnya,
+                "is_dropdown": True
+            })
+        else:
+            result.append({
+                "label": n["label"],
+                "href": n["href"],
+                "active": n["label"] == page_key,
+                "is_dropdown": False
+            })
+    return result
 
 
 # ── Unified Login Route ──────────────────────────────────────────────────
@@ -210,7 +237,7 @@ def index():
         return render_template(
             "index.html",
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Beranda"),
             featured_list=featured_list,
             berita_list=grid_berita,
             galeri_list=galeri_list,
@@ -257,7 +284,7 @@ def berita():
         return render_template(
             "berita.html",
             desa=desa_info,
-            nav_links=[{**n, "active": n["label"] == "Berita"} for n in NAV_LINKS],
+            nav_links=set_nav_active("Berita"),
             berita_list=berita_list,
             show_views=show_views,
             show_tanggal=show_tanggal,
@@ -290,7 +317,7 @@ def detail_berita(berita_id):
         return render_template(
             "detail_berita.html",
             desa=desa_info,
-            nav_links=[{**n, "active": n["label"] == "Berita"} for n in NAV_LINKS],
+            nav_links=set_nav_active("Berita"),
             artikel=artikel,
             show_views=show_views,
             show_tanggal=show_tanggal,
@@ -328,7 +355,7 @@ def kontak():
         return render_template(
             "kontak.html",
             desa=desa_info,
-            nav_links=[{**n, "active": n["label"] == "Kontak"} for n in NAV_LINKS],
+            nav_links=set_nav_active("Kontak"),
             kontak=kontak_data,
             tahun=datetime.now().year,
             config=kontak_data,
@@ -374,7 +401,7 @@ def kritik_saran():
         return render_template(
             "kritik_saran.html",
             desa=desa_info,
-            nav_links=[{**n, "active": False} for n in NAV_LINKS],
+            nav_links=set_nav_active("Kontak"),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -428,7 +455,7 @@ def galeri():
         return render_template(
             "galeri.html",
             desa=desa_info,
-            nav_links=[{**n, "active": n["label"] == "Galeri"} for n in NAV_LINKS],
+            nav_links=set_nav_active("Galeri"),
             foto_list=foto_list,
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
@@ -514,7 +541,7 @@ def peta_interaktif():
             "peta_interaktif.html",
             page={"title": "Peta Interaktif"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -575,7 +602,7 @@ def struktur():
             "struktur.html",
             page={"title": "Struktur Organisasi"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Sejarah"),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -615,7 +642,7 @@ def struktur_detail(struktur_id):
             item=item,
             related=related,
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Sejarah"),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -698,7 +725,7 @@ def sejarah():
             "sejarah.html",
             page={"title": "Sejarah Desa"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Sejarah"),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -735,7 +762,7 @@ def info_kependudukan():
             page={"title": "Info Kependudukan"},
             stats=stats,
             site_name=desa_info['nama'],
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Kependudukan"),
             tahun=datetime.now().year,
             custom_pages=custom_pages,
         )
@@ -787,7 +814,7 @@ def pengumuman():
             "pengumuman.html",
             page={"title": "Pengumuman"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Pengumuman"),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -857,7 +884,7 @@ def transparansi():
             "transparansi.html",
             page={"title": "Transparansi"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=tahun,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -1015,7 +1042,7 @@ def aduan():
             "aduan.html",
             page={"title": "Aduan"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -1050,7 +1077,7 @@ def cek_aduan():
             "cek_aduan.html",
             page={"title": "Cek Aduan"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],

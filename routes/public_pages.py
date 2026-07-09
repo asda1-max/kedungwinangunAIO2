@@ -6,7 +6,7 @@ Part of public.py refactoring
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from datetime import datetime
 from models import get_desa_info, get_config, get_all_galeri, get_all_pages, get_page_by_slug, add_kritik_saran
-from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
+from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA, LAINNYA_PAGES
 import logging
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,33 @@ def get_desa_info_with_maps():
     info['maps_embed_url'] = MAPS_EMBED_URL
     info['dusun'] = DUSUN_DATA
     return info
+
+
+def set_nav_active(page_key, request_path=None):
+    """
+    Set active nav link based on page key.
+    If page_key is 'Lainnya', checks if request_path is in LAINNYA_PAGES.
+    """
+    # Check if we should highlight "Lainnya"
+    highlight_lainnya = page_key == "Lainnya" and request_path and request_path in LAINNYA_PAGES
+    
+    result = []
+    for n in NAV_LINKS:
+        if n["label"] == "Lainnya":
+            result.append({
+                "label": n["label"],
+                "href": n["href"],
+                "active": highlight_lainnya,
+                "is_dropdown": True
+            })
+        else:
+            result.append({
+                "label": n["label"],
+                "href": n["href"],
+                "active": n["label"] == page_key,
+                "is_dropdown": False
+            })
+    return result
 
 
 # ── Galeri ────────────────────────────────────────────────────────────────
@@ -33,7 +60,7 @@ def galeri():
         return render_template(
             "galeri.html",
             desa=desa_info,
-            nav_links=[{**n, "active": n["label"] == "Galeri"} for n in NAV_LINKS],
+            nav_links=set_nav_active("Galeri"),
             foto_list=foto_list,
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
@@ -69,7 +96,7 @@ def kontak():
         return render_template(
             "kontak.html",
             desa=desa_info,
-            nav_links=[{**n, "active": n["label"] == "Kontak"} for n in NAV_LINKS],
+            nav_links=set_nav_active("Kontak"),
             kontak=kontak_data,
             tahun=datetime.now().year,
             config=kontak_data,
@@ -115,7 +142,7 @@ def kritik_saran():
         return render_template(
             "kritik_saran.html",
             desa=desa_info,
-            nav_links=[{**n, "active": False} for n in NAV_LINKS],
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],

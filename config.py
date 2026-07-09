@@ -57,6 +57,7 @@ DEFAULT_CONFIG = {
 }
 
 # ── Nav Links (Static) ─────────────────────────────────────────────────
+# "Lainnya" is a special dropdown marker - sub-pages are handled in template
 NAV_LINKS = [
     {"label": "Beranda", "href": "/", "active": True},
     {"label": "Sejarah", "href": "/sejarah", "active": False},
@@ -65,6 +66,18 @@ NAV_LINKS = [
     {"label": "Berita", "href": "/berita", "active": False},
     {"label": "Galeri", "href": "/galeri", "active": False},
     {"label": "Kontak", "href": "/kontak", "active": False},
+    {"label": "Lainnya", "href": "#", "active": False, "is_dropdown": True},
+]
+
+# Pages inside "Lainnya" dropdown - used to highlight Lainnya when active
+LAINNYA_PAGES = [
+    "/aduan", "/aduan/cek",
+    "/kritik-saran",
+    "/program-kerja",
+    "/agenda",
+    "/peta-interaktif",
+    "/transparansi",
+    "/struktur",
 ]
 
 # ── Data Static ────────────────────────────────────────────────────────

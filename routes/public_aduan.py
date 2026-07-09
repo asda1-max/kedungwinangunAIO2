@@ -6,7 +6,7 @@ Part of public.py refactoring
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from datetime import datetime
 from models import get_desa_info, get_all_pages, add_aduan, get_aduan_by_nomor, get_all_aduan, get_all_program_kerja
-from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
+from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA, LAINNYA_PAGES
 import logging
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,34 @@ def get_desa_info_with_maps():
     info['maps_embed_url'] = MAPS_EMBED_URL
     info['dusun'] = DUSUN_DATA
     return info
+
+
+def set_nav_active(page_key, request_path=None):
+    """
+    Set active nav link based on page key.
+    If page_key is 'Lainnya', checks if request_path is in LAINNYA_PAGES.
+    """
+    # Check if we should highlight "Lainnya"
+    highlight_lainnya = page_key == "Lainnya" and request_path and request_path in LAINNYA_PAGES
+    
+    result = []
+    for n in NAV_LINKS:
+        if n["label"] == "Lainnya":
+            # Check if Lainnya should be active (either page_key == "Lainnya" or path is in LAINNYA_PAGES)
+            result.append({
+                "label": n["label"],
+                "href": n["href"],
+                "active": highlight_lainnya,
+                "is_dropdown": True
+            })
+        else:
+            result.append({
+                "label": n["label"],
+                "href": n["href"],
+                "active": n["label"] == page_key,
+                "is_dropdown": False
+            })
+    return result
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -69,7 +97,7 @@ def aduan():
             "aduan.html",
             page={"title": "Aduan"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -103,7 +131,7 @@ def cek_aduan():
             "cek_aduan.html",
             page={"title": "Cek Aduan"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -179,7 +207,7 @@ def program_kerja():
             "program_kerja.html",
             page={"title": "Program Kerja"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],
@@ -270,7 +298,7 @@ def agenda():
             "agenda.html",
             page={"title": "Agenda"},
             desa=desa_info,
-            nav_links=NAV_LINKS,
+            nav_links=set_nav_active("Lainnya", request.path),
             tahun=datetime.now().year,
             site_name=desa_info['nama'],
             site_tagline=desa_info['tagline'],

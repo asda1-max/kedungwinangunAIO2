@@ -35,7 +35,8 @@
             font-family: 'Inter', sans-serif;
             background: #f4f7f2;
             color: #1f2937;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
         }
         body.dark { background: #0f172a; color: #e2e8f0; }
         body.dark header, body.dark footer { background: #052e16 !important; }
@@ -46,8 +47,21 @@
         body.dark .text-gray-600 { color: #cbd5e1 !important; }
         body.dark .text-gray-700 { color: #e2e8f0 !important; }
         body.dark .border-gray-100 { border-color: #334155 !important; }
+
+        /* Smooth Scroll */
+        html { scroll-behavior: smooth; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        body.dark ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #155C1B; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0e4313; }
+
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* Reveal Animation */
         .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
         .reveal.active { opacity: 1; transform: translateY(0); }
         .float { animation: float 3s ease-in-out infinite; }
@@ -56,89 +70,178 @@
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         .animate-fade-in-up { animation: fadeInUp 1s ease forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Card Effects */
         .card-glow { transition: all 0.4s ease; }
         .card-glow:hover { box-shadow: 0 0 30px rgba(21, 92, 27, 0.2), 0 10px 40px rgba(21, 92, 27, 0.1); }
+
+        /* Section Divider */
         .section-divider { height: 2px; background: linear-gradient(90deg, transparent, #155C1B, #73AA0F, #155C1B, transparent); }
-        /* Mobile nav toggle */
-        #mobile-nav { display: none; }
-        #mobile-nav.open { display: block; }
+
+        /* Mobile Nav Animations */
+        #mobile-nav {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
+        }
+        #mobile-nav.open {
+            max-height: 600px;
+            opacity: 1;
+        }
+
+        /* Navbar Backdrop */
+        .navbar-backdrop {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Dark Mode Toggle Animation */
+        .theme-toggle-icon {
+            transition: transform 0.5s ease, opacity 0.3s ease;
+        }
+        #theme-toggle:hover .theme-toggle-icon {
+            transform: rotate(180deg) scale(1.1);
+        }
+
+        /* Glassmorphism Effect */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        body.dark .glass-effect {
+            background: rgba(5, 46, 22, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Button Shine Effect */
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shine::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-shine:hover::before {
+            left: 100%;
+        }
+
+        /* Notification Badge Pulse */
+        @keyframes badge-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .badge-pulse { animation: badge-pulse 2s infinite; }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <!-- NAVBAR -->
-    <nav class="bg-[#155C1B] sticky top-0 z-50 shadow-lg" id="main-navbar">
+    <nav class="bg-[#155C1B] sticky top-0 z-50 shadow-xl navbar-backdrop" id="main-navbar" x-data="{ scrolled: false }"
+         @scroll.window="scrolled = window.scrollY > 20">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex items-center justify-between h-14 md:h-16">
+            <div class="flex items-center justify-between h-16 md:h-18">
                 <!-- Logo -->
-                <a href="{{ url_for('public.index') }}" class="flex items-center gap-2 md:gap-3">
-                    <img src="{{ url_for('static', filename='images/kebumen.png') }}" alt="Logo" class="h-9 w-auto">
+                <a href="{{ url_for('public.index') }}" class="flex items-center gap-2 md:gap-3 group">
+                    <div class="relative">
+                        <img src="{{ url_for('static', filename='images/kebumen.png') }}" alt="Logo" class="h-10 w-auto transition-transform duration-300 group-hover:scale-110">
+                    </div>
                     <div class="hidden sm:block">
-                        <div class="text-white font-bold text-sm md:text-lg leading-tight">{{ site_name or 'Desa' }}</div>
-                        <div class="text-green-300 text-[10px] md:text-xs">{{ site_tagline or '' }}</div>
+                        <div class="text-white font-bold text-base md:text-xl leading-tight tracking-tight">{{ site_name or 'Desa' }}</div>
+                        <div class="text-green-300 text-[10px] md:text-xs opacity-80">{{ site_tagline or '' }}</div>
                     </div>
                 </a>
 
                 <!-- Desktop Nav Links -->
                 <div class="hidden lg:flex items-center gap-1">
                     {% for link in nav_links %}
-                    <a href="{{ link.href }}" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                           {% if link.active %}bg-white/20 text-white{% else %}text-green-100 hover:bg-white/10 hover:text-white{% endif %}">
-                        {{ link.label }}
-                    </a>
-                    {% endfor %}
-
+                    {% if link.label == 'Lainnya' %}
                     <!-- Lainnya Dropdown -->
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" @click.away="open = false"
-                                class="px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 text-green-100 hover:bg-white/10 hover:text-white">
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2
+                                       {% if link.active %}bg-white/25 text-white shadow-md{% else %}text-green-100 hover:bg-white/15 hover:text-white{% endif %}">
                             Lainnya
-                            <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 transition-transform duration-300" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </button>
-                        <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                             class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
-                            <div class="py-2">
-                                <a href="{{ url_for('public.pengumuman') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span class="text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg></span>
-                                    <span class="font-medium">Pengumuman</span>
+                        <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 translate-y-[-10px]"
+                             @click.away="open = false"
+                             class="absolute left-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+                            <div class="p-3">
+                                <a href="{{ url_for('public.pengumuman') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#155C1B]/5 hover:text-[#155C1B] transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-[#155C1B]/10 flex items-center justify-center text-lg">📢</span>
+                                    <div>
+                                        <span class="font-semibold block">Pengumuman</span>
+                                        <span class="text-xs text-gray-400">Informasi penting</span>
+                                    </div>
                                 </a>
-                                <a href="#potensi" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span class="text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg></span>
-                                    <span class="font-medium">Potensi Desa</span>
+                                <a href="#potensi" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#155C1B]/5 hover:text-[#155C1B] transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-[#73AA0F]/10 flex items-center justify-center text-lg">⭐</span>
+                                    <div>
+                                        <span class="font-semibold block">Potensi Desa</span>
+                                        <span class="text-xs text-gray-400">Kekayaan desa</span>
+                                    </div>
                                 </a>
-                                <a href="{{ url_for('public.galeri') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span class="text-lg">📷</span>
-                                    <span class="font-medium">Galeri</span>
+                                <a href="{{ url_for('public.galeri') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#155C1B]/5 hover:text-[#155C1B] transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-lg">📷</span>
+                                    <div>
+                                        <span class="font-semibold block">Galeri</span>
+                                        <span class="text-xs text-gray-400">Dokumentasi kegiatan</span>
+                                    </div>
                                 </a>
-                                <a href="{{ url_for('public.struktur') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span class="text-lg">👥</span>
-                                    <span class="font-medium">Struktur Organisasi</span>
+                                <a href="{{ url_for('public.struktur') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#155C1B]/5 hover:text-[#155C1B] transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-lg">👥</span>
+                                    <div>
+                                        <span class="font-semibold block">Struktur Organisasi</span>
+                                        <span class="text-xs text-gray-400">Perangkat desa</span>
+                                    </div>
                                 </a>
-                                <a href="{{ url_for('public.transparansi') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span class="text-lg">💰</span>
-                                    <span class="font-medium">Transparansi APBDes</span>
+                                <a href="{{ url_for('public.transparansi') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#155C1B]/5 hover:text-[#155C1B] transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center text-lg">💰</span>
+                                    <div>
+                                        <span class="font-semibold block">Transparansi APBDes</span>
+                                        <span class="text-xs text-gray-400">Laporan keuangan</span>
+                                    </div>
                                 </a>
-                                <a href="{{ url_for('public.info_kependudukan') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span class="text-lg">📊</span>
-                                    <span class="font-medium">Info Kependudukan</span>
+                                <a href="{{ url_for('public.info_kependudukan') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#155C1B]/5 hover:text-[#155C1B] transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center text-lg">📊</span>
+                                    <div>
+                                        <span class="font-semibold block">Info Kependudukan</span>
+                                        <span class="text-xs text-gray-400">Data warga</span>
+                                    </div>
                                 </a>
-                                <a href="{{ url_for('public.kritik_saran') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span class="text-lg">💬</span>
-                                    <span class="font-medium">Kritik & Saran</span>
+                                <a href="{{ url_for('public.kritik_saran') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#155C1B]/5 hover:text-[#155C1B] transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center text-lg">💬</span>
+                                    <div>
+                                        <span class="font-semibold block">Kritik & Saran</span>
+                                        <span class="text-xs text-gray-400">Masukan untuk desa</span>
+                                    </div>
                                 </a>
-                                <a href="{{ url_for('public.peta_interaktif') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span class="text-lg">🗺️</span>
-                                    <span class="font-medium">Peta Interaktif</span>
+                                <a href="{{ url_for('public.peta_interaktif') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#155C1B]/5 hover:text-[#155C1B] transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-lg">🗺️</span>
+                                    <div>
+                                        <span class="font-semibold block">Peta Interaktif</span>
+                                        <span class="text-xs text-gray-400">Peta lokasi desa</span>
+                                    </div>
                                 </a>
                                 {% if custom_pages %}
                                 <div class="border-t border-gray-100 mt-2 pt-2">
                                     {% for p in custom_pages %}
-                                    <a href="{{ url_for('public.view_page', slug=p['slug']) }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                        <span class="text-lg">{{ p['icon'] }}</span>
-                                        <span class="font-medium">{{ p['title'] }}</span>
+                                    <a href="{{ url_for('public.view_page', slug=p['slug']) }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#155C1B]/5 hover:text-[#155C1B] transition-colors">
+                                        <span class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-lg">{{ p['icon'] }}</span>
+                                        <span class="font-semibold">{{ p['title'] }}</span>
                                     </a>
                                     {% endfor %}
                                 </div>
@@ -146,15 +249,22 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                    {% else %}
+                    <!-- Regular nav links -->
+                    <a href="{{ link.href }}" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300
+                           {% if link.active %}bg-white/25 text-white shadow-md{% else %}text-green-100 hover:bg-white/15 hover:text-white{% endif %}">
+                        {{ link.label }}
+                    </a>
+                    {% endif %}
+                    {% endfor %}
 
                 <!-- Right Actions -->
-                <div class="flex items-center gap-1 md:gap-2">
+                <div class="flex items-center gap-2 md:gap-3">
                     <!-- Desktop User Menu (Logged In) -->
                     {% if session.user_logged_in %}
                     <div class="relative hidden md:block">
-                        <button onclick="toggleDesktopUserMenu()" class="flex items-center gap-2 p-1.5 rounded-full hover:bg-white/10 transition-all">
-                            <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-[#73AA0F] to-[#155C1B] flex items-center justify-center text-white font-bold text-sm md:text-base border-2 border-white/30">
+                        <button onclick="toggleDesktopUserMenu()" class="flex items-center gap-2 p-1.5 rounded-full hover:bg-white/15 transition-all duration-300">
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-[#73AA0F] to-[#155C1B] flex items-center justify-center text-white font-bold text-base border-2 border-white/40 shadow-lg">
                                 {{ session.user_nama[0]|upper if session.user_nama else 'U' }}
                             </div>
                             <span class="hidden xl:block text-white text-sm max-w-[100px] truncate">{{ session.user_nama[:12] if session.user_nama else 'User' }}</span>
@@ -162,36 +272,36 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </button>
-                        <div id="desktop-user-menu" class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden hidden z-[100]">
-                            <div class="px-4 py-4 bg-gradient-to-r from-[#155C1B] to-[#2A6726]">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-lg">
+                        <div id="desktop-user-menu" class="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden hidden z-[100]">
+                            <div class="px-5 py-5 bg-gradient-to-r from-[#155C1B] to-[#2A6726]">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-xl border-2 border-white/30">
                                         {{ session.user_nama[0]|upper if session.user_nama else 'U' }}
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <div class="text-white font-semibold truncate">{{ session.user_nama }}</div>
+                                        <div class="text-white font-bold text-lg truncate">{{ session.user_nama }}</div>
                                         <div class="text-green-200 text-xs truncate">{{ session.user_nik }}</div>
                                     </div>
                                 </div>
-                                <div class="mt-2">
+                                <div class="mt-3">
                                     {% if session.user_role == 'admin' %}
-                                    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-200 border border-red-500/30">👑 ADMIN</span>
+                                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-red-500/30 text-red-200 border border-red-500/40">👑 ADMINISTRATOR</span>
                                     {% elif session.user_role == 'dinas' %}
-                                    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-200 border border-blue-500/30">🏢 DINAS</span>
+                                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-blue-500/30 text-blue-200 border border-blue-500/40">🏢 PETUGAS DINAS</span>
                                     {% else %}
-                                    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-200 border border-green-500/30">👤 WARGA</span>
+                                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold bg-green-500/30 text-green-200 border border-green-500/40">👤 WARGA</span>
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="py-2">
-                                <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span class="w-8 h-8 rounded-lg bg-[#155C1B]/10 flex items-center justify-center text-sm">⚙️</span>
-                                    <span class="font-medium text-sm">Dashboard</span>
+                            <div class="p-3">
+                                <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-[#155C1B]/5 transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-[#155C1B]/10 flex items-center justify-center text-sm">⚙️</span>
+                                    <span class="font-semibold">Dashboard</span>
                                 </a>
                                 <div class="my-2 border-t border-gray-100"></div>
-                                <a href="{{ url_for('public.logout') }}" class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors">
-                                    <span class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-sm">🚪</span>
-                                    <span class="font-medium text-sm">Keluar</span>
+                                <a href="{{ url_for('public.logout') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center text-sm">🚪</span>
+                                    <span class="font-semibold">Keluar</span>
                                 </a>
                             </div>
                         </div>
@@ -201,7 +311,7 @@
                     <!-- Desktop Guest Buttons -->
                     {% if not session.user_logged_in %}
                     <div class="hidden md:flex items-center gap-2">
-                        <a href="{{ url_for('public.login') }}" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/20 transition-all">
+                        <a href="{{ url_for('public.login') }}" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold bg-white/15 hover:bg-white/25 border border-white/20 transition-all duration-300 shadow-md hover:shadow-lg">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                             </svg>
@@ -211,21 +321,21 @@
                     {% endif %}
 
                     <!-- Dark Mode Toggle -->
-                    <button id="theme-toggle" class="p-2 rounded-lg text-green-100 hover:bg-white/10 transition-colors" aria-label="Toggle dark mode">
-                        <svg id="sun-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button id="theme-toggle" class="p-2.5 rounded-xl text-green-100 hover:bg-white/15 transition-all duration-300" aria-label="Toggle dark mode">
+                        <svg id="sun-icon" class="w-5 h-5 theme-toggle-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l.707.707M6.343 17.657l-.707.707M16 12h1m-6 0h1M4 12H3m15.364-6.364l.707-.707M6.343 6.343l.707-.707"/>
                         </svg>
-                        <svg id="moon-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg id="moon-icon" class="w-5 h-5 theme-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
                         </svg>
                     </button>
 
-                    <!-- Hamburger Menu Button (Mobile) -->
-                    <button id="hamburger-btn" class="md:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors" aria-label="Menu">
-                        <svg id="hamburger-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- Mobile Menu Button -->
+                    <button id="hamburger-btn" class="md:hidden p-2.5 rounded-xl text-white hover:bg-white/15 transition-all duration-300" aria-label="Menu">
+                        <svg id="hamburger-open" class="w-6 h-6 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
-                        <svg id="hamburger-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg id="hamburger-close" class="w-6 h-6 hidden transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
@@ -233,14 +343,14 @@
             </div>
 
             <!-- Mobile Navigation -->
-            <div id="mobile-nav" class="md:hidden">
-                <div class="pb-4">
+            <div id="mobile-nav">
+                <div class="pb-5 space-y-1">
                     <!-- Nav Links -->
                     <div class="flex flex-wrap gap-1 mb-3">
                         {% for link in nav_links %}
                         <a href="{{ link.href }}"
                            class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                                  {% if link.active %}bg-white/20 text-white{% else %}text-green-100 hover:bg-white/10{% endif %}">
+                                  {% if link.active %}bg-white/25 text-white{% else %}text-green-100 hover:bg-white/15{% endif %}">
                             {{ link.label }}
                         </a>
                         {% endfor %}
@@ -248,9 +358,9 @@
 
                     {% if session.user_logged_in %}
                     <!-- User Account Section (Logged In) -->
-                    <div class="border-t border-white/10 pt-3 mt-1 mb-3">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#73AA0F] to-[#155C1B] flex items-center justify-center text-white font-bold">
+                    <div class="border-t border-white/15 pt-3 mt-1 mb-3">
+                        <div class="flex items-center gap-3 mb-3 px-1">
+                            <div class="w-11 h-11 rounded-full bg-gradient-to-br from-[#73AA0F] to-[#155C1B] flex items-center justify-center text-white font-bold shadow-lg">
                                 {{ session.user_nama[0]|upper if session.user_nama else 'U' }}
                             </div>
                             <div class="flex-1 min-w-0">
@@ -258,39 +368,73 @@
                                 <div class="text-green-300 text-xs truncate">{{ session.user_nik }}</div>
                             </div>
                             {% if session.user_role == 'admin' %}
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-200">ADMIN</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/30 text-red-200">ADMIN</span>
                             {% elif session.user_role == 'dinas' %}
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-200">DINAS</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/30 text-blue-200">DINAS</span>
                             {% endif %}
                         </div>
                         <div class="space-y-1">
-                            <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                                <span class="w-7 h-7 rounded-lg bg-blue-500/30 flex items-center justify-center text-xs">📊</span>
+                            <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm text-green-100 hover:bg-white/15 transition-colors">
+                                <span class="w-8 h-8 rounded-lg bg-blue-500/30 flex items-center justify-center text-sm">📊</span>
                                 Dashboard
                             </a>
-                            <a href="{{ url_for('public.logout') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-red-300 hover:bg-red-500/20 transition-colors">
-                                <span class="w-7 h-7 rounded-lg bg-red-500/30 flex items-center justify-center text-xs">🚪</span>
+                            <a href="{{ url_for('public.logout') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm text-red-300 hover:bg-red-500/20 transition-colors">
+                                <span class="w-8 h-8 rounded-lg bg-red-500/30 flex items-center justify-center text-sm">🚪</span>
                                 Keluar / Logout
                             </a>
                         </div>
                     </div>
                     {% else %}
                     <!-- Sign In / Sign Up Buttons (Guest) -->
-                    <div class="border-t border-white/10 pt-3 mt-1 mb-3 flex gap-2">
-                        <a href="{{ url_for('public.login') }}" class="flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition-colors">
+                    <div class="border-t border-white/15 pt-3 mt-1 mb-3">
+                        <a href="{{ url_for('public.login') }}" class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-white/15 text-white hover:bg-white/25 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                            </svg>
                             Masuk
                         </a>
                     </div>
                     {% endif %}
 
-                    <!-- Custom Pages (Admin Created) - RAHASIA Section -->
+                    <!-- More Links Section -->
+                    <div class="border-t border-white/15 pt-3 mt-1">
+                        <div class="text-green-300/70 text-xs font-semibold uppercase tracking-wider mb-2 px-1">Lainnya</div>
+                        <div class="grid grid-cols-2 gap-1">
+                            <a href="{{ url_for('public.pengumuman') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/15 transition-colors">
+                                <span class="w-7 h-7 rounded-lg bg-[#155C1B]/30 flex items-center justify-center text-xs">📢</span>
+                                <span class="font-medium">Pengumuman</span>
+                            </a>
+                            <a href="{{ url_for('public.galeri') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/15 transition-colors">
+                                <span class="w-7 h-7 rounded-lg bg-[#155C1B]/30 flex items-center justify-center text-xs">📷</span>
+                                <span class="font-medium">Galeri</span>
+                            </a>
+                            <a href="{{ url_for('public.struktur') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/15 transition-colors">
+                                <span class="w-7 h-7 rounded-lg bg-[#155C1B]/30 flex items-center justify-center text-xs">👥</span>
+                                <span class="font-medium">Struktur</span>
+                            </a>
+                            <a href="{{ url_for('public.transparansi') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/15 transition-colors">
+                                <span class="w-7 h-7 rounded-lg bg-[#155C1B]/30 flex items-center justify-center text-xs">💰</span>
+                                <span class="font-medium">APBDes</span>
+                            </a>
+                            <a href="{{ url_for('public.info_kependudukan') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/15 transition-colors">
+                                <span class="w-7 h-7 rounded-lg bg-[#155C1B]/30 flex items-center justify-center text-xs">📊</span>
+                                <span class="font-medium">Kependudukan</span>
+                            </a>
+                            <a href="{{ url_for('public.kritik_saran') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/15 transition-colors">
+                                <span class="w-7 h-7 rounded-lg bg-[#155C1B]/30 flex items-center justify-center text-xs">💬</span>
+                                <span class="font-medium">Kritik Saran</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Custom Pages (Admin Created) -->
                     {% if custom_pages_nav %}
-                    <div class="border-t border-white/10 pt-3 mt-1">
-                        <div class="text-yellow-300 text-xs font-semibold uppercase tracking-wider mb-2 px-1">🔐 Rahasia</div>
+                    <div class="border-t border-white/15 pt-3 mt-1">
+                        <div class="text-yellow-300/70 text-xs font-semibold uppercase tracking-wider mb-2 px-1">🔐 Halaman Khusus</div>
                         <div class="flex flex-col gap-1">
                             {% for page in custom_pages_nav %}
                             <a href="{{ url_for('public.view_page', slug=page.slug) }}"
-                               class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                               class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/15 transition-colors">
                                 <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">{{ page.icon }}</span>
                                 <span class="font-medium">{{ page.title }}</span>
                             </a>

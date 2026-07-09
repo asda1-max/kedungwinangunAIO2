@@ -327,61 +327,87 @@
     <!-- NAVBAR -->
     {% include 'partials/navbar.html' %}
 
-    <!-- HERO SECTION -->
-    <section id="hero" class="relative min-h-[500px] md:min-h-[600px] flex items-center overflow-hidden">
+    <!-- HERO SECTION - Enhanced -->
+    <section id="hero" class="relative min-h-[550px] md:min-h-[680px] flex items-center overflow-hidden">
         <!-- Background Image with Parallax -->
         <div class="absolute inset-0" id="hero-bg">
             <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
                  alt="Desa Kedungwinangun"
-                 class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-r from-[#155C1B]/90 via-[#155C1B]/70 to-transparent"></div>
+                 class="w-full h-full object-cover hero-zoom">
+            <div class="absolute inset-0 bg-gradient-to-br from-[#155C1B]/90 via-[#155C1B]/75 to-[#2A6726]/60"></div>
         </div>
 
         <!-- Animated Decorative Elements -->
-        <div class="absolute top-20 left-10 w-20 h-20 bg-[#73AA0F]/20 rounded-full blur-2xl float"></div>
-        <div class="absolute bottom-20 right-20 w-32 h-32 bg-[#155C1B]/30 rounded-full blur-3xl float float-delay-1"></div>
-        <div class="absolute top-1/3 right-1/4 w-16 h-16 bg-[#73AA0F]/15 rounded-full blur-xl float float-delay-2"></div>
+        <div class="absolute top-20 left-10 w-24 h-24 bg-[#73AA0F]/20 rounded-full blur-3xl float-subtle"></div>
+        <div class="absolute bottom-32 right-20 w-40 h-40 bg-[#155C1B]/25 rounded-full blur-3xl float-subtle" style="animation-delay: 0.5s;"></div>
+        <div class="absolute top-1/3 right-1/4 w-20 h-20 bg-[#73AA0F]/15 rounded-full blur-xl float-subtle" style="animation-delay: 1s;"></div>
+        <div class="absolute bottom-20 left-1/4 w-16 h-16 bg-white/5 rounded-full blur-xl float-subtle" style="animation-delay: 1.5s;"></div>
+
+        <!-- Top Gradient Fade -->
+        <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#155C1B]/30 to-transparent"></div>
 
         <!-- Content -->
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <div class="max-w-2xl">
-                <span class="inline-block bg-[#73AA0F] text-white text-xs font-bold px-4 py-1.5 rounded-full mb-6 animate-fade-in-up">
-                    🏡 Selamat Datang di Desa Kami
+            <div class="max-w-3xl">
+                <!-- Badge -->
+                <span class="inline-flex items-center gap-2 bg-[#73AA0F] text-white text-xs font-bold px-5 py-2 rounded-full mb-6 animate-fade-in-up shadow-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Selamat Datang di Desa Kami
                 </span>
-                <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight animate-fade-in-up" style="animation-delay: 0.1s;">
+
+                <!-- Title -->
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight animate-fade-in-up" style="animation-delay: 0.1s;">
                     {{ desa.nama }}
                 </h1>
-                <p class="text-xl md:text-2xl text-green-100 font-semibold mb-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+
+                <!-- Tagline -->
+                <p class="text-xl sm:text-2xl md:text-3xl text-green-100 font-semibold mb-6 animate-fade-in-up" style="animation-delay: 0.2s;">
                     {{ desa.tagline }}
                 </p>
-                <p class="text-green-200 text-base md:text-lg mb-4 leading-relaxed animate-fade-in-up" style="animation-delay: 0.3s;">
+
+                <!-- Description -->
+                <p class="text-base sm:text-lg text-green-200/90 mb-8 leading-relaxed max-w-2xl animate-fade-in-up" style="animation-delay: 0.3s;">
                     {{ desa.deskripsi }}
                 </p>
 
-                <!-- Date & Time -->
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20 w-44">
-                        <div class="text-green-300 text-[10px] font-medium uppercase tracking-wider mb-1">Tanggal</div>
+                <!-- Date & Time Cards -->
+                <div class="flex flex-wrap items-center gap-3 mb-10 animate-fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-4 border border-white/20 shadow-xl min-w-[180px]">
+                        <div class="text-green-300/80 text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Tanggal
+                        </div>
                         <div id="current-date" class="text-white text-sm font-bold leading-tight">Memuat...</div>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20 w-28 text-center">
-                        <div class="text-green-300 text-[10px] font-medium uppercase tracking-wider mb-1">Jam</div>
-                        <div id="current-time" class="text-white text-sm font-bold font-mono tracking-wider">Memuat...</div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-4 border border-white/20 shadow-xl min-w-[140px]">
+                        <div class="text-green-300/80 text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Waktu
+                        </div>
+                        <div id="current-time" class="text-white text-lg font-bold font-mono tracking-wider">Memuat...</div>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-3 border border-white/20 w-14 text-center">
-                        <div class="text-green-300 text-[10px] font-medium uppercase tracking-wider mb-1">Zona</div>
-                        <div class="text-white text-xs font-bold">WIB</div>
+                    <div class="bg-[#73AA0F]/30 backdrop-blur-md rounded-2xl px-4 py-4 border border-[#73AA0F]/40 shadow-xl text-center">
+                        <div class="text-green-300/80 text-[10px] font-semibold uppercase tracking-wider mb-1">Zona</div>
+                        <div class="text-white text-sm font-bold">WIB</div>
+                        <div class="text-green-300 text-[10px]">UTC+7</div>
                     </div>
                 </div>
 
-                <div class="flex flex-wrap gap-4">
-                    <a href="{{ url_for('public.sejarah') }}" class="inline-flex items-center gap-2 bg-[#73AA0F] hover:bg-[#63930b] text-white font-bold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-4 animate-fade-in-up" style="animation-delay: 0.5s;">
+                    <a href="{{ url_for('public.sejarah') }}" class="inline-flex items-center gap-2.5 bg-[#73AA0F] hover:bg-[#63930b] text-white font-bold px-6 py-3.5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 btn-shine">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
                         Sejarah Desa
                     </a>
-                    <a href="{{ url_for('public.kontak') }}" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-3 rounded-xl transition-all duration-300 backdrop-blur-sm border border-white/20">
+                    <a href="{{ url_for('public.kontak') }}" class="inline-flex items-center gap-2.5 bg-white/15 hover:bg-white/25 text-white font-bold px-6 py-3.5 rounded-xl transition-all duration-300 backdrop-blur-sm border border-white/25 shadow-lg hover:shadow-xl hover:-translate-y-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                         </svg>
@@ -389,6 +415,13 @@
                     </a>
                 </div>
             </div>
+        </div>
+
+        <!-- Bottom Wave -->
+        <div class="absolute bottom-0 left-0 right-0">
+            <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#f4f7f2"/>
+            </svg>
         </div>
     </section>
 
@@ -833,31 +866,39 @@
     </section>
     {% endif %}
 
-    <!-- FOOTER -->
-    <footer class="bg-[#155C1B] text-white">
+    <!-- FOOTER - Enhanced -->
+    <footer class="bg-gradient-to-br from-[#155C1B] via-[#0f4615] to-[#155C1B] text-white">
+        <!-- Main Footer -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                <!-- Brand -->
-                <div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
+                <!-- Brand Column -->
+                <div class="lg:col-span-1">
                     <div class="flex items-center gap-3 mb-6">
-                        <img src="{{ url_for('static', filename='images/kebumen.png') }}" alt="Logo" class="h-12 w-auto">
+                        <div class="relative">
+                            <img src="{{ url_for('static', filename='images/kebumen.png') }}" alt="Logo" class="h-14 w-auto drop-shadow-lg">
+                        </div>
                         <div>
                             <h3 class="font-bold text-xl">{{ desa.nama }}</h3>
                             <p class="text-green-300 text-sm">{{ desa.tagline }}</p>
                         </div>
                     </div>
-                    <p class="text-green-200 leading-relaxed">{{ desa.deskripsi }}</p>
+                    <p class="text-green-200/80 leading-relaxed mb-6">{{ desa.deskripsi }}</p>
 
-                    <!-- Social -->
-                    <div class="flex gap-3 mt-6">
+                    <!-- Social Links -->
+                    <div class="flex gap-3">
                         {% if config.sosial_facebook %}
-                        <a href="https://facebook.com/{{ config.sosial_facebook }}" target="_blank" class="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                        <a href="https://facebook.com/{{ config.sosial_facebook }}" target="_blank" class="social-icon" title="Facebook">
                             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                         </a>
                         {% endif %}
                         {% if config.sosial_instagram %}
-                        <a href="https://instagram.com/{{ config.sosial_instagram }}" target="_blank" class="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                        <a href="https://instagram.com/{{ config.sosial_instagram }}" target="_blank" class="social-icon" title="Instagram">
                             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                        </a>
+                        {% endif %}
+                        {% if config.kontak_whatsapp %}
+                        <a href="https://wa.me/{{ config.kontak_whatsapp }}" target="_blank" class="social-icon bg-green-600 hover:bg-green-500" title="WhatsApp">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                         </a>
                         {% endif %}
                     </div>
@@ -865,47 +906,103 @@
 
                 <!-- Quick Links -->
                 <div>
-                    <h4 class="font-bold text-lg mb-6">Navigasi</h4>
+                    <h4 class="font-bold text-lg mb-6 flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm">📍</span>
+                        Navigasi
+                    </h4>
                     <ul class="space-y-3">
-                        <li><a href="{{ url_for('public.index') }}" class="text-green-100 hover:text-white transition-colors flex items-center gap-2"><span>›</span> Beranda</a></li>
-                        <li><a href="{{ url_for('public.sejarah') }}" class="text-green-100 hover:text-white transition-colors flex items-center gap-2"><span>›</span> Sejarah Desa</a></li>
-                        <li><a href="{{ url_for('public.pengumuman') }}" class="text-green-100 hover:text-white transition-colors flex items-center gap-2"><span>›</span> Pengumuman</a></li>
-                        <li><a href="{{ url_for('public.berita') }}" class="text-green-100 hover:text-white transition-colors flex items-center gap-2"><span>›</span> Berita</a></li>
-                        <li><a href="#potensi" class="text-green-100 hover:text-white transition-colors flex items-center gap-2"><span>›</span> Potensi Desa</a></li>
-                        <li><a href="{{ url_for('public.galeri') }}" class="text-green-100 hover:text-white transition-colors flex items-center gap-2"><span>›</span> Galeri</a></li>
-                        <li><a href="{{ url_for('public.kontak') }}" class="text-green-100 hover:text-white transition-colors flex items-center gap-2"><span>›</span> Kontak</a></li>
+                        <li><a href="{{ url_for('public.index') }}" class="footer-link">Beranda</a></li>
+                        <li><a href="{{ url_for('public.sejarah') }}" class="footer-link">Sejarah Desa</a></li>
+                        <li><a href="{{ url_for('public.pengumuman') }}" class="footer-link">Pengumuman</a></li>
+                        <li><a href="{{ url_for('public.berita') }}" class="footer-link">Berita</a></li>
+                        <li><a href="#potensi" class="footer-link">Potensi Desa</a></li>
+                        <li><a href="{{ url_for('public.galeri') }}" class="footer-link">Galeri</a></li>
+                    </ul>
+                </div>
+
+                <!-- Services -->
+                <div>
+                    <h4 class="font-bold text-lg mb-6 flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm">⚡</span>
+                        Layanan
+                    </h4>
+                    <ul class="space-y-3">
+                        <li><a href="{{ url_for('public.aduan') }}" class="footer-link">Pengaduan</a></li>
+                        <li><a href="{{ url_for('public.info_kependudukan') }}" class="footer-link">Kependudukan</a></li>
+                        <li><a href="{{ url_for('public.transparansi') }}" class="footer-link">Transparansi</a></li>
+                        <li><a href="{{ url_for('public.program_kerja') }}" class="footer-link">Program Kerja</a></li>
+                        <li><a href="{{ url_for('public.agenda') }}" class="footer-link">Agenda Desa</a></li>
+                        <li><a href="{{ url_for('public.kritik_saran') }}" class="footer-link">Kritik & Saran</a></li>
                     </ul>
                 </div>
 
                 <!-- Contact -->
                 <div>
-                    <h4 class="font-bold text-lg mb-6">Kontak</h4>
-                    <ul class="space-y-4 text-green-100">
+                    <h4 class="font-bold text-lg mb-6 flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm">📞</span>
+                        Kontak
+                    </h4>
+                    <ul class="space-y-4">
                         {% if config.alamat_desa %}
                         <li class="flex items-start gap-3">
                             <svg class="w-5 h-5 mt-1 shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span>{{ config.alamat_desa }}</span>
+                            <span class="text-green-200/80">{{ config.alamat_desa }}</span>
                         </li>
                         {% endif %}
                         {% if config.kontak_whatsapp %}
                         <li class="flex items-center gap-3">
                             <svg class="w-5 h-5 shrink-0 text-green-400" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                            <span>+{{ config.kontak_whatsapp }}</span>
+                            <span class="text-green-200/80">+{{ config.kontak_whatsapp }}</span>
                         </li>
                         {% endif %}
                         {% if config.kontak_email %}
                         <li class="flex items-center gap-3">
                             <svg class="w-5 h-5 shrink-0 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            <span>{{ config.kontak_email }}</span>
+                            <span class="text-green-200/80 text-sm">{{ config.kontak_email }}</span>
                         </li>
                         {% endif %}
                     </ul>
                 </div>
             </div>
 
-            <!-- Copyright -->
-            <div class="mt-12 pt-8 border-t border-green-800 text-center text-green-300 text-sm">
-                <p>© {{ tahun }} {{ desa.nama }}. Hak Cipta Dilindungi.</p>
+            <!-- Quick Stats -->
+            <div class="mt-12 pt-8 border-t border-green-800/50">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white/5 rounded-xl p-4 text-center">
+                        <div class="text-2xl md:text-3xl font-bold text-[#73AA0F]">{{ desa.jumlah_dusun }}</div>
+                        <div class="text-green-300/70 text-sm">Dusun</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4 text-center">
+                        <div class="text-2xl md:text-3xl font-bold text-[#73AA0F]">{{ perangkat_desa|length if perangkat_desa else 0 }}</div>
+                        <div class="text-green-300/70 text-sm">Perangkat</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4 text-center">
+                        <div class="text-2xl md:text-3xl font-bold text-[#73AA0F]">{{ berita_list|length if berita_list else 0 }}</div>
+                        <div class="text-green-300/70 text-sm">Berita</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4 text-center">
+                        <div class="text-2xl md:text-3xl font-bold text-[#73AA0F]">{{ pengumuman_list|length if pengumuman_list else 0 }}</div>
+                        <div class="text-green-300/70 text-sm">Pengumuman</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="border-t border-green-800/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="text-center md:text-left">
+                        <p class="text-green-300/70 text-sm">
+                            © {{ tahun }} <span class="text-green-300 font-semibold">{{ desa.nama }}</span>. Hak Cipta Dilindungi.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm text-green-300/50">
+                        <span>Dibuat dengan</span>
+                        <span class="text-red-400">❤️</span>
+                        <span>di Indonesia</span>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>

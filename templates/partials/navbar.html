@@ -1,6 +1,6 @@
 {# NAVBAR COMPONENT #}
 
-<nav class="bg-[#155C1B] sticky top-0 z-50 shadow-lg">
+<nav class="bg-[#155C1B] sticky top-0 z-50 shadow-lg" x-data="{ mobileOpen: false, dropdownOpen: false }">
     {# ─── TOP ROW ─── #}
     <div class="max-w-7xl mx-auto px-4">
         <div class="flex items-center justify-between h-14 md:h-16">
@@ -17,36 +17,32 @@
             {# ─── DESKTOP NAV LINKS ─── #}
             <div class="hidden lg:flex items-center gap-1">
                 {% for link in nav_links %}
-                <a href="{{ link.href }}" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                       {% if link.active %}bg-white/20 text-white{% else %}text-green-100 hover:bg-white/10 hover:text-white{% endif %}">
-                    {{ link.label }}
-                </a>
-                {% endfor %}
-
-                {# ─── LAINNYA DROPDOWN (Desktop Only) ─── #}
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" @click.away="open = false"
-                            class="px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 text-green-100 hover:bg-white/10 hover:text-white">
+                {% if link.label == 'Lainnya' %}
+                {# ─── LAINNYA DROPDOWN ─── #}
+                <div class="relative">
+                    <button @click="dropdownOpen = !dropdownOpen"
+                            class="px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1
+                                   {% if link.active %}bg-white/20 text-white{% else %}text-green-100 hover:bg-white/10 hover:text-white{% endif %}">
                         Lainnya
-                        <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': dropdownOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
-                    <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                         class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+                    {# Dropdown Menu - positioned relative to nav container #}
+                    <div x-show="dropdownOpen"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         @click.away="dropdownOpen = false"
+                         class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50"
+                         style="display: none;">
                         <div class="py-2">
                             <a href="{{ url_for('public.pengumuman') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                <span class="text-lg">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-                                </span>
+                                <span class="text-lg">📢</span>
                                 <span class="font-medium">Pengumuman</span>
-                            </a>
-                            <a href="#potensi" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                <span class="text-lg">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-                                </span>
-                                <span class="font-medium">Potensi Desa</span>
                             </a>
                             <a href="{{ url_for('public.galeri') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
                                 <span class="text-lg">📷</span>
@@ -69,15 +65,11 @@
                                 <span class="font-medium">Kritik & Saran</span>
                             </a>
                             <a href="{{ url_for('public.aduan') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                <span class="text-lg">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                </span>
+                                <span class="text-lg">⚠️</span>
                                 <span class="font-medium">Aduan</span>
                             </a>
                             <a href="{{ url_for('public.program_kerja') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
-                                <span class="text-lg">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                                </span>
+                                <span class="text-lg">📋</span>
                                 <span class="font-medium">Program Kerja</span>
                             </a>
                             <a href="{{ url_for('public.agenda') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
@@ -101,6 +93,14 @@
                         </div>
                     </div>
                 </div>
+                {% else %}
+                {# Regular nav links #}
+                <a href="{{ link.href }}" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                       {% if link.active %}bg-white/20 text-white{% else %}text-green-100 hover:bg-white/10 hover:text-white{% endif %}">
+                    {{ link.label }}
+                </a>
+                {% endif %}
+                {% endfor %}
             </div>
 
             {# ─── RIGHT ACTIONS ─── #}
@@ -142,10 +142,6 @@
                                 <span class="w-8 h-8 rounded-lg bg-[#155C1B]/10 flex items-center justify-center text-sm">⚙️</span>
                                 Dashboard
                             </a>
-                            <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 text-sm">
-                                <span class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center text-sm">📋</span>
-                                Dashboard Saya
-                            </a>
                             <div class="my-2 border-t border-gray-100"></div>
                             <a href="{{ url_for('public.logout') }}" class="flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 text-sm">
                                 <span class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-sm">🚪</span>
@@ -179,7 +175,7 @@
                 </button>
 
                 {# ── Hamburger (Mobile Only) ── #}
-                <button id="btn-hamburger" class="lg:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors" aria-label="Menu">
+                <button id="btn-hamburger" class="lg:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors" aria-label="Menu" @click="mobileOpen = !mobileOpen">
                     <svg id="icon-hamburger" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
@@ -192,24 +188,23 @@
     </div>
 
     {# ─── MOBILE NAVIGATION ─── #}
-    <div id="mobile-nav" class="lg:hidden">
+    <div x-show="mobileOpen" x-transition class="lg:hidden">
         <div class="max-w-7xl mx-auto px-4 pb-4">
-
-            {# Nav Links - ALWAYS VISIBLE on Mobile #}
+            {# Nav Links - Mobile #}
             <div class="flex flex-wrap gap-1 pt-3">
                 {% for link in nav_links %}
+                {% if link.label != 'Lainnya' %}
                 <a href="{{ link.href }}" class="px-3 py-2 rounded-lg text-sm font-medium
                        {% if link.active %}bg-white/20 text-white{% else %}text-green-100 hover:bg-white/10{% endif %} transition-colors">
                     {{ link.label }}
                 </a>
+                {% endif %}
                 {% endfor %}
             </div>
 
-            {# User Dropdown - TOGGLED BY HAMBURGER #}
-            <div id="mobile-user-menu" class="pt-3 mt-2 border-t border-white/10 hidden">
-
-                {% if session.user_logged_in %}
-                {# User Info #}
+            {# User Dropdown - Mobile #}
+            {% if session.user_logged_in %}
+            <div class="pt-3 mt-2 border-t border-white/10">
                 <div class="flex items-center gap-3 pb-3">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#73AA0F] to-[#155C1B] flex items-center justify-center text-white font-bold text-lg">
                         {{ session.user_nama[0]|upper if session.user_nama else 'U' }}
@@ -218,116 +213,79 @@
                         <div class="text-white font-medium text-sm truncate">{{ session.user_nama }}</div>
                         <div class="text-green-300 text-xs truncate">{{ session.user_nik }}</div>
                     </div>
-                    {% if session.user_role == 'admin' %}
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-200">ADMIN</span>
-                    {% elif session.user_role == 'dinas' %}
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-200">DINAS</span>
-                    {% else %}
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-200">WARGA</span>
-                    {% endif %}
                 </div>
-
-                {# Dashboard buttons #}
                 <div class="space-y-1">
-                    {% if session.user_role == 'admin' %}
                     <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
                         <span class="w-7 h-7 rounded-lg bg-[#155C1B]/30 flex items-center justify-center text-xs">⚙️</span>
-                        Dashboard Admin
-                    </a>
-                    <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                        <span class="w-7 h-7 rounded-lg bg-blue-500/30 flex items-center justify-center text-xs">📊</span>
-                        Dashboard Dinas
-                    </a>
-                    {% elif session.user_role == 'dinas' %}
-                    <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                        <span class="w-7 h-7 rounded-lg bg-blue-500/30 flex items-center justify-center text-xs">📊</span>
-                        Dashboard Dinas
-                    </a>
-                    {% endif %}
-                    <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                        <span class="w-7 h-7 rounded-lg bg-green-500/30 flex items-center justify-center text-xs">📋</span>
-                        Dashboard Saya
+                        Dashboard
                     </a>
                     <a href="{{ url_for('public.logout') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-red-300 hover:bg-red-500/20 transition-colors">
                         <span class="w-7 h-7 rounded-lg bg-red-500/30 flex items-center justify-center text-xs">🚪</span>
-                        Keluar / Logout
+                        Keluar
                     </a>
                 </div>
-                {% endif %}
+            </div>
+            {% endif %}
 
-                {% if not session.user_logged_in %}
-                <div class="flex gap-2">
-                    <a href="{{ url_for('public.login') }}" class="flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition-colors">Masuk</a>
+            {% if not session.user_logged_in %}
+            <div class="flex gap-2 mt-3">
+                <a href="{{ url_for('public.login') }}" class="flex-1 text-center px-4 py-2.5 rounded-lg text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition-colors">Masuk</a>
+            </div>
+            {% endif %}
+
+            {# ─── LAINNYA (Inside Mobile Menu) ─── #}
+            <div class="pt-3 mt-2 border-t border-white/10">
+                <div class="text-yellow-300 text-xs font-semibold uppercase tracking-wider mb-2">Lainnya</div>
+                <div class="space-y-1">
+                    <a href="{{ url_for('public.pengumuman') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">📢</span>
+                        Pengumuman
+                    </a>
+                    <a href="{{ url_for('public.galeri') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">📷</span>
+                        Galeri
+                    </a>
+                    <a href="{{ url_for('public.struktur') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">👥</span>
+                        Struktur Organisasi
+                    </a>
+                    <a href="{{ url_for('public.transparansi') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">💰</span>
+                        Transparansi APBDes
+                    </a>
+                    <a href="{{ url_for('public.info_kependudukan') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">📊</span>
+                        Info Kependudukan
+                    </a>
+                    <a href="{{ url_for('public.kritik_saran') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">💬</span>
+                        Kritik & Saran
+                    </a>
+                    <a href="{{ url_for('public.aduan') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">⚠️</span>
+                        Aduan
+                    </a>
+                    <a href="{{ url_for('public.program_kerja') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">📋</span>
+                        Program Kerja
+                    </a>
+                    <a href="{{ url_for('public.agenda') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">📅</span>
+                        Agenda
+                    </a>
+                    <a href="{{ url_for('public.peta_interaktif') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">🗺️</span>
+                        Peta Interaktif
+                    </a>
+                    {% if custom_pages %}
+                    {% for p in custom_pages %}
+                    <a href="{{ url_for('public.view_page', slug=p['slug']) }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">{{ p['icon'] }}</span>
+                        {{ p['title'] }}
+                    </a>
+                    {% endfor %}
+                    {% endif %}
                 </div>
-                {% endif %}
-
-                {# ─── LAINNYA (Inside Hamburger Menu) ─── #}
-                <div class="pt-3 mt-2 border-t border-white/10">
-                    <div class="text-yellow-300 text-xs font-semibold uppercase tracking-wider mb-2">Lainnya</div>
-                    <div class="space-y-1">
-                        <a href="{{ url_for('public.pengumuman') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-                            </span>
-                            Pengumuman
-                        </a>
-                        <a href="#potensi" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-                            </span>
-                            Potensi Desa
-                        </a>
-                        <a href="{{ url_for('public.galeri') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">📷</span>
-                            Galeri
-                        </a>
-                        <a href="{{ url_for('public.struktur') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">👥</span>
-                            Struktur Organisasi
-                        </a>
-                        <a href="{{ url_for('public.transparansi') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">💰</span>
-                            Transparansi APBDes
-                        </a>
-                        <a href="{{ url_for('public.info_kependudukan') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">📊</span>
-                            Info Kependudukan
-                        </a>
-                        <a href="{{ url_for('public.kritik_saran') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">💬</span>
-                            Kritik & Saran
-                        </a>
-                        <a href="{{ url_for('public.aduan') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                            </span>
-                            Aduan
-                        </a>
-                        <a href="{{ url_for('public.program_kerja') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                            </span>
-                            Program Kerja
-                        </a>
-                        <a href="{{ url_for('public.agenda') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">📅</span>
-                            Agenda
-                        </a>
-                        <a href="{{ url_for('public.peta_interaktif') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">🗺️</span>
-                            Peta Interaktif
-                        </a>
-                        {% if custom_pages %}
-                        {% for p in custom_pages %}
-                        <a href="{{ url_for('public.view_page', slug=p['slug']) }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
-                            <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xs">{{ p['icon'] }}</span>
-                            {{ p['title'] }}
-                        </a>
-                        {% endfor %}
-                        {% endif %}
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
@@ -366,21 +324,6 @@
         });
     }
 
-    // Hamburger menu
-    var hamburgerBtn = document.getElementById('btn-hamburger');
-    var mobileMenu = document.getElementById('mobile-user-menu');
-    var hamburgerIcon = document.getElementById('icon-hamburger');
-    var closeIcon = document.getElementById('icon-close');
-
-    if (hamburgerBtn && mobileMenu) {
-        hamburgerBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            mobileMenu.classList.toggle('hidden');
-            if (hamburgerIcon) hamburgerIcon.classList.toggle('hidden');
-            if (closeIcon) closeIcon.classList.toggle('hidden');
-        });
-    }
-
     // Desktop user dropdown
     var deskBtn = document.getElementById('btn-desktop-user');
     var deskMenu = document.getElementById('desktop-user-menu');
@@ -392,15 +335,24 @@
         });
     }
 
+    // Hamburger menu - Alpine.js handles this via x-show
+    // But we still need to toggle icons
+    var hamburgerBtn = document.getElementById('btn-hamburger');
+    var hamburgerIcon = document.getElementById('icon-hamburger');
+    var closeIcon = document.getElementById('icon-close');
+
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (hamburgerIcon) hamburgerIcon.classList.toggle('hidden');
+            if (closeIcon) closeIcon.classList.toggle('hidden');
+        });
+    }
+
     // Close on outside click
     document.addEventListener('click', function(e) {
         if (deskMenu && deskBtn && !deskMenu.contains(e.target) && !deskBtn.contains(e.target)) {
             deskMenu.classList.add('hidden');
-        }
-        if (mobileMenu && hamburgerBtn && !mobileMenu.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-            mobileMenu.classList.add('hidden');
-            if (hamburgerIcon) hamburgerIcon.classList.remove('hidden');
-            if (closeIcon) closeIcon.classList.add('hidden');
         }
     });
 })();

@@ -10,7 +10,7 @@ from models import (
     get_komentar_by_berita, build_comment_tree, create_komentar,
     delete_komentar, get_komentar_by_id, count_komentar_by_berita
 )
-from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA
+from config import NAV_LINKS, MAPS_EMBED_URL, DUSUN_DATA, LAINNYA_PAGES
 import logging
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,33 @@ def get_desa_info_with_maps():
     info['maps_embed_url'] = MAPS_EMBED_URL
     info['dusun'] = DUSUN_DATA
     return info
+
+
+def set_nav_active(page_key, request_path=None):
+    """
+    Set active nav link based on page key.
+    If page_key is 'Lainnya', checks if request_path is in LAINNYA_PAGES.
+    """
+    # Check if we should highlight "Lainnya"
+    highlight_lainnya = page_key == "Lainnya" and request_path and request_path in LAINNYA_PAGES
+    
+    result = []
+    for n in NAV_LINKS:
+        if n["label"] == "Lainnya":
+            result.append({
+                "label": n["label"],
+                "href": n["href"],
+                "active": highlight_lainnya,
+                "is_dropdown": True
+            })
+        else:
+            result.append({
+                "label": n["label"],
+                "href": n["href"],
+                "active": n["label"] == page_key,
+                "is_dropdown": False
+            })
+    return result
 
 
 # ── Berita List ──────────────────────────────────────────────────────────
@@ -46,7 +73,7 @@ def berita():
         return render_template(
             "berita.html",
             desa=desa_info,
-            nav_links=[{**n, "active": n["label"] == "Berita"} for n in NAV_LINKS],
+            nav_links=set_nav_active("Berita"),
             berita_list=berita_list,
             show_views=show_views,
             show_tanggal=show_tanggal,
@@ -79,7 +106,7 @@ def detail_berita(berita_id):
         return render_template(
             "detail_berita.html",
             desa=desa_info,
-            nav_links=[{**n, "active": n["label"] == "Berita"} for n in NAV_LINKS],
+            nav_links=set_nav_active("Berita"),
             artikel=artikel,
             show_views=show_views,
             show_tanggal=show_tanggal,
