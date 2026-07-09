@@ -102,10 +102,14 @@
                                 <div class="md:w-32 bg-gradient-to-br from-[#155C1B] to-[#2A6726] text-white p-4 flex flex-col items-center justify-center md:border-r border-white/10">
                                     <div class="text-center">
                                         {% if agenda.tanggal_mulai %}
-                                        {% set tgl = agenda.tanggal_mulai|string_to_date %}
-                                        <span class="text-3xl font-bold">{{ tgl.day }}</span>
-                                        <span class="block text-sm">{{ tgl.strftime('%b') }}</span>
-                                        <span class="text-xs opacity-80">{{ tgl.year }}</span>
+                                        {% set tgl = agenda.tanggal_mulai %}
+                                        {% set day = tgl[8:10] if tgl|length >= 10 else '-' %}
+                                        {% set month = tgl[5:7] if tgl|length >= 7 else '' %}
+                                        {% set year = tgl[0:4] if tgl|length >= 4 else '' %}
+                                        {% set month_names = {'01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'Mei','06':'Jun','07':'Jul','08':'Agt','09':'Sep','10':'Okt','11':'Nov','12':'Des'} %}
+                                        <span class="text-3xl font-bold">{{ day }}</span>
+                                        <span class="block text-sm">{{ month_names.get(month, month) }}</span>
+                                        <span class="text-xs opacity-80">{{ year }}</span>
                                         {% else %}
                                         <span class="text-3xl font-bold">-</span>
                                         {% endif %}
@@ -178,9 +182,12 @@
                     <div class="flex items-start gap-3">
                         <div class="w-12 h-12 bg-gray-100 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
                             {% if agenda.tanggal_mulai %}
-                            {% set tgl = agenda.tanggal_mulai|string_to_date %}
-                            <span class="text-lg font-bold text-gray-700">{{ tgl.day }}</span>
-                            <span class="text-[10px] text-gray-500">{{ tgl.strftime('%b') }}</span>
+                            {% set tgl = agenda.tanggal_mulai %}
+                            {% set day = tgl[8:10] if tgl|length >= 10 else '-' %}
+                            {% set month = tgl[5:7] if tgl|length >= 7 else '' %}
+                            {% set month_names = {'01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'Mei','06':'Jun','07':'Jul','08':'Agt','09':'Sep','10':'Okt','11':'Nov','12':'Des'} %}
+                            <span class="text-lg font-bold text-gray-700">{{ day }}</span>
+                            <span class="text-[10px] text-gray-500">{{ month_names.get(month, '') }}</span>
                             {% else %}
                             <span class="text-lg">📅</span>
                             {% endif %}

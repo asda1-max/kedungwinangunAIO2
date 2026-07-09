@@ -984,21 +984,24 @@ def aduan():
         judul = request.form.get('judul', '').strip()
         kategori = request.form.get('kategori', 'infrastruktur')
         lokasi = request.form.get('lokasi', '').strip()
-        deskripsi = request.form.get('deskripsi', '').strip()
+        isi = request.form.get('deskripsi', '').strip()  # form field name is 'deskripsi'
 
-        if not nama or not judul or not deskripsi:
+        if not nama or not judul or not isi:
             flash('Nama, judul, dan deskripsi aduan wajib diisi!', 'error')
             return redirect(url_for('public.aduan'))
 
+        logger.info(f"[PUBLIC-ADUAN] Form submitted: nama={nama}, judul={judul}, kategori={kategori}")
         success, nomor = add_aduan(
-            nama=nama, judul=judul, deskripsi=deskripsi, kategori=kategori,
+            nama=nama, judul=judul, deskripsi=isi, kategori=kategori,
             email=email or None, telepon=telepon or None, nik=nik or None,
             alamat=alamat or None, dusun=dusun or None, lokasi=lokasi or None
         )
         
         if success:
+            logger.info(f"[PUBLIC-ADUAN] Success: nomor={nomor}")
             flash(f'Aduan berhasil dikirim! Nomor pengaduan: {nomor}', 'success')
         else:
+            logger.error(f"[PUBLIC-ADUAN] Failed to submit: nama={nama}, judul={judul}")
             flash('Gagal mengirim aduan. Silakan coba lagi.', 'error')
         
         return redirect(url_for('public.aduan'))

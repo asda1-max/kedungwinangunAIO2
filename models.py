@@ -141,6 +141,9 @@ def migrate_database():
                 lokasi TEXT,
                 icon TEXT DEFAULT '📅',
                 kategori TEXT DEFAULT 'umum',
+                penanggung_jawab TEXT,
+                peserta TEXT,
+                status TEXT DEFAULT 'akan_datang',
                 urutan INTEGER DEFAULT 0,
                 aktif INTEGER DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -2172,8 +2175,8 @@ def add_aduan(nama, judul, deskripsi, kategori='infrastruktur', email=None, tele
         nomor = f"KDGW-ADUAN-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}"
         
         cursor.execute('''
-            INSERT INTO aduan (nomor_aduan, nama, email, telepon, nik, alamat, dusun, judul, 
-                             kategori, lokasi, deskripsi, lampiran_url)
+            INSERT INTO aduan (nomor_aduan, nama, email, telepon, nik, alamat, dusun, judul,
+                             kategori, lokasi, isi, lampiran)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (nomor, nama, email, telepon, nik, alamat, dusun, judul, kategori, lokasi, deskripsi, lampiran_url))
         conn.commit()
@@ -2189,11 +2192,10 @@ def update_aduan(aduan_id, judul, deskripsi, kategori, lokasi, status, prioritas
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            UPDATE aduan SET judul = ?, deskripsi = ?, kategori = ?, lokasi = ?, 
-                           status = ?, prioritas = ?, catatan = ?, updated_at = ?
+            UPDATE aduan SET judul = ?, isi = ?, kategori = ?, lokasi = ?, 
+                           status = ?, tanggapan = ?
             WHERE id = ?
-        ''', (judul, deskripsi, kategori, lokasi, status, prioritas, catatan, 
-              datetime.now().strftime("%Y-%m-%d %H:%M:%S"), aduan_id))
+        ''', (judul, deskripsi, kategori, lokasi, status, catatan, aduan_id))
         conn.commit()
         conn.close()
         return True
@@ -2220,11 +2222,10 @@ def respond_aduan(aduan_id, catatan, responded_by):
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            UPDATE aduan SET status = 'ditanggapi', catatan = ?, responded_by = ?, 
-                           responded_at = ?, updated_at = ?
+            UPDATE aduan SET status = 'ditanggapi', tanggapan = ?, 
+                           responded_by = ?, responded_at = ?
             WHERE id = ?
-        ''', (catatan, responded_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-              datetime.now().strftime("%Y-%m-%d %H:%M:%S"), aduan_id))
+        ''', (catatan, responded_by, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), aduan_id))
         conn.commit()
         conn.close()
         return True
@@ -2291,7 +2292,7 @@ def get_program_kerja_by_id(program_id):
         logger.error(f"Error getting program_kerja {program_id}: {str(e)}")
         return None
 
-def add_program_kerja(judul, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif=1):
+def add_program_kerja(nama, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif=1):
     """Tambah program kerja baru"""
     try:
         conn = get_db_connection()
@@ -2299,12 +2300,12 @@ def add_program_kerja(judul, deskripsi, kategori, tahun, target, realiasi, angga
         cursor.execute('SELECT MAX(urutan) as max_order FROM program_kerja')
         row = cursor.fetchone()
         max_order = (row['max_order'] or 0) + 1
-        
+
         cursor.execute('''
-            INSERT INTO program_kerja (judul, deskripsi, kategori, tahun, target, realiasi, 
+            INSERT INTO program_kerja (nama, deskripsi, kategori, tahun, target, realiasi,
                                       anggaran, icon, status, aktif, urutan)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (judul, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif, max_order))
+        ''', (nama, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif, max_order))
         conn.commit()
         conn.close()
         return True
@@ -2312,17 +2313,17 @@ def add_program_kerja(judul, deskripsi, kategori, tahun, target, realiasi, angga
         logger.error(f"Error adding program_kerja: {str(e)}")
         return False
 
-def update_program_kerja(program_id, judul, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif, urutan):
+def update_program_kerja(program_id, nama, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif, urutan):
     """Update program kerja"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            UPDATE program_kerja SET judul = ?, deskripsi = ?, kategori = ?, tahun = ?,
+            UPDATE program_kerja SET nama = ?, deskripsi = ?, kategori = ?, tahun = ?,
                                    target = ?, realiasi = ?, anggaran = ?, icon = ?,
                                    status = ?, aktif = ?, urutan = ?, updated_at = ?
             WHERE id = ?
-        ''', (judul, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif, urutan,
+        ''', (nama, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif, urutan,
               datetime.now().strftime("%Y-%m-%d %H:%M:%S"), program_id))
         conn.commit()
         conn.close()
@@ -2400,7 +2401,7 @@ def get_agenda_by_id(agenda_id):
         logger.error(f"Error getting agenda {agenda_id}: {str(e)}")
         return None
 
-def add_agenda(judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi,
+def add_agenda(judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu, lokasi,
                icon, penanggung_jawab, peserta, status, aktif=1):
     """Tambah agenda baru"""
     try:
@@ -2409,12 +2410,12 @@ def add_agenda(judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu
         cursor.execute('SELECT MAX(urutan) as max_order FROM agenda')
         row = cursor.fetchone()
         max_order = (row['max_order'] or 0) + 1
-        
+
         cursor.execute('''
-            INSERT INTO agenda (judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu,
+            INSERT INTO agenda (judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu,
                               lokasi, icon, penanggung_jawab, peserta, status, aktif, urutan)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi,
+        ''', (judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu, lokasi,
               icon, penanggung_jawab, peserta, status, aktif, max_order))
         conn.commit()
         conn.close()
@@ -2423,21 +2424,20 @@ def add_agenda(judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu
         logger.error(f"Error adding agenda: {str(e)}")
         return False
 
-def update_agenda(agenda_id, judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu,
+def update_agenda(agenda_id, judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu,
                   lokasi, icon, penanggung_jawab, peserta, status, aktif, urutan):
     """Update agenda"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            UPDATE agenda SET judul = ?, deskripsi = ?, kategori = ?, tanggal_mulai = ?,
-                           tanggal_selesai = ?, waktu = ?, lokasi = ?, icon = ?,
+            UPDATE agenda SET judul = ?, deskripsi = ?, kategori = ?, tanggal = ?,
+                           tanggal_mulai = ?, waktu = ?, lokasi = ?, icon = ?,
                            penanggung_jawab = ?, peserta = ?, status = ?, aktif = ?,
-                           urutan = ?, updated_at = ?
+                           urutan = ?
             WHERE id = ?
-        ''', (judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi,
-              icon, penanggung_jawab, peserta, status, aktif, urutan,
-              datetime.now().strftime("%Y-%m-%d %H:%M:%S"), agenda_id))
+        ''', (judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu, lokasi,
+              icon, penanggung_jawab, peserta, status, aktif, urutan, agenda_id))
         conn.commit()
         conn.close()
         return True

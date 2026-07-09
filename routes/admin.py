@@ -2037,29 +2037,32 @@ def aduan_detail(aduan_id):
             
             if action == 'respond':
                 catatan = request.form.get('catatan', '').strip()
+                logger.info(f"[ADUAN] respond action: aduan_id={aduan_id}, catatan length={len(catatan)}")
                 if catatan:
                     result = respond_aduan(aduan_id, catatan, session.get('user_id'))
                     if result:
                         flash('Tanggapan berhasil dikirim!', 'success')
                     else:
+                        logger.warning(f"[ADUAN] respond_aduan returned False for aduan_id={aduan_id}")
                         flash_error('Gagal mengirim tanggapan.')
                 else:
                     flash_error('Catatan/tanggapan wajib diisi!')
             
             elif action == 'update_status':
+                logger.info(f"[ADUAN] update_status action: aduan_id={aduan_id}")
                 from models import update_aduan
                 status = request.form.get('status', '')
-                prioritas = request.form.get('prioritas', 'normal')
                 catatan = request.form.get('catatan', '').strip()
                 judul = request.form.get('judul', item['judul'])
-                deskripsi = request.form.get('deskripsi', item['deskripsi'])
+                isi = request.form.get('deskripsi', item.get('isi', ''))
                 kategori = request.form.get('kategori', item['kategori'])
                 lokasi = request.form.get('lokasi', item['lokasi'] or '')
                 
-                result = update_aduan(aduan_id, judul, deskripsi, kategori, lokasi, status, prioritas, catatan)
+                result = update_aduan(aduan_id, judul, isi, kategori, lokasi, status, None, catatan)
                 if result:
                     flash('Status aduan berhasil diperbarui!', 'success')
                 else:
+                    logger.warning(f"[ADUAN] update_aduan returned False for aduan_id={aduan_id}")
                     flash_error('Gagal memperbarui status.')
             
             return redirect(url_for('admin.aduan_detail', aduan_id=aduan_id))
@@ -2130,6 +2133,7 @@ def add_program_kerja_route():
     """Form tambah program kerja"""
     try:
         from models import add_program_kerja
+        from datetime import datetime
         
         if request.method == 'POST':
             judul = request.form.get('judul', '').strip()
@@ -2146,11 +2150,13 @@ def add_program_kerja_route():
                 flash_error('Judul program kerja harus diisi!')
                 return redirect(request.url)
             
-            result = add_program_kerja(judul, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status)
+            result = add_program_kerja(nama=judul, deskripsi=deskripsi, kategori=kategori, tahun=tahun, target=target, realiasi=realiasi, anggaran=anggaran, icon=icon, status=status)
+            logger.info(f"[PROGRAM_KERJA] add_program_kerja called with: judul={judul}, kategori={kategori}, tahun={tahun}, status={status}")
             if result:
                 flash('Program kerja berhasil ditambahkan!', 'success')
                 return redirect(url_for('admin.program_kerja'))
             else:
+                logger.warning(f"[PROGRAM_KERJA] add_program_kerja returned False for judul={judul}")
                 flash_error('Gagal menambahkan program kerja.')
                 return redirect(request.url)
         
@@ -2167,6 +2173,7 @@ def edit_program_kerja_route(program_id):
     """Form edit program kerja"""
     try:
         from models import get_program_kerja_by_id, update_program_kerja
+        from datetime import datetime
         
         item = get_program_kerja_by_id(program_id)
         if not item:
@@ -2190,11 +2197,13 @@ def edit_program_kerja_route(program_id):
                 flash_error('Judul program kerja harus diisi!')
                 return redirect(request.url)
             
-            result = update_program_kerja(program_id, judul, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif, urutan)
+            logger.info(f"[PROGRAM_KERJA] update_program_kerja called: id={program_id}, nama={judul}")
+            result = update_program_kerja(program_id, nama=judul, deskripsi=deskripsi, kategori=kategori, tahun=tahun, target=target, realiasi=realiasi, anggaran=anggaran, icon=icon, status=status, aktif=aktif, urutan=urutan)
             if result:
                 flash('Program kerja berhasil diperbarui!', 'success')
                 return redirect(url_for('admin.program_kerja'))
             else:
+                logger.warning(f"[PROGRAM_KERJA] update_program_kerja returned False for id={program_id}")
                 flash_error('Gagal memperbarui program kerja.')
                 return redirect(request.url)
         
@@ -2296,11 +2305,13 @@ def add_agenda_route():
                 flash_error('Judul dan Tanggal Mulai harus diisi!')
                 return redirect(request.url)
             
-            result = add_agenda(judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi, icon, penanggung_jawab, peserta, status)
+            logger.info(f"[AGENDA] add_agenda called: judul={judul}, tanggal={tanggal_mulai}")
+            result = add_agenda(judul=judul, deskripsi=deskripsi, kategori=kategori, tanggal=tanggal_mulai, tanggal_mulai=tanggal_mulai, waktu=waktu, lokasi=lokasi, icon=icon, penanggung_jawab=penanggung_jawab, peserta=peserta, status=status)
             if result:
                 flash('Agenda berhasil ditambahkan!', 'success')
                 return redirect(url_for('admin.agenda'))
             else:
+                logger.warning(f"[AGENDA] add_agenda returned False for judul={judul}")
                 flash_error('Gagal menambahkan agenda.')
                 return redirect(request.url)
         
@@ -2342,11 +2353,13 @@ def edit_agenda_route(agenda_id):
                 flash_error('Judul dan Tanggal Mulai harus diisi!')
                 return redirect(request.url)
             
-            result = update_agenda(agenda_id, judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi, icon, penanggung_jawab, peserta, status, aktif, urutan)
+            logger.info(f"[AGENDA] update_agenda called: id={agenda_id}, judul={judul}")
+            result = update_agenda(agenda_id, judul=judul, deskripsi=deskripsi, kategori=kategori, tanggal=tanggal_mulai, tanggal_mulai=tanggal_mulai, waktu=waktu, lokasi=lokasi, icon=icon, penanggung_jawab=penanggung_jawab, peserta=peserta, status=status, aktif=aktif, urutan=urutan)
             if result:
                 flash('Agenda berhasil diperbarui!', 'success')
                 return redirect(url_for('admin.agenda'))
             else:
+                logger.warning(f"[AGENDA] update_agenda returned False for id={agenda_id}")
                 flash_error('Gagal memperbarui agenda.')
                 return redirect(request.url)
         
