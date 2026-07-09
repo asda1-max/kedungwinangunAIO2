@@ -6,331 +6,340 @@
     <title>Peta Interaktif - {{ site_name }}</title>
     <link rel="icon" href="{{ url_for('static', filename='images/kebumen.png') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'desa-dark': '#155C1B', 'desa-mid': '#2A6726',
-                        'desa-light': '#73AA0F', 'desa-muted': '#5B8A4E',
+                        'desa': { dark: '#0f3d14', mid: '#155C1B', muted: '#5B8A4E', light: '#73AA0F' },
                     }
                 }
             }
         }
     </script>
     <style>
-        * { box-sizing: border-box; }
-        html, body { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; }
-        #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 1; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; font-family: 'Inter', sans-serif; background: #0a0f0d; overflow: hidden; }
+        #map { position: absolute; inset: 0; z-index: 1; }
 
-        #title-bar {
-            position: absolute; top: 0; left: 0; right: 0; z-index: 900;
-            background: #1b4332; color: #fff; padding: 10px 16px;
-            display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        /* ===== TOP BAR ===== */
+        #top-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(15, 23, 20, 0.85); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
+            gap: 12px;
         }
-        #title-bar h1 { font-size: 16px; margin: 0; font-weight: 600; }
-        #title-bar span { font-size: 12px; opacity: 0.85; }
+        #top-bar h1 { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+        #top-bar h1 span { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 400; }
+        .tb-actions { display: flex; gap: 4px; }
+        .tb-btn {
+            width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 16px;
+            transition: all 0.2s; backdrop-filter: blur(10px);
+        }
+        .tb-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.25); }
+        .tb-btn.active { background: rgba(34, 197, 94, 0.25); border-color: rgba(34, 197, 94, 0.5); color: #4ade80; }
 
-        /* ===== SIDEBAR ===== */
+        /* ===== FLOATING STATS BAR ===== */
+        #stats-bar {
+            position: fixed; top: 68px; left: 50%; transform: translateX(-50%); z-index: 999;
+            display: flex; gap: 6px; background: rgba(15, 23, 20, 0.75); backdrop-filter: blur(20px);
+            border-radius: 14px; padding: 6px; border: 1px solid rgba(255,255,255,0.08);
+            overflow-x: auto; max-width: 95vw; white-space: nowrap;
+        }
+        .stat-chip {
+            padding: 6px 12px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: 600;
+            color: rgba(255,255,255,0.7); transition: all 0.2s; display: flex; align-items: center; gap: 5px;
+            border: 1px solid transparent; white-space: nowrap; user-select: none;
+        }
+        .stat-chip:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .stat-chip.active { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2); }
+        .stat-chip-count { font-size: 15px; font-weight: 700; }
+        .stat-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+        /* ===== DESKTOP SIDEBAR ===== */
         #sidebar {
-            position: absolute; top: 48px; left: 0; bottom: 0; z-index: 900;
-            width: 320px; background: #fff;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.15);
-            display: flex; flex-direction: column;
-            transition: transform 0.3s ease;
+            position: fixed; top: 72px; left: 12px; bottom: 16px; z-index: 998;
+            width: 360px; background: rgba(15, 23, 20, 0.88); backdrop-filter: blur(24px);
+            border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);
+            display: flex; flex-direction: column; overflow: hidden;
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
         }
-        #sidebar.hidden { transform: translateX(-100%); }
-        #sidebar-toggle {
-            position: absolute; top: 60px; left: 320px; z-index: 901;
-            background: #fff; border: none; border-radius: 0 8px 8px 0;
-            padding: 12px 8px; cursor: pointer; box-shadow: 2px 2px 6px rgba(0,0,0,0.15);
-            transition: left 0.3s ease;
-        }
-        #sidebar-toggle.hidden { left: 0; }
-        #sidebar-toggle svg { transition: transform 0.3s ease; }
-        #sidebar-toggle.rotated svg { transform: rotate(180deg); }
+        #sidebar.collapsed { transform: translateX(-110%); opacity: 0; pointer-events: none; }
 
-        .sidebar-header {
-            padding: 12px 14px; background: #1b4332; color: #fff;
+        .sb-search {
+            padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .sb-search-box {
             display: flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 10px 14px; transition: all 0.2s;
         }
-        .sidebar-header h2 { font-size: 15px; font-weight: 600; margin: 0; }
+        .sb-search-box:focus-within { border-color: rgba(74, 222, 128, 0.4); background: rgba(255,255,255,0.1); }
+        .sb-search-box svg { flex-shrink: 0; width: 18px; height: 18px; color: rgba(255,255,255,0.3); }
+        .sb-search-box input {
+            flex: 1; border: none; background: none; outline: none; color: #fff; font-size: 14px; font-family: inherit;
+        }
+        .sb-search-box input::placeholder { color: rgba(255,255,255,0.3); }
+        .sb-search-clear {
+            background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 16px; display: none;
+        }
+        .sb-search-clear.visible { display: block; }
 
-        .cat-tabs {
-            display: flex; background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
-            overflow-x: auto; flex-shrink: 0;
+        .sb-list { flex: 1; overflow-y: auto; padding: 8px; }
+        .sb-list::-webkit-scrollbar { width: 4px; }
+        .sb-list::-webkit-scrollbar-track { background: transparent; }
+        .sb-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        .sb-section-title {
+            font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.25); text-transform: uppercase;
+            letter-spacing: 0.08em; padding: 12px 8px 6px;
         }
-        .cat-tab {
-            padding: 10px 14px; font-size: 12px; font-weight: 500; color: #64748b;
-            cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent;
-            transition: all 0.2s;
+        .sb-item {
+            display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px;
+            cursor: pointer; transition: all 0.15s; margin-bottom: 2px;
         }
-        .cat-tab:hover { color: #1b4332; }
-        .cat-tab.active { color: #1b4332; border-bottom-color: #1b4332; background: #fff; }
+        .sb-item:hover { background: rgba(255,255,255,0.06); }
+        .sb-item.selected { background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3); }
+        .sb-item-icon {
+            width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center;
+            justify-content: center; font-size: 18px; flex-shrink: 0;
+        }
+        .sb-item-info { flex: 1; min-width: 0; }
+        .sb-item-name { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sb-item-desc { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sb-item-arrow { color: rgba(255,255,255,0.2); font-size: 14px; }
+        .sb-empty { text-align: center; padding: 40px 24px; color: rgba(255,255,255,0.3); }
+        .sb-empty-icon { font-size: 40px; margin-bottom: 10px; }
 
-        .sidebar-search {
-            padding: 10px 12px; border-bottom: 1px solid #e2e8f0;
-        }
-        .sidebar-search input {
-            width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px;
-            font-size: 13px; outline: none;
-        }
-        .sidebar-search input:focus { border-color: #1b4332; }
-
-        .sidebar-list { flex: 1; overflow-y: auto; padding: 8px; }
-        
-        .list-section-header {
-            font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase;
-            letter-spacing: 0.5px; padding: 8px 8px 4px; border-bottom: 1px solid #e2e8f0;
-            margin-bottom: 4px;
-        }
-        
-        .list-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 12px; border-radius: 8px; cursor: pointer;
-            transition: background 0.15s; margin-bottom: 4px;
-        }
-        .list-item:hover { background: #f1f5f9; }
-        .list-item.active { background: #dcfce7; border: 1px solid #86efac; }
-        .list-item-icon {
-            width: 36px; height: 36px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; flex-shrink: 0;
-        }
-        .list-item-info { flex: 1; min-width: 0; }
-        .list-item-title { font-size: 13px; font-weight: 500; color: #1e293b; 
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .list-item-sub { font-size: 11px; color: #64748b; margin-top: 2px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .list-item-badge {
-            font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500;
-        }
-
-        /* Detail Panel */
+        /* ===== DETAIL PANEL (Desktop) ===== */
         #detail-panel {
-            position: absolute; top: 48px; right: 10px; z-index: 900;
-            width: 320px; background: #fff; border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden;
-            max-height: calc(100vh - 70px);
+            position: fixed; top: 72px; right: 12px; bottom: 16px; z-index: 998;
+            width: 340px; background: rgba(15, 23, 20, 0.88); backdrop-filter: blur(24px);
+            border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);
+            display: flex; flex-direction: column; overflow: hidden;
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
         }
-        .detail-header {
-            padding: 14px 16px; background: #1b4332; color: #fff;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .detail-header-icon { font-size: 28px; }
-        .detail-header h3 { font-size: 16px; font-weight: 600; margin: 0; flex: 1; }
-        .detail-close {
-            background: rgba(255,255,255,0.2); border: none; border-radius: 6px;
-            width: 28px; height: 28px; color: #fff; cursor: pointer; font-size: 18px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .detail-close:hover { background: rgba(255,255,255,0.3); }
-        
-        .detail-body { padding: 14px 16px; overflow-y: auto; max-height: calc(100vh - 180px); }
-        .detail-section { margin-bottom: 14px; }
-        .detail-section-title {
-            font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase;
-            letter-spacing: 0.5px; margin-bottom: 6px;
-        }
-        .detail-row { display: flex; gap: 8px; margin-bottom: 8px; font-size: 13px; }
-        .detail-label { color: #64748b; min-width: 80px; }
-        .detail-value { color: #1e293b; flex: 1; }
-        
-        .detail-image {
-            width: 100%; border-radius: 8px; margin-top: 8px;
-            max-height: 180px; object-fit: cover; background: #f1f5f9;
-        }
-        .detail-image-placeholder {
-            width: 100%; height: 120px; border-radius: 8px; background: #f1f5f9;
-            display: flex; align-items: center; justify-content: center;
-            color: #94a3b8; font-size: 13px; margin-top: 8px;
-        }
-        
-        .detail-coords {
-            background: #f1f5f9; border-radius: 6px; padding: 8px 10px;
-            font-size: 12px; font-family: monospace; color: #475569;
-            display: flex; align-items: center; gap: 6px;
-        }
-        
-        .detail-link {
-            display: inline-flex; align-items: center; gap: 4px;
-            color: #1b4332; font-size: 13px; font-weight: 500;
-            text-decoration: none; margin-top: 6px;
-        }
-        .detail-link:hover { text-decoration: underline; }
+        #detail-panel.hidden { transform: translateX(110%); opacity: 0; pointer-events: none; }
 
-        .empty-state {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px 20px; color: #94a3b8; text-align: center;
+        .dp-header {
+            padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-        .empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.5; }
-        .empty-state p { font-size: 13px; }
-
-        #legend {
-            position: absolute; bottom: 20px; right: 10px; z-index: 900;
-            background: #fff; border-radius: 10px; padding: 10px 14px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2); font-size: 12px; max-width: 220px;
+        .dp-header-icon { font-size: 28px; flex-shrink: 0; }
+        .dp-header-info { flex: 1; min-width: 0; }
+        .dp-header-info h3 { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dp-header-info span { font-size: 11px; color: rgba(255,255,255,0.4); }
+        .dp-close {
+            width: 32px; height: 32px; border-radius: 8px; border: none; background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.6); cursor: pointer; font-size: 18px; display: flex;
+            align-items: center; justify-content: center; transition: all 0.2s;
         }
-        #legend h3 { margin: 0 0 6px 0; font-size: 12px; color: #1b4332; }
-        .legend-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 1px solid #333; }
+        .dp-close:hover { background: rgba(239,68,68,0.3); color: #fca5a5; }
 
+        .dp-body { flex: 1; overflow-y: auto; padding: 16px; }
+        .dp-body::-webkit-scrollbar { width: 4px; }
+        .dp-body::-webkit-scrollbar-track { background: transparent; }
+        .dp-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        .dp-image {
+            width: 100%; border-radius: 12px; max-height: 200px; object-fit: cover;
+            margin-bottom: 14px; background: rgba(255,255,255,0.04);
+        }
+        .dp-image-placeholder {
+            width: 100%; height: 140px; border-radius: 12px; margin-bottom: 14px;
+            background: rgba(255,255,255,0.04); display: flex; align-items: center;
+            justify-content: center; font-size: 48px;
+        }
+        .dp-section { margin-bottom: 14px; }
+        .dp-section-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+        .dp-row { display: flex; gap: 10px; padding: 6px 0; font-size: 13px; }
+        .dp-row-label { color: rgba(255,255,255,0.35); min-width: 60px; }
+        .dp-row-value { color: rgba(255,255,255,0.85); flex: 1; }
+        .dp-coords {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px; padding: 8px 12px; font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 8px;
+        }
+        .dp-actions { display: flex; gap: 8px; margin-top: 16px; }
+        .dp-btn {
+            flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.06); color: #fff; cursor: pointer; font-size: 12px; font-weight: 600;
+            font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .dp-btn:hover { background: rgba(255,255,255,0.12); }
+        .dp-btn.primary { background: rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.3); }
+        .dp-btn.primary:hover { background: rgba(34, 197, 94, 0.3); }
+
+        /* ===== MOBILE BOTTOM SHEET ===== */
+        @media (max-width: 768px) {
+            #sidebar {
+                top: auto; left: 0; right: 0; bottom: 0; width: 100%; height: 55vh;
+                border-radius: 20px 20px 0 0; transform: translateY(calc(100% - 56px));
+            }
+            #sidebar.expanded { transform: translateY(0); }
+            #sidebar.collapsed { transform: translateY(calc(100% - 56px)); opacity: 1; pointer-events: auto; }
+            .sb-handle {
+                display: flex; justify-content: center; padding: 10px 0 6px; cursor: grab;
+            }
+            .sb-handle-bar {
+                width: 40px; height: 4px; background: rgba(255,255,255,0.25); border-radius: 2px;
+            }
+            #detail-panel {
+                top: auto; right: 0; left: 0; bottom: 0; width: 100%; height: 65vh;
+                border-radius: 20px 20px 0 0; transform: translateY(100%);
+            }
+            #detail-panel.visible { transform: translateY(0); }
+            #detail-panel.hidden { transform: translateY(100%); opacity: 0; pointer-events: none; }
+            #stats-bar { top: 60px; }
+            .tb-btn.sidebar-toggle { display: flex; }
+            #top-bar h1 span { display: none; }
+        }
+        @media (min-width: 769px) {
+            .sb-handle { display: none; }
+            .tb-btn.sidebar-toggle { display: none; }
+        }
+
+        /* ===== LAYER TOGGLE (Floating Right Panel) ===== */
+        #layer-toggle {
+            position: fixed; top: 120px; right: 12px; z-index: 997;
+            background: rgba(15, 23, 20, 0.88); backdrop-filter: blur(20px);
+            border-radius: 16px; padding: 16px 18px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 2px;
+            min-width: 210px; max-width: 230px;
+            transition: all 0.3s;
+        }
+        @media (max-width: 768px) {
+            #layer-toggle { top: auto; bottom: 100px; right: 8px; padding: 12px 14px; min-width: 190px; max-width: 210px; }
+        }
+        .lt-title {
+            font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase;
+            letter-spacing: 0.08em; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+        }
+        .lt-row {
+            display: flex; align-items: center; gap: 10px; padding: 6px 10px; cursor: pointer;
+            font-size: 13px; color: rgba(255,255,255,0.85); transition: all 0.15s; user-select: none;
+            border-radius: 8px;
+        }
+        .lt-row:hover { background: rgba(255,255,255,0.06); }
+        .lt-row.off { color: rgba(255,255,255,0.35); }
+        .lt-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; transition: opacity 0.2s; }
+        .lt-row.off .lt-dot { opacity: 0.3; }
+        .lt-check {
+            width: 36px; height: 20px; border-radius: 10px; position: relative; flex-shrink: 0;
+            background: rgba(255,255,255,0.15); transition: background 0.2s; margin-left: auto;
+        }
+        .lt-row:not(.off) .lt-check { background: rgba(34, 197, 94, 0.5); }
+        .lt-check-knob {
+            position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+            background: #fff; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .lt-row:not(.off) .lt-check-knob { left: 18px; }
+
+        /* ===== MAP OVERRIDES ===== */
+        .leaflet-control-zoom { border: none !important; box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important; }
+        .leaflet-control-zoom a {
+            background: rgba(15,23,20,0.85) !important; color: rgba(255,255,255,0.8) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important; backdrop-filter: blur(12px);
+        }
+        .leaflet-control-zoom a:hover { background: rgba(255,255,255,0.15) !important; color: #fff !important; }
+        .leaflet-control-attribution { background: rgba(0,0,0,0.6) !important; color: rgba(255,255,255,0.4) !important; font-size: 9px !important; }
+        .leaflet-control-attribution a { color: rgba(255,255,255,0.5) !important; }
+        .marker-cluster-small { background: rgba(34,197,94,0.25) !important; }
+        .marker-cluster-small div { background: rgba(34,197,94,0.8) !important; color: #fff !important; font-weight: 700 !important; }
+        .marker-cluster-medium { background: rgba(245,158,11,0.25) !important; }
+        .marker-cluster-medium div { background: rgba(245,158,11,0.8) !important; }
+
+        /* ===== PULSE ANIMATION ===== */
+        @keyframes marker-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
+            70% { box-shadow: 0 0 0 16px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        .marker-pulse { animation: marker-pulse 1.5s infinite; }
         .dusun-label {
-            background: rgba(255,255,255,0.92); border: 1.5px solid #7209b7;
-            border-radius: 6px; padding: 2px 7px; font-size: 11px; font-weight: 700;
-            color: #3c096c; white-space: nowrap; box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+            background: rgba(255,255,255,0.9) !important; border: 2px solid #a855f7 !important;
+            border-radius: 8px !important; padding: 3px 8px !important; font-size: 11px !important;
+            font-weight: 700 !important; color: #581c87 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
             text-align: center; line-height: 1.3;
         }
-
-        .leaflet-popup-content-wrapper { border-radius: 10px; }
-
-        .counter-badge {
-            font-size: 10px; background: #e2e8f0; color: #64748b; 
-            padding: 2px 6px; border-radius: 10px; font-weight: 500;
-        }
-        
-        /* Scrollbar styling */
-        .sidebar-list::-webkit-scrollbar { width: 6px; }
-        .sidebar-list::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        
-        /* ===== LAYER TOGGLE PANEL ===== */
-        #layer-toggle {
-            position: absolute; bottom: 20px; left: 10px; z-index: 900;
-            background: #fff; border-radius: 10px; padding: 10px 14px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2); font-size: 12px; min-width: 180px;
-        }
-        #layer-toggle h3 { margin: 0 0 8px 0; font-size: 12px; color: #1b4332; display: flex; align-items: center; gap: 6px; }
-        .layer-toggle-item {
-            display: flex; align-items: center; gap: 8px;
-            padding: 4px 0; cursor: pointer;
-        }
-        .layer-toggle-item:hover { color: #1b4332; }
-        .layer-toggle-item input { cursor: pointer; accent-color: #1b4332; }
-        .layer-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .leaflet-tooltip { border: none !important; box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important; border-radius: 8px !important; font-family: 'Inter', sans-serif !important; }
     </style>
 </head>
-<body x-data="mapApp()" x-init="init()">
+<body x-data="petaApp()" x-init="init()">
 
-<!-- Title Bar -->
-<div id="title-bar">
-    <h1>🗺️ Peta Interaktif {{ site_name }}</h1>
-    <span>Klirong, Kebumen</span>
+<!-- ===== TOP BAR ===== -->
+<div id="top-bar">
+    <h1>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Peta {{ site_name }}
+        <span>Klirong, Kebumen</span>
+    </h1>
+    <div class="tb-actions">
+        <button class="tb-btn sidebar-toggle" @click="toggleSidebar()" title="Daftar Lokasi">☰</button>
+        <button class="tb-btn" @click="locateMe()" title="Lokasi Saya">◎</button>
+        <button class="tb-btn" @click="measureToggle()" :class="{ active: measureActive }" title="Ukur Jarak">↔</button>
+        <button class="tb-btn" @click="mapZoomIn()" title="Zoom In">+</button>
+        <button class="tb-btn" @click="mapZoomOut()" title="Zoom Out">−</button>
+        <button class="tb-btn" @click="resetView()" title="Reset View">⌂</button>
+        <a href="/" class="tb-btn" title="Kembali ke Website" style="text-decoration:none;">←</a>
+    </div>
 </div>
 
-<!-- Sidebar Toggle Button -->
-<button id="sidebar-toggle" onclick="toggleSidebar()" :class="{ 'hidden': !sidebarOpen }">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M15 18l-6-6 6-6"/>
-    </svg>
-</button>
+<!-- ===== STATS CHIPS ===== -->
+<div id="stats-bar" x-show="Object.keys(counts).length > 0">
+    <template x-for="cat in categories" :key="cat.id">
+        <div class="stat-chip" :class="{ active: activeCategory === cat.id }" @click="setCategory(cat.id)">
+            <span class="stat-chip-dot" :style="'background:' + cat.color"></span>
+            <span x-text="cat.icon"></span>
+            <span x-text="cat.label"></span>
+            <span class="stat-chip-count" x-text="counts[cat.id] || 0"></span>
+        </div>
+    </template>
+</div>
 
-<!-- Left Sidebar -->
-<div id="sidebar" :class="{ 'hidden': !sidebarOpen }">
-    <div class="sidebar-header">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-        <h2>Data Desa</h2>
-        <a href="/" class="ml-auto bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1 rounded-lg flex items-center gap-1 transition">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            Kembali
-        </a>
-    </div>
-
-    <!-- Category Tabs -->
-    <div class="cat-tabs">
-        <div class="cat-tab" :class="{ 'active': activeCategory === 'umkm' }" @click="setCategory('umkm')">
-            🏪 UMKM <span class="counter-badge" x-text="counts.umkm"></span>
-        </div>
-        <div class="cat-tab" :class="{ 'active': activeCategory === 'perangkat' }" @click="setCategory('perangkat')">
-            👔 Perangkat <span class="counter-badge" x-text="counts.perangkat"></span>
-        </div>
-        <div class="cat-tab" :class="{ 'active': activeCategory === 'bpd' }" @click="setCategory('bpd')">
-            📋 BPD <span class="counter-badge" x-text="counts.bpd"></span>
-        </div>
-        <div class="cat-tab" :class="{ 'active': activeCategory === 'pkk' }" @click="setCategory('pkk')">
-            👩 PKK <span class="counter-badge" x-text="counts.pkk"></span>
-        </div>
-        <div class="cat-tab" :class="{ 'active': activeCategory === 'karang_taruna' }" @click="setCategory('karang_taruna')">
-            🧑 K.Taruna <span class="counter-badge" x-text="counts.karang_taruna"></span>
-        </div>
-        <div class="cat-tab" :class="{ 'active': activeCategory === 'rt' }" @click="setCategory('rt')">
-            🏠 RT <span class="counter-badge" x-text="counts.rt"></span>
-        </div>
-        <div class="cat-tab" :class="{ 'active': activeCategory === 'rw' }" @click="setCategory('rw')">
-            🏛️ RW <span class="counter-badge" x-text="counts.rw"></span>
+<!-- ===== SIDEBAR ===== -->
+<div id="sidebar" :class="{ collapsed: !sidebarOpen, expanded: sidebarExpanded }" 
+     @touchstart.passive="touchStart($event)" @touchmove.passive="touchMove($event)" @touchend="touchEnd()">
+    <div class="sb-handle"><div class="sb-handle-bar"></div></div>
+    <div class="sb-search">
+        <div class="sb-search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Cari lokasi..." x-model="searchQuery" @input="filterItems()" @focus="openSidebar()">
+            <button class="sb-search-clear" :class="{ visible: searchQuery.length > 0 }" @click="searchQuery=''; filterItems();">×</button>
         </div>
     </div>
-
-    <!-- Search -->
-    <div class="sidebar-search">
-        <input type="text" :placeholder="'Cari ' + categoryLabels[activeCategory] + '...'" 
-               x-model="searchQuery" @input="filterList()">
-    </div>
-
-    <!-- List -->
-    <div class="sidebar-list">
-        <!-- UMKM List -->
-        <template x-if="activeCategory === 'umkm'">
+    <div class="sb-list" @scroll.passive>
+        <template x-if="filteredItems.length === 0">
+            <div class="sb-empty">
+                <div class="sb-empty-icon">🔍</div>
+                <p>Tidak ada hasil ditemukan</p>
+            </div>
+        </template>
+        <template x-if="filteredItems.length > 0">
             <div>
-                <template x-if="filteredItems.length === 0">
-                    <div class="empty-state">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                        </svg>
-                        <p>Tidak ada UMKM ditemukan</p>
-                    </div>
-                </template>
-                <template x-for="item in filteredItems" :key="item.properties.id">
-                    <div class="list-item" :class="{ 'active': selectedId === item.properties.id && selectedType === 'umkm' }"
-                         @click="selectItem(item, 'umkm')">
-                        <div class="list-item-icon" :style="'background:' + getUmkmColor(item.properties.kategori) + '20; color:' + getUmkmColor(item.properties.kategori)">
-                            🏪
+                <template x-for="item in filteredItems" :key="item._id">
+                    <div class="sb-item" :class="{ selected: selectedItem && selectedItem._id === item._id }" 
+                         @click="selectItem(item)">
+                        <div class="sb-item-icon" :style="'background:' + item._color + '22;'">
+                            <span x-text="item._icon"></span>
                         </div>
-                        <div class="list-item-info">
-                            <div class="list-item-title" x-text="item.properties.nama || 'UMKM'"></div>
-                            <div class="list-item-sub" x-text="item.properties.kategori || item.properties.pemilik || '-'"></div>
+                        <div class="sb-item-info">
+                            <div class="sb-item-name" x-text="item._name"></div>
+                            <div class="sb-item-desc" x-text="item._desc"></div>
                         </div>
-                        <span class="list-item-badge" :style="'background:' + getUmkmColor(item.properties.kategori) + '20; color:' + getUmkmColor(item.properties.kategori)"
-                              x-text="item.properties.kategori || '-'"></span>
-                    </div>
-                </template>
-            </div>
-        </template>
-
-        <!-- Location List (RT, RW, Perangkat, BPD, PKK, Karang Taruna) -->
-        <template x-if="activeCategory !== 'umkm'">
-            <div>
-                <template x-if="filteredItems.length === 0">
-                    <div class="empty-state">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                        </svg>
-                        <p>Tidak ada data ditemukan</p>
-                    </div>
-                </template>
-                <template x-for="item in filteredItems" :key="item.properties.id">
-                    <div class="list-item" :class="{ 'active': selectedId === item.properties.id && selectedType === 'lokasi' }"
-                         @click="selectItem(item, 'lokasi')">
-                        <div class="list-item-icon" :style="'background:' + getLocationColor(item.properties.jenis) + '20; color:' + getLocationColor(item.properties.jenis)">
-                            <span x-text="getLocationIcon(item.properties.jenis)"></span>
-                        </div>
-                        <div class="list-item-info">
-                            <div class="list-item-title" x-text="item.properties.nama || item.properties.nama_ketua || item.properties.wilayah || item.properties.jenis"></div>
-                            <div class="list-item-sub" x-text="item.properties.jabatan || getLocationLabel(item.properties.jenis)"></div>
-                        </div>
-                        <span class="list-item-badge" :style="'background:' + getLocationColor(item.properties.jenis) + '15; color:' + getLocationColor(item.properties.jenis)"
-                              x-text="getLocationLabel(item.properties.jenis)"></span>
+                        <div class="sb-item-arrow">→</div>
                     </div>
                 </template>
             </div>
@@ -338,547 +347,598 @@
     </div>
 </div>
 
-<!-- Right Detail Panel -->
-<div id="detail-panel" x-show="showDetail" x-transition>
-    <div class="detail-header">
-        <span class="detail-header-icon" x-text="detailIcon"></span>
-        <h3 x-text="detailTitle"></h3>
-        <button class="detail-close" @click="closeDetail()">&times;</button>
-    </div>
-    <div class="detail-body">
-        <!-- Image -->
-        <template x-if="detailImage">
-            <img :src="detailImage" class="detail-image" @error="$el.style.display='none'">
-        </template>
-        <template x-if="!detailImage">
-            <div class="detail-image-placeholder">
-                <span x-text="detailIcon + ' Tidak ada foto'"></span>
+<!-- ===== DETAIL PANEL ===== -->
+<div id="detail-panel" :class="{ hidden: !selectedItem, visible: selectedItem && isMobile }" x-show="selectedItem" x-transition>
+    <template x-if="selectedItem">
+        <div style="display: flex; flex-direction: column; height: 100%;">
+            <div class="dp-header">
+                <div class="dp-header-icon" x-text="selectedItem._icon"></div>
+                <div class="dp-header-info">
+                    <h3 x-text="selectedItem._name"></h3>
+                    <span x-text="selectedItem._type"></span>
+                </div>
+                <button class="dp-close" @click="closeDetail()">×</button>
             </div>
-        </template>
+            <div class="dp-body">
+                <template x-if="selectedItem._image">
+                    <img :src="selectedItem._image" class="dp-image" @error="$el.style.display='none'" loading="lazy">
+                </template>
+                <template x-if="!selectedItem._image">
+                    <div class="dp-image-placeholder" x-text="selectedItem._icon"></div>
+                </template>
 
-        <!-- Coordinates -->
-        <div class="detail-section" x-show="detailCoords">
-            <div class="detail-section-title">📍 Koordinat</div>
-            <div class="detail-coords">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                </svg>
-                <span x-text="detailCoords"></span>
+                <div class="dp-section" x-show="selectedItem._coords">
+                    <div class="dp-section-label">📍 Koordinat</div>
+                    <div class="dp-coords" x-text="selectedItem._coords"></div>
+                </div>
+
+                <div class="dp-section" x-show="selectedItem._category">
+                    <div class="dp-section-label">🏷️ Kategori</div>
+                    <span style="padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;"
+                          :style="'background:' + selectedItem._color + '22; color:' + selectedItem._color"
+                          x-text="selectedItem._category"></span>
+                </div>
+
+                <template x-for="row in selectedItem._rows" :key="row.label">
+                    <div class="dp-section" x-show="row.value">
+                        <div class="dp-section-label" x-text="row.label"></div>
+                        <div class="dp-row-value" x-text="row.value || '-'"></div>
+                    </div>
+                </template>
+
+                <div class="dp-actions">
+                    <a :href="'https://www.google.com/maps?q=' + selectedItem._coords" target="_blank" class="dp-btn primary">
+                        🗺️ Google Maps
+                    </a>
+                    <button class="dp-btn" @click="flyToItem()">📍 Fokus</button>
+                </div>
             </div>
         </div>
-
-        <!-- Info Rows -->
-        <template x-for="row in detailRows" :key="row.label">
-            <div class="detail-section" x-show="row.value">
-                <div class="detail-section-title" x-text="row.label"></div>
-                <div class="detail-value" x-text="row.value || '-'"></div>
-            </div>
-        </template>
-
-        <!-- Action Links -->
-        <template x-if="detailLink">
-            <a :href="detailLink" class="detail-link" target="_blank">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                    <polyline points="15 3 21 3 21 9"/>
-                    <line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-                Lihat di Google Maps
-            </a>
-        </template>
-    </div>
+    </template>
 </div>
 
-<!-- Layer Toggle Panel -->
-<div id="layer-toggle" x-data="layerToggle()" x-init="init()">
-    <h3>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-            <polyline points="2 17 12 22 22 17"/>
-            <polyline points="2 12 12 17 22 12"/>
-        </svg>
-        Layer Peta
-    </h3>
-    <div class="layer-toggle-item" @click="toggleLayer('umkm')">
-        <input type="checkbox" x-model="activeLayers.umkm" readonly>
-        <span class="layer-dot" style="background:#e63946"></span>
-        UMKM
+<!-- ===== LAYER TOGGLE ===== -->
+<div id="layer-toggle" x-data="layerToggler()" x-init="init()">
+    <div class="lt-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        Layer
     </div>
-    <div class="layer-toggle-item" @click="toggleLayer('perangkat')">
-        <input type="checkbox" x-model="activeLayers.perangkat" readonly>
-        <span class="layer-dot" style="background:#1b4332"></span>
-        Perangkat Desa
-    </div>
-    <div class="layer-toggle-item" @click="toggleLayer('bpd')">
-        <input type="checkbox" x-model="activeLayers.bpd" readonly>
-        <span class="layer-dot" style="background:#7c3aed"></span>
-        BPD
-    </div>
-    <div class="layer-toggle-item" @click="toggleLayer('pkk')">
-        <input type="checkbox" x-model="activeLayers.pkk" readonly>
-        <span class="layer-dot" style="background:#ec4899"></span>
-        PKK
-    </div>
-    <div class="layer-toggle-item" @click="toggleLayer('karang_taruna')">
-        <input type="checkbox" x-model="activeLayers.karang_taruna" readonly>
-        <span class="layer-dot" style="background:#f59e0b"></span>
-        Karang Taruna
-    </div>
-    <div class="layer-toggle-item" @click="toggleLayer('rt')">
-        <input type="checkbox" x-model="activeLayers.rt" readonly>
-        <span class="layer-dot" style="background:#457b9d"></span>
-        Rumah RT
-    </div>
-    <div class="layer-toggle-item" @click="toggleLayer('rw')">
-        <input type="checkbox" x-model="activeLayers.rw" readonly>
-        <span class="layer-dot" style="background:#264653"></span>
-        Rumah RW
-    </div>
-    <div class="layer-toggle-item" @click="toggleLayer('desa')">
-        <input type="checkbox" x-model="activeLayers.desa" readonly>
-        <span style="width:12px;height:8px;border:2px solid #e76f51;background:rgba(231,111,81,0.15);display:inline-block"></span>
-        Batas Desa
-    </div>
-    <div class="layer-toggle-item" @click="toggleLayer('dusun')">
-        <input type="checkbox" x-model="activeLayers.dusun" readonly>
-        <span style="width:12px;height:8px;border:2px solid #7209b7;background:rgba(114,9,183,0.15);display:inline-block"></span>
-        Batas RW/Dusun
-    </div>
+    <template x-for="l in layers" :key="l.id">
+        <div class="lt-row" :class="{ off: !l.active }" @click="toggle(l.id)">
+            <span class="lt-dot" :style="'background:' + l.color + (l.shape === 'square' ? ';border-radius:4px' : '')"></span>
+            <span x-text="l.label"></span>
+            <span class="lt-check"><span class="lt-check-knob"></span></span>
+        </div>
+    </template>
 </div>
 
+<!-- ===== MAP ===== -->
 <div id="map"></div>
 
+<!-- ===== MEASURE TOOLTIP ===== -->
+<div id="measure-tooltip" style="position:fixed;display:none;background:rgba(0,0,0,0.85);color:#4ade80;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;z-index:2000;pointer-events:none;font-family:'JetBrains Mono',monospace;"></div>
+
+<!-- ===== SERVER DATA ===== -->
 <script>
-// ========== DATA FROM SERVER ==========
-const umkmData = {{ umkm_geojson|tojson }};
-const locationsData = {{ all_locations_geojson|tojson }};
+    const UMKM_DATA = {{ umkm_geojson|tojson }};
+    const LOCATIONS_DATA = {{ all_locations_geojson|tojson }};
 </script>
 
 <script>
-// ========== MAP INITIALIZATION ==========
-const map = L.map('map').setView([-7.6998, 109.6520], 15);
+    // ===================================================================
+    // GLOBAL STATE
+    // ===================================================================
+    const CATEGORIES = [
+        { id: 'umkm', label: 'UMKM', icon: '🏪', color: '#e63946' },
+        { id: 'perangkat', label: 'Perangkat', icon: '👔', color: '#059669' },
+        { id: 'bpd', label: 'BPD', icon: '📋', color: '#7c3aed' },
+        { id: 'pkk', label: 'PKK', icon: '👩', color: '#ec4899' },
+        { id: 'karang_taruna', label: 'K.Taruna', icon: '🧑', color: '#f59e0b' },
+        { id: 'rt', label: 'RT', icon: '🏠', color: '#3b82f6' },
+        { id: 'rw', label: 'RW', icon: '🏛️', color: '#6366f1' },
+    ];
+    const CAT_COLORS = Object.fromEntries(CATEGORIES.map(c => [c.id, c.color]));
+    const CAT_ICONS = Object.fromEntries(CATEGORIES.map(c => [c.id, c.icon]));
+    const CAT_LABELS = Object.fromEntries(CATEGORIES.map(c => [c.id, c.label]));
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 20,
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+    // ===================================================================
+    // ALPINE APP
+    // ===================================================================
+    function petaApp() {
+        return {
+            sidebarOpen: true,
+            sidebarExpanded: false,
+            isMobile: window.innerWidth <= 768,
+            activeCategory: 'umkm',
+            searchQuery: '',
+            selectedItem: null,
+            measureActive: false,
+            counts: {},
+            categories: CATEGORIES,
+            allItems: [],
+            filteredItems: [],
 
-// ========== ICONS ==========
-const LOCATION_COLORS = {
-    'perangkat': '#1b4332',
-    'bpd': '#7c3aed',
-    'pkk': '#ec4899',
-    'karang_taruna': '#f59e0b',
-    'rt': '#457b9d',
-    'rw': '#264653',
-    'RT': '#457b9d',
-    'RW': '#264653',
-    'lembaga': '#6366f1',
-};
-
-const LOCATION_ICONS = {
-    'perangkat': '👔',
-    'bpd': '📋',
-    'pkk': '👩',
-    'karang_taruna': '🧑',
-    'rt': '🏠',
-    'rw': '🏛️',
-    'RT': '🏠',
-    'RW': '🏛️',
-    'lembaga': '🏢',
-};
-
-const LOCATION_LABELS = {
-    'perangkat': 'Perangkat',
-    'bpd': 'BPD',
-    'pkk': 'PKK',
-    'karang_taruna': 'K.Taruna',
-    'rt': 'RT',
-    'rw': 'RW',
-    'RT': 'RT',
-    'RW': 'RW',
-    'lembaga': 'Lembaga',
-};
-
-function createMarkerIcon(color, type) {
-    const icon = LOCATION_ICONS[type] || '📍';
-    const size = type === 'rw' || type === 'RW' ? 17 : 14;
-    return L.divIcon({
-        html: `<div style="background:${color};width:${size}px;height:${size}px;border-radius:${type === 'RT' || type === 'rt' ? '50%' : '4px'};border:2px solid #fff;box-shadow:0 0 3px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:${size/2}px"></div>`,
-        className: '', iconSize: [size, size], iconAnchor: [size/2, size/2]
-    });
-}
-
-function umkmIcon() {
-    return L.divIcon({
-        html: '<div style="background:#e63946;width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 3px rgba(0,0,0,0.5)"></div>',
-        className: '', iconSize: [14,14], iconAnchor: [7,7]
-    });
-}
-
-// ========== LAYER: BATAS DESA ==========
-let desaLayer;
-
-fetch('/geojson/batas_desa_wgs84.geojson')
-    .then(res => res.json())
-    .then(data => {
-        desaLayer = L.geoJSON(data, {
-            style: { color: '#e76f51', weight: 3, fillColor: '#e76f51', fillOpacity: 0.08, dashArray: '6 4' }
-        }).addTo(map);
-    })
-    .catch(err => {
-        fetch('/geojson/batas_desa.geojson')
-            .then(r => r.json())
-            .then(data => {
-                desaLayer = L.geoJSON(data, {
-                    style: { color: '#e76f51', weight: 3, fillColor: '#e76f51', fillOpacity: 0.08, dashArray: '6 4' }
-                }).addTo(map);
-            });
-    });
-
-// ========== LAYER: BATAS DUSUN / RW ==========
-let dusunLayer, dusunLabelLayer;
-
-fetch('/geojson/DusunRWKedungwinangun_wgs84.geojson')
-    .then(res => res.json())
-    .then(data => {
-        dusunLayer = L.geoJSON(data, {
-            style: { color: '#7209b7', weight: 2, fillColor: '#7209b7', fillOpacity: 0.1 }
-        }).addTo(map);
-
-        dusunLabelLayer = L.layerGroup();
-        data.features.forEach(f => {
-            const p = f.properties;
-            const centroid = p.centroid || p.Centroid;
-            if (centroid && centroid.length === 2) {
-                const [lon, lat] = centroid;
-                const label = L.marker([lat, lon], {
-                    icon: L.divIcon({
-                        className: '',
-                        html: `<div style="background:rgba(255,255,255,0.92);border:1.5px solid #7209b7;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;color:#3c096c;text-align:center;line-height:1.3"><div>RW ${String(p.RW).padStart(2,'0')}</div><div style="font-size:10px;font-weight:500;color:#5a189a">Dusun ${p.Dusun}</div></div>`,
-                        iconSize: null,
-                        iconAnchor: [40, 15]
-                    }),
-                    interactive: false
+            init() {
+                window.peta = this;
+                this.isMobile = window.innerWidth <= 768;
+                window.addEventListener('resize', () => {
+                    this.isMobile = window.innerWidth <= 768;
                 });
-                dusunLabelLayer.addLayer(label);
+                this.buildItems();
+                this.counts = this.computeCounts();
+                this.filterItems();
+                initMap();
+            },
+
+            buildItems() {
+                this.allItems = [];
+                // UMKM
+                (UMKM_DATA.features || []).forEach(f => {
+                    const p = f.properties;
+                    const cat = p.kategori || 'umum';
+                    this.allItems.push({
+                        _id: 'umkm_' + p.id,
+                        _type: 'umkm',
+                        _category: cat,
+                        _name: p.nama || 'UMKM',
+                        _desc: p.pemilik || p.dusun || '',
+                        _icon: '🏪',
+                        _color: CAT_COLORS.umkm,
+                        _image: p.foto || '',
+                        _coords: `${f.geometry.coordinates[1].toFixed(6)}, ${f.geometry.coordinates[0].toFixed(6)}`,
+                        _rows: [
+                            { label: '👤 Pemilik', value: p.pemilik },
+                            { label: '📍 Alamat', value: p.alamat },
+                            { label: '🏘️ Dusun', value: p.dusun },
+                            { label: '📞 Kontak', value: p.kontak },
+                            { label: '💰 Harga', value: p.harga },
+                            { label: '📝 Deskripsi', value: p.deskripsi },
+                        ],
+                        _feature: f,
+                    });
+                });
+                // Locations
+                (LOCATIONS_DATA.features || []).forEach(f => {
+                    const p = f.properties;
+                    let cat = (p.jenis || '').toLowerCase();
+                    if (cat === 'perangkat desa') cat = 'perangkat';
+                    const valid = CATEGORIES.find(c => c.id === cat);
+                    if (!valid) return;
+                    this.allItems.push({
+                        _id: 'loc_' + p.id,
+                        _type: 'lokasi',
+                        _category: cat,
+                        _name: p.nama || p.nama_ketua || p.wilayah || valid.label,
+                        _desc: p.jabatan || p.wilayah || '',
+                        _icon: valid.icon,
+                        _color: valid.color,
+                        _image: p.foto_url || '',
+                        _coords: `${f.geometry.coordinates[1].toFixed(6)}, ${f.geometry.coordinates[0].toFixed(6)}`,
+                        _rows: [
+                            { label: '🏷️ Jenis', value: p.jenis },
+                            { label: '💼 Jabatan', value: p.jabatan },
+                            { label: '👤 Nama', value: p.nama_ketua },
+                            { label: '📍 Wilayah', value: p.wilayah },
+                            { label: '🏠 Alamat', value: p.alamat },
+                            { label: '📞 No. HP', value: p.no_hp },
+                            { label: '📞 Telepon', value: p.telepon },
+                            { label: '📧 Email', value: p.email },
+                            { label: '🏛️ RW', value: p.rw },
+                            { label: '🏠 RT', value: p.rt },
+                        ],
+                        _feature: f,
+                    });
+                });
+            },
+
+            computeCounts() {
+                const c = {};
+                CATEGORIES.forEach(cat => c[cat.id] = 0);
+                this.allItems.forEach(item => {
+                    if (c[item._type] !== undefined) c[item._type]++;
+                    else if (c[item._category] !== undefined) c[item._category]++;
+                });
+                // Perangkat count from lokasi
+                c.perangkat = this.allItems.filter(i => i._category === 'perangkat').length;
+                c.bpd = this.allItems.filter(i => i._category === 'bpd').length;
+                c.pkk = this.allItems.filter(i => i._category === 'pkk').length;
+                c.karang_taruna = this.allItems.filter(i => i._category === 'karang_taruna').length;
+                c.rt = this.allItems.filter(i => i._category === 'rt').length;
+                c.rw = this.allItems.filter(i => i._category === 'rw').length;
+                c.umkm = this.allItems.filter(i => i._type === 'umkm').length;
+                return c;
+            },
+
+            filterItems() {
+                const q = this.searchQuery.toLowerCase();
+                let items = this.allItems;
+                if (this.activeCategory === 'umkm') {
+                    items = items.filter(i => i._type === 'umkm');
+                } else {
+                    items = items.filter(i => i._category === this.activeCategory);
+                }
+                if (q) {
+                    items = items.filter(i =>
+                        i._name.toLowerCase().includes(q) ||
+                        i._desc.toLowerCase().includes(q) ||
+                        i._category.toLowerCase().includes(q)
+                    );
+                }
+                this.filteredItems = items;
+            },
+
+            setCategory(cat) {
+                this.activeCategory = cat;
+                this.searchQuery = '';
+                this.filterItems();
+                this.openSidebar();
+                // Highlight respective layer markers on map
+                if (window.highlightCategory) window.highlightCategory(cat);
+            },
+
+            selectItem(item) {
+                this.selectedItem = item;
+                if (this.isMobile) this.sidebarExpanded = false;
+                // Fly to marker
+                const [lng, lat] = item._feature.geometry.coordinates;
+                if (window.petaMap) {
+                    window.petaMap.flyTo([lat, lng], 18, { duration: 0.6 });
+                    if (window.petaMarkers && window.petaMarkers[item._id]) {
+                        window.petaMarkers[item._id].openPopup();
+                    }
+                }
+            },
+
+            closeDetail() {
+                this.selectedItem = null;
+            },
+
+            flyToItem() {
+                if (!this.selectedItem) return;
+                const [lng, lat] = this.selectedItem._feature.geometry.coordinates;
+                if (window.petaMap) window.petaMap.flyTo([lat, lng], 18, { duration: 0.6 });
+            },
+
+            toggleSidebar() {
+                if (this.isMobile) {
+                    this.sidebarExpanded = !this.sidebarExpanded;
+                } else {
+                    this.sidebarOpen = !this.sidebarOpen;
+                }
+            },
+
+            openSidebar() {
+                if (this.isMobile && !this.sidebarExpanded) {
+                    this.sidebarExpanded = true;
+                } else if (!this.isMobile && !this.sidebarOpen) {
+                    this.sidebarOpen = true;
+                }
+            },
+
+            mapZoomIn() { if (window.petaMap) window.petaMap.zoomIn(); },
+            mapZoomOut() { if (window.petaMap) window.petaMap.zoomOut(); },
+
+            resetView() {
+                if (window.petaMap) {
+                    window.petaMap.setView([-7.6998, 109.6520], 15);
+                    this.closeDetail();
+                    this.activeCategory = 'umkm';
+                    this.searchQuery = '';
+                    this.filterItems();
+                }
+            },
+
+            locateMe() {
+                if (!navigator.geolocation) { alert('Geolokasi tidak didukung browser ini.'); return; }
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        const { latitude, longitude } = pos.coords;
+                        if (window.petaMap) {
+                            window.petaMap.flyTo([latitude, longitude], 17, { duration: 0.8 });
+                            if (window._userMarker) window.petaMap.removeLayer(window._userMarker);
+                            window._userMarker = L.marker([latitude, longitude], {
+                                icon: L.divIcon({
+                                    html: '<div style="width:16px;height:16px;background:#3b82f6;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(59,130,246,0.3);animation:marker-pulse 1.5s infinite;"></div>',
+                                    className: '', iconSize: [16, 16], iconAnchor: [8, 8],
+                                })
+                            }).addTo(window.petaMap).bindPopup('📍 Lokasi Anda').openPopup();
+                        }
+                    },
+                    () => alert('Tidak dapat mengakses lokasi. Pastikan GPS aktif.'),
+                    { enableHighAccuracy: true }
+                );
+            },
+
+            measureToggle() {
+                this.measureActive = !this.measureActive;
+                if (window.toggleMeasure) window.toggleMeasure();
+            },
+
+            // Mobile sheet handling
+            sheetStartY: 0,
+            touchStart(e) {
+                if (!this.isMobile) return;
+                this.sheetStartY = e.touches[0].clientY;
+            },
+            touchMove(e) {
+                if (!this.isMobile) return;
+                const dy = e.touches[0].clientY - this.sheetStartY;
+                if (dy > 60) { this.sidebarExpanded = false; }
+                if (dy < -40) { this.sidebarExpanded = true; }
+            },
+            touchEnd() { this.sheetStartY = 0; },
+        };
+    }
+
+    // ===================================================================
+    // LAYER TOGGLER ALPINE COMPONENT
+    // ===================================================================
+    function layerToggler() {
+        return {
+            layers: [
+                { id: 'umkm', label: 'UMKM', color: '#e63946', shape: 'circle', active: true },
+                { id: 'perangkat', label: 'Perangkat Desa', color: '#059669', shape: 'circle', active: true },
+                { id: 'bpd', label: 'BPD', color: '#7c3aed', shape: 'circle', active: true },
+                { id: 'pkk', label: 'PKK', color: '#ec4899', shape: 'circle', active: true },
+                { id: 'karang_taruna', label: 'Karang Taruna', color: '#f59e0b', shape: 'circle', active: true },
+                { id: 'rt', label: 'Rumah RT', color: '#3b82f6', shape: 'circle', active: true },
+                { id: 'rw', label: 'Rumah RW', color: '#6366f1', shape: 'square', active: true },
+                { id: 'desa', label: 'Batas Desa', color: '#e76f51', shape: 'square', active: true },
+                { id: 'dusun', label: 'Batas Dusun/RW', color: '#a855f7', shape: 'square', active: true },
+            ],
+            init() { window.layerTogglerData = this; },
+            toggle(id) {
+                const l = this.layers.find(ly => ly.id === id);
+                if (!l) return;
+                l.active = !l.active;
+                if (window.toggleMapLayer) window.toggleMapLayer(id, l.active);
+            }
+        };
+    }
+
+    // ===================================================================
+    // MAP INITIALIZATION
+    // ===================================================================
+    function initMap() {
+        const map = L.map('map', {
+            center: [-7.6998, 109.6520],
+            zoom: 15,
+            zoomControl: false,
+            attributionControl: true,
+        });
+        window.petaMap = map;
+
+        // Zoom control custom position
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        // Tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 20,
+            attribution: '&copy; OSM | Desa Kedungwinangun',
+        }).addTo(map);
+
+        // Marker clusters: ONE PER CATEGORY for toggling
+        const categoryClusters = {};
+        CATEGORIES.forEach(c => {
+            if (c.id === 'umkm') {
+                categoryClusters[c.id] = L.markerClusterGroup({ maxClusterRadius: 40, chunkedLoading: true });
+            } else {
+                categoryClusters[c.id] = L.markerClusterGroup({ maxClusterRadius: 40, chunkedLoading: true });
             }
         });
-        dusunLabelLayer.addTo(map);
-    })
-    .catch(err => console.log('Batas dusun tidak bisa dimuat:', err));
+        window._mapLayers = categoryClusters;
+        // Will be augmented with desa/dusun later
 
-// ========== SEPARATE LAYERS FOR TOGGLING ==========
-let umkmLayer, rtLayer, rwLayer, perangkatLayer, bpdLayer, pkkLayer, karangTarunaLayer;
-const allLayers = {};
-let allMarkers = {};
+        window.petaMarkers = {};
 
-// UMKM Layer
-umkmLayer = L.geoJSON(umkmData, {
-    pointToLayer: (feature, latlng) => {
-        const marker = L.marker(latlng, { icon: umkmIcon() });
-        allMarkers[`umkm_${feature.properties.id}`] = marker;
-        return marker;
-    },
-    onEachFeature: (feature, layer) => {
-        layer.on('click', () => window.mapAppData && window.mapAppData.selectItem(feature, 'umkm'));
-    }
-}).addTo(map);
-allLayers.umkm = umkmLayer;
-
-// Helper function to create category-specific layers
-function createLocationLayer(category) {
-    const features = {
-        type: 'FeatureCollection',
-        features: locationsData.features.filter(f => {
-            const jenis = (f.properties.jenis || '').toLowerCase();
-            if (category === 'perangkat') return jenis === 'perangkat' || jenis === 'perangkat desa';
-            if (category === 'rt') return jenis === 'rt';
-            if (category === 'rw') return jenis === 'rw';
-            if (category === 'bpd') return jenis === 'bpd';
-            if (category === 'pkk') return jenis === 'pkk';
-            if (category === 'karang_taruna') return jenis === 'karang_taruna';
-            return false;
-        })
-    };
-    
-    const color = LOCATION_COLORS[category] || '#6c757d';
-    const layer = L.geoJSON(features, {
-        pointToLayer: (feature, latlng) => {
-            const marker = L.marker(latlng, { icon: createMarkerIcon(color, category) });
-            const id = feature.properties.id;
-            allMarkers[`lokasi_${id}`] = marker;
-            return marker;
-        },
-        onEachFeature: (feature, layer) => {
-            layer.on('click', () => window.mapAppData && window.mapAppData.selectItem(feature, 'lokasi'));
+        // Icons
+        function umkmIcon() {
+            return L.divIcon({
+                html: '<div style="width:14px;height:14px;background:#e63946;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 3px rgba(230,57,70,0.3),0 2px 6px rgba(0,0,0,0.4);"></div>',
+                className: '', iconSize: [14, 14], iconAnchor: [7, 7],
+            });
         }
-    }).addTo(map);
-    
-    allLayers[category] = layer;
-    return layer;
-}
 
-// Create all location layers
-createLocationLayer('perangkat');
-createLocationLayer('bpd');
-createLocationLayer('pkk');
-createLocationLayer('karang_taruna');
-createLocationLayer('rt');
-createLocationLayer('rw');
+        function locIcon(color, isRW) {
+            const size = isRW ? 16 : 13;
+            const radius = isRW ? '4px' : '50%';
+            return L.divIcon({
+                html: `<div style="width:${size}px;height:${size}px;background:${color};border:2px solid #fff;border-radius:${radius};box-shadow:0 0 0 3px ${color}33,0 2px 6px rgba(0,0,0,0.4);"></div>`,
+                className: '', iconSize: [size, size], iconAnchor: [size/2, size/2],
+            });
+        }
 
-// ========== SIDEBAR TOGGLE ==========
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const toggle = document.getElementById('sidebar-toggle');
-    sidebar.classList.toggle('hidden');
-    toggle.classList.toggle('hidden');
-    toggle.classList.toggle('rotated');
-}
+        // Add UMKM markers -> umkm cluster
+        (UMKM_DATA.features || []).forEach(f => {
+            const p = f.properties;
+            const [lng, lat] = f.geometry.coordinates;
+            const marker = L.marker([lat, lng], { icon: umkmIcon() });
+            const id = 'umkm_' + p.id;
+            window.petaMarkers[id] = marker;
+            marker.bindPopup(`<b>🏪 ${p.nama || 'UMKM'}</b><br><small>${p.kategori || ''}</small><br><small>${p.alamat || ''}</small>`);
+            marker.on('click', () => {
+                if (window.peta && window.peta.allItems) {
+                    const item = window.peta.allItems.find(i => i._id === id);
+                    if (item) window.peta.selectItem(item);
+                }
+            });
+            categoryClusters.umkm.addLayer(marker);
+        });
+        map.addLayer(categoryClusters.umkm);
 
-// ========== LAYER TOGGLE ALPINE COMPONENT ==========
-function layerToggle() {
-    return {
-        activeLayers: {
-            umkm: true,
-            perangkat: true,
-            bpd: true,
-            pkk: true,
-            karang_taruna: true,
-            rt: true,
-            rw: true,
-            desa: true,
-            dusun: true
-        },
-        
-        init() {
-            window.layerToggleData = this;
-        },
-        
-        toggleLayer(layer) {
-            // Toggle the state
-            this.activeLayers[layer] = !this.activeLayers[layer];
-            
-            // Update map layer
-            if (layer === 'desa') {
-                if (desaLayer) {
-                    this.activeLayers.desa ? map.addLayer(desaLayer) : map.removeLayer(desaLayer);
+        // Add location markers -> per-category clusters
+        (LOCATIONS_DATA.features || []).forEach(f => {
+            const p = f.properties;
+            let cat = (p.jenis || '').toLowerCase().replace('perangkat desa', 'perangkat');
+            if (!categoryClusters[cat]) cat = 'perangkat'; // fallback
+            const color = CAT_COLORS[cat] || '#6c757d';
+            const [lng, lat] = f.geometry.coordinates;
+            const marker = L.marker([lat, lng], { icon: locIcon(color, cat === 'rw') });
+            const id = 'loc_' + p.id;
+            window.petaMarkers[id] = marker;
+            const label = CAT_LABELS[cat] || p.jenis || '';
+            marker.bindPopup(`<b>${CAT_ICONS[cat] || '📍'} ${p.nama || p.nama_ketua || label}</b><br><small>${p.jabatan || ''}</small>`);
+            marker.on('click', () => {
+                if (window.peta && window.peta.allItems) {
+                    const item = window.peta.allItems.find(i => i._id === id);
+                    if (item) window.peta.selectItem(item);
                 }
-            } else if (layer === 'dusun') {
-                if (dusunLayer) {
-                    this.activeLayers.dusun ? map.addLayer(dusunLayer) : map.removeLayer(dusunLayer);
-                }
-                if (dusunLabelLayer) {
-                    this.activeLayers.dusun ? map.addLayer(dusunLabelLayer) : map.removeLayer(dusunLabelLayer);
-                }
-            } else if (allLayers[layer]) {
-                this.activeLayers[layer] ? map.addLayer(allLayers[layer]) : map.removeLayer(allLayers[layer]);
+            });
+            categoryClusters[cat].addLayer(marker);
+        });
+        // Add all location clusters to map (initially all on)
+        ['perangkat', 'bpd', 'pkk', 'karang_taruna', 'rt', 'rw'].forEach(cat => {
+            if (categoryClusters[cat]) map.addLayer(categoryClusters[cat]);
+        });
+
+        // Highlight category
+        window.highlightCategory = function(cat) {
+            // Zoom to relevant markers
+            let items;
+            if (cat === 'umkm') items = (UMKM_DATA.features || []).map(f => [f.geometry.coordinates[1], f.geometry.coordinates[0]]);
+            else {
+                items = (LOCATIONS_DATA.features || [])
+                    .filter(f => {
+                        const j = (f.properties.jenis || '').toLowerCase().replace('perangkat desa', 'perangkat');
+                        return j === cat;
+                    })
+                    .map(f => [f.geometry.coordinates[1], f.geometry.coordinates[0]]);
             }
-        }
-    };
-}
+            if (items.length > 0) {
+                const bounds = L.latLngBounds(items);
+                map.fitBounds(bounds, { padding: [60, 60], maxZoom: 16 });
+            }
+        };
 
-// ========== ALPINE APP ==========
-function mapApp() {
-    return {
-        sidebarOpen: true,
-        activeCategory: 'umkm',
-        searchQuery: '',
-        
-        allItems: [],
-        filteredItems: [],
-        counts: { umkm: 0, perangkat: 0, bpd: 0, pkk: 0, karang_taruna: 0, rt: 0, rw: 0 },
-        
-        showDetail: false,
-        selectedId: null,
-        selectedType: null,
-        
-        detailIcon: '',
-        detailTitle: '',
-        detailImage: '',
-        detailCoords: '',
-        detailRows: [],
-        detailLink: '',
-        
-        categoryLabels: {
-            umkm: 'UMKM',
-            perangkat: 'Perangkat Desa',
-            bpd: 'BPD',
-            pkk: 'PKK',
-            karang_taruna: 'Karang Taruna',
-            rt: 'RT',
-            rw: 'RW'
-        },
-        
-        umkmColors: {
-            makanan: '#e63946',
-            minuman: '#457b9d',
-            kerajinan: '#f8961e',
-            jasa: '#2a9d8f',
-            pertanian: '#6a994e',
-            peternakan: '#bc6c25',
-            perikanan: '#48cae4',
-            umum: '#6c757d'
-        },
-        
-        init() {
-            window.mapAppData = this;
-            
-            // Process umkm data
-            this.allUmkm = umkmData.features || [];
-            
-            // Process locations data (RT, RW, Perangkat, BPD, PKK, dll)
-            this.allLocations = locationsData.features || [];
-            
-            // Count by category (case-insensitive, handle variations)
-            this.counts.umkm = this.allUmkm.length;
-            this.counts.perangkat = this.allLocations.filter(f => {
-                const j = (f.properties.jenis || '').toLowerCase();
-                return j === 'perangkat' || j === 'perangkat desa';
-            }).length;
-            this.counts.bpd = this.allLocations.filter(f => 
-                (f.properties.jenis || '').toLowerCase() === 'bpd'
-            ).length;
-            this.counts.pkk = this.allLocations.filter(f => 
-                (f.properties.jenis || '').toLowerCase() === 'pkk'
-            ).length;
-            this.counts.karang_taruna = this.allLocations.filter(f => 
-                (f.properties.jenis || '').toLowerCase() === 'karang_taruna'
-            ).length;
-            this.counts.rt = this.allLocations.filter(f => 
-                (f.properties.jenis || '').toLowerCase() === 'rt'
-            ).length;
-            this.counts.rw = this.allLocations.filter(f => 
-                (f.properties.jenis || '').toLowerCase() === 'rw'
-            ).length;
-            
-            this.filterList();
-        },
-        
-        setCategory(cat) {
-            this.activeCategory = cat;
-            this.searchQuery = '';
-            this.filterList();
-        },
-        
-        filterList() {
-            const q = this.searchQuery.toLowerCase();
-            
-            if (this.activeCategory === 'umkm') {
-                if (q) {
-                    this.filteredItems = this.allUmkm.filter(i => 
-                        (i.properties.nama || '').toLowerCase().includes(q) ||
-                        (i.properties.kategori || '').toLowerCase().includes(q) ||
-                        (i.properties.pemilik || '').toLowerCase().includes(q)
-                    );
-                } else {
-                    this.filteredItems = [...this.allUmkm];
-                }
-            } else {
-                const cat = this.activeCategory;
-                let filtered = this.allLocations.filter(i => {
-                    const jenis = (i.properties.jenis || '').toLowerCase();
-                    // Handle Perangkat/Perangkat Desa
-                    if (cat === 'perangkat') return jenis === 'perangkat' || jenis === 'perangkat desa';
-                    // Handle RT
-                    if (cat === 'rt') return jenis === 'rt';
-                    // Handle RW
-                    if (cat === 'rw') return jenis === 'rw';
-                    return jenis === cat;
+        window.toggleMapLayer = function(id, active) {
+            // Marker cluster layers (umkm, perangkat, bpd, pkk, karang_taruna, rt, rw)
+            if (window._mapLayers[id]) {
+                active ? map.addLayer(window._mapLayers[id]) : map.removeLayer(window._mapLayers[id]);
+            }
+            // Boundary layers
+            if (id === 'desa' && window._desaLayer) {
+                active ? map.addLayer(window._desaLayer) : map.removeLayer(window._desaLayer);
+            }
+            if (id === 'dusun') {
+                if (window._dusunLayer) active ? map.addLayer(window._dusunLayer) : map.removeLayer(window._dusunLayer);
+                if (window._dusunLabels) active ? map.addLayer(window._dusunLabels) : map.removeLayer(window._dusunLabels);
+            }
+        };
+
+        // ===== BOUNDARY LAYERS =====
+        // Desa boundary
+        function loadDesaBoundary() {
+            fetch('/geojson/batas_desa_wgs84.geojson')
+                .then(r => r.json())
+                .then(data => {
+                    window._desaLayer = L.geoJSON(data, {
+                        style: { color: '#e76f51', weight: 2.5, fillColor: '#e76f51', fillOpacity: 0.06, dashArray: '8 4' }
+                    }).addTo(map);
+                })
+                .catch(() => {
+                    fetch('/geojson/batas_desa.geojson')
+                        .then(r => r.json())
+                        .then(data => {
+                            window._desaLayer = L.geoJSON(data, {
+                                style: { color: '#e76f51', weight: 2.5, fillColor: '#e76f51', fillOpacity: 0.06, dashArray: '8 4' }
+                            }).addTo(map);
+                        });
                 });
-                
-                if (q) {
-                    filtered = filtered.filter(i =>
-                        (i.properties.nama || '').toLowerCase().includes(q) ||
-                        (i.properties.jabatan || '').toLowerCase().includes(q) ||
-                        (i.properties.wilayah || '').toLowerCase().includes(q) ||
-                        (i.properties.nama_ketua || '').toLowerCase().includes(q)
-                    );
-                }
-                this.filteredItems = filtered;
-            }
-        },
-        
-        getUmkmColor(kategori) {
-            return this.umkmColors[kategori] || '#6c757d';
-        },
-        
-        getLocationColor(jenis) {
-            return LOCATION_COLORS[jenis] || '#6c757d';
-        },
-        
-        getLocationIcon(jenis) {
-            return LOCATION_ICONS[jenis] || '📍';
-        },
-        
-        getLocationLabel(jenis) {
-            return LOCATION_LABELS[jenis] || jenis;
-        },
-        
-        selectItem(item, type) {
-            this.selectedId = item.properties.id;
-            this.selectedType = type;
-            this.showDetail = true;
-            
-            const p = item.properties;
-            const coords = item.geometry.coordinates;
-            const lat = coords[1].toFixed(6);
-            const lng = coords[0].toFixed(6);
-            
-            this.detailCoords = `${lat}, ${lng}`;
-            this.detailLink = `https://www.google.com/maps?q=${lat},${lng}`;
-            
-            if (type === 'umkm') {
-                this.detailIcon = '🏪';
-                this.detailTitle = p.nama || 'UMKM';
-                this.detailImage = p.foto || p.foto_url || '';
-                this.detailRows = [
-                    { label: '📋 Kategori', value: p.kategori },
-                    { label: '👤 Pemilik', value: p.pemilik },
-                    { label: '📍 Alamat', value: p.alamat || p.dusun },
-                    { label: '📞 Kontak', value: p.no_hp || p.kontak },
-                    { label: '📝 Deskripsi', value: p.deskripsi }
-                ];
-            } else {
-                // Location type (RT, RW, Perangkat, BPD, PKK, dll)
-                this.detailIcon = this.getLocationIcon(p.jenis);
-                this.detailTitle = p.nama || p.nama_ketua || p.wilayah || this.getLocationLabel(p.jenis);
-                this.detailImage = p.foto_url || '';
-                
-                const rows = [];
-                rows.push({ label: '🏷️ Jenis', value: this.getLocationLabel(p.jenis) });
-                
-                if (p.jabatan) rows.push({ label: '💼 Jabatan', value: p.jabatan });
-                if (p.nik) rows.push({ label: '📋 NIK', value: p.nik });
-                if (p.nama_ketua) rows.push({ label: '👤 Nama', value: p.nama_ketua });
-                if (p.wilayah) rows.push({ label: '📍 Wilayah', value: p.wilayah });
-                if (p.alamat) rows.push({ label: '🏠 Alamat', value: p.alamat });
-                if (p.no_hp) rows.push({ label: '📞 No. HP', value: p.no_hp });
-                if (p.telepon) rows.push({ label: '📞 Telepon', value: p.telepon });
-                if (p.email) rows.push({ label: '📧 Email', value: p.email });
-                if (p.rw) rows.push({ label: '🏛️ RW', value: p.rw });
-                if (p.rt) rows.push({ label: '🏠 RT', value: p.rt });
-                
-                this.detailRows = rows;
-            }
-            
-            // Fly to marker
-            const markerKey = `${type}_${p.id}`;
-            if (allMarkers[markerKey]) {
-                map.flyTo(allMarkers[markerKey].getLatLng(), 17, { duration: 0.8 });
-            } else {
-                map.flyTo([lat, lng], 17, { duration: 0.8 });
-            }
-        },
-        
-        closeDetail() {
-            this.showDetail = false;
-            this.selectedId = null;
-            this.selectedType = null;
         }
-    };
-}
+
+        // Dusun/RW boundary with labels
+        function loadDusunBoundary() {
+            fetch('/geojson/DusunRWKedungwinangun_wgs84.geojson')
+                .then(r => r.json())
+                .then(data => {
+                    window._dusunLayer = L.geoJSON(data, {
+                        style: { color: '#a855f7', weight: 1.5, fillColor: '#a855f7', fillOpacity: 0.06 },
+                        onEachFeature: (feature, layer) => {
+                            const p = feature.properties;
+                            layer.bindTooltip(`RW ${String(p.RW || '').padStart(2,'0')} - Dusun ${p.Dusun || ''}`, {
+                                permanent: false, direction: 'center', className: 'dusun-tooltip'
+                            });
+                        }
+                    }).addTo(map);
+
+                    window._dusunLabels = L.layerGroup();
+                    data.features.forEach(f => {
+                        const p = f.properties;
+                        const centroid = p.centroid || p.Centroid;
+                        if (centroid && centroid.length === 2) {
+                            const [lon, lat] = centroid;
+                            const label = L.marker([lat, lon], {
+                                icon: L.divIcon({
+                                    className: '',
+                                    html: `<div class="dusun-label"><div>RW ${String(p.RW || '').padStart(2,'0')}</div><div style="font-size:10px;font-weight:500;color:#7c3aed">${p.Dusun || ''}</div></div>`,
+                                    iconSize: null,
+                                    iconAnchor: [40, 15]
+                                }),
+                                interactive: false
+                            });
+                            window._dusunLabels.addLayer(label);
+                        }
+                    });
+                    window._dusunLabels.addTo(map);
+                });
+        }
+
+        loadDesaBoundary();
+        loadDusunBoundary();
+
+        // ===== MEASURE TOOL =====
+        let measurePoints = [];
+        let measureLine = null;
+        let measureActive = false;
+
+        window.toggleMeasure = function() {
+            measureActive = !measureActive;
+            if (!measureActive) {
+                if (measureLine) map.removeLayer(measureLine);
+                measurePoints = [];
+                measureLine = null;
+                document.getElementById('measure-tooltip').style.display = 'none';
+                map.getContainer().style.cursor = '';
+            } else {
+                map.getContainer().style.cursor = 'crosshair';
+            }
+        };
+
+        map.on('click', function(e) {
+            if (!measureActive) return;
+            measurePoints.push(e.latlng);
+            if (measureLine) map.removeLayer(measureLine);
+            measureLine = L.polyline(measurePoints, { color: '#4ade80', weight: 3, dashArray: '6 4' }).addTo(map);
+
+            let dist = 0;
+            for (let i = 1; i < measurePoints.length; i++) {
+                dist += measurePoints[i-1].distanceTo(measurePoints[i]);
+            }
+            const tooltip = document.getElementById('measure-tooltip');
+            if (measurePoints.length >= 2) {
+                tooltip.style.display = 'block';
+                const pt = map.latLngToContainerPoint(e.latlng);
+                tooltip.style.left = (pt.x + 12) + 'px';
+                tooltip.style.top = (pt.y - 36) + 'px';
+                tooltip.textContent = dist > 1000 ? (dist/1000).toFixed(2) + ' km' : dist.toFixed(1) + ' m';
+            }
+            if (measurePoints.length === 1) {
+                tooltip.style.display = 'block';
+                const pt = map.latLngToContainerPoint(e.latlng);
+                tooltip.style.left = (pt.x + 12) + 'px';
+                tooltip.style.top = (pt.y - 24) + 'px';
+                tooltip.textContent = 'Klik lagi untuk mengukur';
+            }
+        });
+
+        map.on('contextmenu', function(e) {
+            if (!measureActive) return;
+            if (measureLine) map.removeLayer(measureLine);
+            measurePoints = [];
+            measureLine = null;
+            document.getElementById('measure-tooltip').style.display = 'none';
+        });
+    }
 </script>
 
 </body>

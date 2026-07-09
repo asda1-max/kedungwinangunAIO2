@@ -146,6 +146,7 @@
 </head>
 <body>
     <!-- NAVBAR -->
+    {% block navbar %}
     <nav class="bg-[#155C1B] sticky top-0 z-50 shadow-xl navbar-backdrop" id="main-navbar" x-data="{ scrolled: false }"
          @scroll.window="scrolled = window.scrollY > 20">
         <div class="max-w-7xl mx-auto px-4">
@@ -445,9 +446,10 @@
                 </div>
             </div>
         </div>
-    </nav>
+            </nav>
+            {% endblock %}
 
-    <!-- Main Content -->
+            <!-- Main Content -->
     <main>
         {% block content %}{% endblock %}
     </main>

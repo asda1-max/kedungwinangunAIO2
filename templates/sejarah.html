@@ -1,104 +1,855 @@
 {% extends 'base.html' %}
 
+{% block navbar %}
+{% set navbar_extra_class = 'sejarah-nav' %}
+{% include 'partials/navbar.html' %}
+{% endblock %}
+
 {% block title %}Sejarah Desa - {{ site_name }}{% endblock %}
 
+{% block meta_description %}Jelajahi perjalanan sejarah Desa {{ site_name }} dari masa ke masa dalam timeline interaktif yang memukau.{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── SEJARAH NAVBAR — RETRO TRANSPARENT OVERRIDE ── */
+#main-navbar.sejarah-nav {
+  background: var(--darker-bg, #061a09) !important;
+  box-shadow: none !important;
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+#main-navbar.sejarah-nav.nav-scrolled {
+  background: rgba(6, 26, 9, 0.92) !important;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.4) !important;
+}
+#main-navbar.sejarah-nav .text-green-100,
+#main-navbar.sejarah-nav .text-green-300 {
+  color: rgba(154, 205, 50, 0.85) !important;
+}
+#main-navbar.sejarah-nav .bg-white\\/20,
+#main-navbar.sejarah-nav .bg-white\\/10 {
+  background: rgba(115, 170, 15, 0.15) !important;
+}
+#main-navbar.sejarah-nav .hover\\:bg-white\\/10:hover {
+  background: rgba(115, 170, 15, 0.2) !important;
+}
+</style>
+<style>
+/* ── RETRO FUTURISTIC DESIGN SYSTEM ── */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --neon-green: #73AA0F;
+  --neon-glow: #9ACD32;
+  --deep-forest: #0a2e0e;
+  --darker-bg: #061a09;
+  --grid-color: rgba(115, 170, 15, 0.08);
+  --card-border: rgba(115, 170, 15, 0.25);
+  --text-dim: rgba(255,255,255,0.6);
+  --retro-font: 'Orbitron', monospace;
+  --body-font: 'Space Grotesk', sans-serif;
+}
+
+/* ── SCROLLBAR STYLING ── */
+.sejarah-scroll::-webkit-scrollbar { width: 6px; }
+.sejarah-scroll::-webkit-scrollbar-track { background: var(--darker-bg); }
+.sejarah-scroll::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: 3px; box-shadow: 0 0 8px rgba(115,170,15,0.4); }
+
+/* ── HERO GRID OVERLAY ── */
+.retro-grid {
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridShift 20s linear infinite;
+}
+@keyframes gridShift {
+  0% { background-position: 0 0; }
+  100% { background-position: 60px 60px; }
+}
+
+/* ── GLOWING ORBS ── */
+.glowing-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.glowing-orb:nth-child(1) {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #73AA0F, transparent);
+  top: -100px; left: -100px;
+  animation-delay: 0s;
+}
+.glowing-orb:nth-child(2) {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, #9ACD32, transparent);
+  bottom: -50px; right: -50px;
+  animation-delay: -3s;
+}
+.glowing-orb:nth-child(3) {
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, #155C1B, transparent);
+  top: 50%; left: 50%;
+  animation-delay: -6s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -30px) scale(1.1); }
+  50% { transform: translate(-20px, 20px) scale(0.9); }
+  75% { transform: translate(20px, 30px) scale(1.05); }
+}
+
+/* ── MOBILE ── */
+@media (max-width: 480px) {
+  .retro-grid { background-size: 40px 40px; }
+  .glowing-orb:nth-child(1) { width: 160px; height: 160px; top: -60px; left: -60px; filter: blur(50px); }
+  .glowing-orb:nth-child(2) { width: 120px; height: 120px; bottom: -30px; right: -30px; filter: blur(50px); }
+  .glowing-orb:nth-child(3) { width: 100px; height: 100px; filter: blur(40px); }
+}
+@media (max-width: 767px) {
+  .sejarah-body { overflow-x: hidden; }
+  .counter-number { font-size: 2rem; }
+}
+
+/* ── SCANNER LINE ── */
+.scanner-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-green), var(--neon-glow), var(--neon-green), transparent);
+  box-shadow: 0 0 20px rgba(115,170,15,0.5), 0 0 60px rgba(115,170,15,0.2);
+  animation: scanDown 4s ease-in-out infinite;
+  opacity: 0.6;
+}
+@keyframes scanDown {
+  0% { top: 0%; }
+  50% { top: 100%; }
+  100% { top: 0%; }
+}
+
+/* ── HERO TITLE GLITCH ── */
+.glitch-text {
+  position: relative;
+  animation: glitchPulse 4s ease-in-out infinite;
+}
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.glitch-text::before {
+  color: var(--neon-glow);
+  animation: glitch1 4s ease-in-out infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+}
+.glitch-text::after {
+  color: #155C1B;
+  animation: glitch2 4s ease-in-out infinite;
+  clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+}
+@keyframes glitchPulse {
+  0%, 90%, 100% { text-shadow: none; }
+  92% { text-shadow: 2px 0 var(--neon-glow), -2px 0 #155C1B; }
+  94% { text-shadow: -2px 0 var(--neon-glow), 2px 0 #155C1B; }
+  96% { text-shadow: 1px 0 var(--neon-glow), -1px 0 #155C1B; }
+}
+@keyframes glitch1 {
+  0%, 90%, 100% { opacity: 0; transform: translate(0); }
+  92% { opacity: 0.8; transform: translate(-3px, -2px); }
+  94% { opacity: 0.6; transform: translate(3px, 2px); }
+  96% { opacity: 0; transform: translate(-1px, 1px); }
+}
+@keyframes glitch2 {
+  0%, 90%, 100% { opacity: 0; transform: translate(0); }
+  92% { opacity: 0.8; transform: translate(3px, 1px); }
+  94% { opacity: 0.6; transform: translate(-3px, -1px); }
+  96% { opacity: 0; transform: translate(2px, -1px); }
+}
+
+/* ── TIMELINE ── */
+.timeline-track {
+  position: relative;
+}
+.timeline-track::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    var(--neon-green) 5%,
+    var(--neon-glow) 50%,
+    var(--neon-green) 95%,
+    transparent 100%
+  );
+  box-shadow: 0 0 15px rgba(115,170,15,0.3);
+}
+@media (max-width: 767px) {
+  .timeline-track::before { left: 24px; }
+}
+
+/* ── TIMELINE DOT ── */
+.timeline-dot {
+  width: 20px;
+  height: 20px;
+  background: var(--darker-bg);
+  border: 3px solid var(--neon-green);
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  box-shadow: 0 0 12px rgba(115,170,15,0.4);
+  transition: all 0.4s ease;
+}
+.timeline-dot::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid rgba(115,170,15,0.2);
+  animation: dotPulse 3s ease-in-out infinite;
+}
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.3); opacity: 0; }
+}
+@media (max-width: 767px) {
+  .timeline-dot { left: 24px; }
+}
+
+/* ── TIMELINE CARD ── */
+.timeline-card {
+  position: relative;
+  width: calc(50% - 40px);
+  padding: 28px;
+  background: rgba(10, 46, 14, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  opacity: 0;
+  transform: translateY(40px);
+}
+.timeline-card.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.timeline-card:hover {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 30px rgba(115,170,15,0.15), inset 0 0 30px rgba(115,170,15,0.03);
+  transform: translateY(-4px);
+}
+.timeline-card:nth-child(odd) {
+  margin-left: auto;
+}
+.timeline-card:nth-child(odd)::before {
+  content: '';
+  position: absolute;
+  left: -13px;
+  top: 30px;
+  width: 24px;
+  height: 24px;
+  background: var(--darker-bg);
+  border: 2px solid var(--neon-green);
+  transform: rotate(45deg);
+  border-right-color: transparent;
+  border-top-color: transparent;
+  box-shadow: -4px 4px 8px rgba(0,0,0,0.3);
+}
+.timeline-card:nth-child(even)::after {
+  content: '';
+  position: absolute;
+  right: -13px;
+  top: 30px;
+  width: 24px;
+  height: 24px;
+  background: var(--darker-bg);
+  border: 2px solid var(--neon-green);
+  transform: rotate(45deg);
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  box-shadow: 4px -4px 8px rgba(0,0,0,0.3);
+}
+@media (max-width: 767px) {
+  .timeline-card {
+    width: calc(100% - 60px);
+    margin-left: 60px !important;
+    padding: 20px;
+  }
+  .timeline-card::before, .timeline-card::after { display: none !important; }
+}
+
+/* ── YEAR BADGE ── */
+.year-badge {
+  font-family: var(--retro-font);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  padding: 6px 16px;
+  border: 1px solid var(--neon-green);
+  border-radius: 20px;
+  color: var(--neon-glow);
+  background: rgba(115,170,15,0.08);
+  display: inline-block;
+  text-shadow: 0 0 8px rgba(115,170,15,0.3);
+  box-shadow: inset 0 0 20px rgba(115,170,15,0.05);
+}
+
+/* ── YEAR ON THE LINE ── */
+.year-on-line {
+  font-family: var(--retro-font);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--neon-green);
+  opacity: 0.7;
+  text-shadow: 0 0 10px rgba(115,170,15,0.3);
+}
+
+/* ── COUNTER SECTION ── */
+.counter-item {
+  text-align: center;
+}
+.counter-number {
+  font-family: var(--retro-font);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--neon-glow);
+  text-shadow: 0 0 20px rgba(154,205,50,0.4);
+  line-height: 1;
+}
+@media (min-width: 768px) {
+  .counter-number { font-size: 3.5rem; }
+}
+
+/* ── GLOW BORDER ANIMATION ── */
+@keyframes borderGlow {
+  0%, 100% { border-color: rgba(115,170,15,0.3); }
+  50% { border-color: rgba(115,170,15,0.6); }
+}
+
+/* ── RETRO CORNER DECORATIONS ── */
+.corner-bracket {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--neon-green);
+  opacity: 0.3;
+}
+.corner-bracket.tl { top: 8px; left: 8px; border-top: 2px solid; border-left: 2px solid; }
+.corner-bracket.tr { top: 8px; right: 8px; border-top: 2px solid; border-right: 2px solid; }
+.corner-bracket.bl { bottom: 8px; left: 8px; border-bottom: 2px solid; border-left: 2px solid; }
+.corner-bracket.br { bottom: 8px; right: 8px; border-bottom: 2px solid; border-right: 2px solid; }
+
+/* ── IMAGE GLOW ── */
+.img-neon-frame {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.img-neon-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(115,170,15,0.2);
+  box-shadow: inset 0 0 30px rgba(115,170,15,0.05);
+  pointer-events: none;
+}
+
+/* ── HORIZONTAL SCROLL SECTION ── */
+.h-scroll-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+}
+.h-scroll-container:active { cursor: grabbing; }
+.h-scroll-container::-webkit-scrollbar { height: 4px; }
+.h-scroll-container::-webkit-scrollbar-track { background: var(--darker-bg); }
+.h-scroll-container::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: 2px; }
+.h-scroll-item {
+  scroll-snap-align: start;
+  min-width: 300px;
+  max-width: 360px;
+  flex-shrink: 0;
+}
+
+/* ── PARTICLE CONTAINER ── */
+#particles-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── STATS COUNTER ANIMATION ── */
+.count-up {
+  display: inline-block;
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<!-- Hero Section -->
-<section class="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#155C1B] via-[#1a6b22] to-[#228B22]">
-    <div class="absolute inset-0">
-        <div class="absolute top-20 left-10 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-20 right-10 w-96 h-96 bg-[#73AA0F]/10 rounded-full blur-3xl"></div>
+<!-- ════════════════════════════════════════════════ -->
+<!-- HERO — RETRO FUTURISTIC GATEWAY                -->
+<!-- ════════════════════════════════════════════════ -->
+<section class="relative min-h-[85vh] flex items-center justify-center overflow-hidden retro-grid" style="background-color: var(--darker-bg);">
+
+  <!-- Glowing Orbs -->
+  <div class="glowing-orb"></div>
+  <div class="glowing-orb"></div>
+  <div class="glowing-orb"></div>
+
+  <!-- Scanner Line -->
+  <div class="scanner-line"></div>
+
+  <!-- Canvas for particles -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- Hexagonal pattern overlay -->
+  <div class="absolute inset-0 opacity-[0.03]" style="background-image: url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2373AA0F' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E&quot;);"></div>
+
+  <div class="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto">
+    <!-- Top badge -->
+    <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-[var(--neon-green)]/30 bg-[var(--darker-bg)]/60 backdrop-blur-md mb-8 reveal">
+      <span class="w-2 h-2 rounded-full bg-[var(--neon-green)] animate-pulse"></span>
+      <span class="text-[var(--neon-glow)] text-xs sm:text-sm font-medium tracking-widest uppercase" style="font-family: var(--retro-font);">
+        Jejak Perjalanan
+      </span>
+      <span class="w-2 h-2 rounded-full bg-[var(--neon-green)] animate-pulse" style="animation-delay: 0.5s;"></span>
     </div>
 
-    <div class="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto">
-        <span class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white/90 text-sm font-medium mb-6">
-            Jejak Perjalanan Desa
-        </span>
-        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6">
-            Sejarah Desa<br>
-            <span class="bg-gradient-to-r from-[#73AA0F] to-[#9ACD32] bg-clip-text text-transparent">Kedungwinangun</span>
-        </h1>
-        <p class="text-lg sm:text-xl text-white/80 max-w-3xl mx-auto mb-8 px-4">
-            Mengenal lebih dalam perjalanan panjang desa kami dari masa ke masa
-        </p>
-        <a href="#timeline" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#155C1B] font-bold rounded-xl hover:bg-gray-100 transition-all">
-            Jelajahi Sejarah
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-            </svg>
-        </a>
+    <!-- Main Title -->
+    <h1 class="glitch-text text-[clamp(1.5rem,6vw,4rem)] font-black mb-4 leading-[1.1]" data-text="SEJARAH DESA" style="font-family: var(--retro-font); color: #fff; letter-spacing: 2px;">
+      SEJARAH<br>
+      <span class="text-[var(--neon-glow)]" style="text-shadow: 0 0 20px rgba(154,205,50,0.4), 0 0 40px rgba(154,205,50,0.15);">KEDUNGWINANGUN</span>
+    </h1>
+
+    <p class="text-base sm:text-xl text-[var(--text-dim)] max-w-3xl mx-auto mb-10 px-4 reveal" style="font-family: var(--body-font); font-weight: 300; letter-spacing: 1px;">
+      Mengarungi lorong waktu, menyusuri setiap jejak langkah yang mekecmbentuk wajah desa kami
+    </p>
+
+    <!-- CTA Buttons -->
+    <div class="flex flex-wrap gap-4 justify-center reveal">
+      <a href="#timeline" class="group relative inline-flex items-center gap-3 px-8 py-4 rounded-xl font-bold text-sm tracking-widest uppercase transition-all duration-300" style="font-family: var(--retro-font); background: linear-gradient(135deg, var(--neon-green), var(--neon-glow)); color: var(--darker-bg); box-shadow: 0 0 30px rgba(115,170,15,0.3);">
+        <span class="relative z-10">Jelajahi Timeline</span>
+        <svg class="relative z-10 w-4 h-4 group-hover:translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 14l-7 7m0 0l-7-7"/>
+        </svg>
+        <div class="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+      </a>
+      <a href="#stats" class="inline-flex items-center gap-3 px-8 py-4 rounded-xl font-bold text-sm tracking-widest uppercase border transition-all duration-300" style="font-family: var(--retro-font); border-color: var(--card-border); color: var(--neon-glow);">
+        <span>Sekilas Data</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+        </svg>
+      </a>
     </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 reveal">
+      <span class="text-xs tracking-[4px] uppercase" style="color: var(--text-dim); font-family: var(--retro-font); opacity: 0.5;">Scroll</span>
+      <div class="w-5 h-8 rounded-full border border-white/20 flex justify-center p-1">
+        <div class="w-1 h-2 rounded-full bg-[var(--neon-green)] animate-bounce"></div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- Timeline Section -->
-<section id="timeline" class="py-16 sm:py-20 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">Lini Masa Desa</h2>
-            <div class="w-20 sm:w-24 h-1 bg-[#73AA0F] mx-auto rounded-full"></div>
+<!-- ════════════════════════════════════════════════ -->
+<!-- STATS COUNTER — DATA SNAP                     -->
+<!-- ════════════════════════════════════════════════ -->
+<section id="stats" class="relative py-16 md:py-20 overflow-hidden" style="background: var(--deep-forest);">
+  <div class="absolute inset-0 opacity-[0.04]" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(115,170,15,0.3) 40px, rgba(115,170,15,0.3) 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(115,170,15,0.3) 40px, rgba(115,170,15,0.3) 41px);"></div>
+
+  <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-10 md:mb-14 reveal">
+      <span class="text-xs tracking-[4px] uppercase text-[var(--neon-green)]/60" style="font-family: var(--retro-font);">Desa dalam Angka</span>
+      <h2 class="text-2xl md:text-4xl font-bold text-white mt-2" style="font-family: var(--retro-font); letter-spacing: 2px;">
+        <span class="text-[var(--neon-glow)]">//</span> STATISTIK SEJARAH
+      </h2>
+      <div class="w-16 h-0.5 mx-auto mt-4 rounded-full" style="background: linear-gradient(90deg, transparent, var(--neon-green), transparent);"></div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+      {% set total_items = sejarah_items|length %}
+      {% set years_span = 0 %}
+      {% if sejarah_items %}
+        {% set first_year = sejarah_items[0].tahun_dari|default(0) %}
+        {% set last_item = sejarah_items[-1] %}
+        {% set last_year = last_item.tahun_sampai|default(2026) %}
+      {% endif %}
+
+      <div class="counter-item p-6 rounded-xl border" style="border-color: var(--card-border); background: rgba(115,170,15,0.04);">
+        <div class="counter-number count-up" data-target="{{ total_items }}">{{ total_items }}</div>
+        <div class="text-sm mt-2 uppercase tracking-wider" style="color: var(--text-dim); font-family: var(--retro-font); font-size: 0.65rem;">Peristiwa</div>
+      </div>
+
+      <div class="counter-item p-6 rounded-xl border" style="border-color: var(--card-border); background: rgba(115,170,15,0.04);">
+        <div class="counter-number count-up" data-target="6">6</div>
+        <div class="text-sm mt-2 uppercase tracking-wider" style="color: var(--text-dim); font-family: var(--retro-font); font-size: 0.65rem;">Dusun</div>
+      </div>
+
+      <div class="counter-item p-6 rounded-xl border" style="border-color: var(--card-border); background: rgba(115,170,15,0.04);">
+        <div class="counter-number count-up" data-target="6">6</div>
+        <div class="text-sm mt-2 uppercase tracking-wider" style="color: var(--text-dim); font-family: var(--retro-font); font-size: 0.65rem;">Kategori</div>
+      </div>
+
+      <div class="counter-item p-6 rounded-xl border" style="border-color: var(--card-border); background: rgba(115,170,15,0.04);">
+        <div class="counter-number">
+          {% if sejarah_items and sejarah_items[0].tahun_dari %}
+            {{ 2026 - sejarah_items[0].tahun_dari }}
+          {% else %}
+            126
+          {% endif %}
         </div>
+        <div class="text-sm mt-2 uppercase tracking-wider" style="color: var(--text-dim); font-family: var(--retro-font); font-size: 0.65rem;">Tahun Perjalanan</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <div class="relative">
-            {% for item in sejarah_items %}
-            <div class="relative mb-8 sm:mb-10 pl-6 sm:pl-8 md:pl-10">
-                <!-- Timeline line -->
-                <div class="absolute left-2 sm:left-3 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#155C1B] to-[#73AA0F]"></div>
+<!-- ════════════════════════════════════════════════ -->
+<!-- TIMELINE — VERTICAL INTERACTIVE                -->
+<!-- ════════════════════════════════════════════════ -->
+<section id="timeline" class="relative py-16 md:py-24 overflow-hidden" style="background: var(--darker-bg);">
+  <!-- Subtle radial gradient -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.03]" style="background: radial-gradient(circle, var(--neon-green), transparent);"></div>
 
-                <!-- Timeline dot -->
-                <div class="absolute left-0 sm:left-0.5 top-0 w-4 h-4 sm:w-5 sm:h-5 bg-[#73AA0F] rounded-full border-2 sm:border-4 border-white shadow-md z-10"></div>
+  <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
+    <!-- Section Header -->
+    <div class="text-center mb-12 md:mb-16 reveal">
+      <span class="text-xs tracking-[4px] uppercase text-[var(--neon-green)]/60" style="font-family: var(--retro-font);">Lini Masa</span>
+      <h2 class="text-2xl md:text-4xl font-bold text-white mt-2" style="font-family: var(--retro-font); letter-spacing: 2px;">
+        <span class="text-[var(--neon-glow)]">⟐</span> PERJALANAN WAKTU <span class="text-[var(--neon-glow)]">⟐</span>
+      </h2>
+      <p class="text-[var(--text-dim)] mt-3 max-w-xl mx-auto" style="font-family: var(--body-font);">
+        Setiap era meninggalkan jejak — dari awal mula hingga kini
+      </p>
+    </div>
 
-                <!-- Card -->
-                <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-md hover:shadow-lg transition-all ml-4 sm:ml-6 md:ml-8 mr-0 sm:mr-4">
-                    <span class="inline-block px-3 py-1 bg-gradient-to-r from-[#155C1B] to-[#228B22] text-white rounded-full text-xs sm:text-sm font-bold mb-3">
-                        {% if item.tahun_dari %}
-                            {{ item.tahun_dari }}{% if item.tahun_sampai %} - {{ item.tahun_sampai }}{% endif %}
-                        {% else %}
-                            Era {{ loop.index }}
-                        {% endif %}
-                    </span>
+    <!-- Timeline -->
+    <div class="timeline-track relative">
+      {% for item in sejarah_items %}
+      {% set is_odd = loop.index is odd %}
+      <div class="relative mb-12 md:mb-16 timeline-item" data-index="{{ loop.index0 }}">
+        <!-- Dot on the line -->
+        <div class="timeline-dot"></div>
 
-                    {% if item.gambar_url %}
-                    <div class="-mx-4 sm:-mx-6 -mt-4 sm:-mt-6 mb-4">
-                        <img src="{{ item.gambar_url }}" alt="{{ item.gambar_alt or item.judul }}" class="w-full h-40 sm:h-48 object-cover">
-                    </div>
-                    {% endif %}
+        <!-- Year on the line (desktop) -->
+        {% if item.tahun_dari %}
+        <div class="hidden md:block absolute left-1/2 -translate-x-1/2 -bottom-6 year-on-line">
+          {{ item.tahun_dari }}{% if item.tahun_sampai and item.tahun_sampai != item.tahun_dari %} — {{ item.tahun_sampai }}{% endif %}
+        </div>
+        {% endif %}
 
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-1 sm:mb-2">{{ item.judul }}</h3>
-                    {% if item.sub_judul %}
-                    <p class="text-[#73AA0F] font-medium text-sm sm:text-base mb-2 sm:mb-3">{{ item.sub_judul }}</p>
-                    {% endif %}
-                    <p class="text-gray-600 text-sm sm:text-base leading-relaxed">{{ item.konten }}</p>
+        <!-- Card -->
+        <div class="timeline-card {% if is_odd %}md:mr-[calc(50%+30px)]{% else %}md:ml-[calc(50%+30px)]{% endif %}" data-delay="{{ loop.index0 * 150 }}">
+          <!-- Corner brackets -->
+          <div class="corner-bracket tl"></div>
+          <div class="corner-bracket tr"></div>
+          <div class="corner-bracket bl"></div>
+          <div class="corner-bracket br"></div>
 
-                    {% if item.video_url %}
-                    <div class="mt-4">
-                        {% if 'youtube' in item.video_url %}
-                            {% set video_id = item.video_url.split('v=')[1] if 'v=' in item.video_url else item.video_url.split('/')[-1] %}
-                            {% set video_id = video_id.split('&')[0] %}
-                            <div class="aspect-video rounded-lg overflow-hidden">
-                                <iframe class="w-full h-full" src="https://www.youtube.com/embed/{{ video_id }}" frameborder="0" allowfullscreen></iframe>
-                            </div>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                </div>
+          <!-- Year badge (mobile) -->
+          <div class="md:hidden mb-3">
+            <span class="year-badge">
+              {{ item.tahun_dari }}{% if item.tahun_sampai %} — {{ item.tahun_sampai }}{% endif %}
+            </span>
+          </div>
+
+          <!-- Era Number -->
+          <div class="absolute -top-3 {% if is_odd %}right-4{% else %}left-4{% endif %} text-[2rem] md:text-[3rem] font-black leading-none select-none" style="color: rgba(115,170,15,0.06); font-family: var(--retro-font);">
+            {{ '%02d' % loop.index }}
+          </div>
+
+          <!-- Image -->
+          {% if item.gambar_url %}
+          <div class="img-neon-frame -mx-[1px] -mt-[1px] mb-5 rounded-t-xl" style="border-radius: 12px 12px 0 0;">
+            <img src="{{ item.gambar_url }}" alt="{{ item.gambar_alt or item.judul }}"
+                 class="w-full h-44 md:h-52 object-cover"
+                 style="filter: brightness(0.9) saturate(1.1);"
+                 loading="lazy">
+            <div class="absolute inset-0" style="background: linear-gradient(0deg, rgba(6,26,9,0.6) 0%, transparent 50%);"></div>
+          </div>
+          {% endif %}
+
+          <!-- Content -->
+          <div class="relative z-10">
+            <!-- Desktop year badge -->
+            <div class="hidden md:block mb-4">
+              <span class="year-badge">
+                {{ item.tahun_dari }}{% if item.tahun_sampai %} — {{ item.tahun_sampai }}{% endif %}
+              </span>
             </div>
-            {% endfor %}
+
+            <h3 class="text-xl md:text-2xl font-bold text-white mb-1" style="font-family: var(--body-font);">
+              {{ item.judul }}
+            </h3>
+            {% if item.sub_judul %}
+            <p class="text-sm md:text-base font-medium mb-3" style="color: var(--neon-glow); font-family: var(--body-font);">
+              {{ item.sub_judul }}
+            </p>
+            {% endif %}
+
+            <div class="w-10 h-0.5 rounded-full mb-3" style="background: linear-gradient(90deg, var(--neon-green), transparent);"></div>
+
+            <p class="text-sm md:text-base leading-relaxed" style="color: var(--text-dim); font-family: var(--body-font);">
+              {{ item.konten }}
+            </p>
+
+            <!-- Video -->
+            {% if item.video_url %}
+            <div class="mt-5">
+              {% if 'youtube' in item.video_url %}
+                {% set video_id = item.video_url.split('v=')[1] if 'v=' in item.video_url else item.video_url.split('/')[-1] %}
+                {% set video_id = video_id.split('&')[0] %}
+                <div class="aspect-video rounded-lg overflow-hidden border border-[var(--card-border)]">
+                  <iframe class="w-full h-full" src="https://www.youtube.com/embed/{{ video_id }}" frameborder="0" allowfullscreen loading="lazy"></iframe>
+                </div>
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Hover scanline effect -->
+          <div class="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+            <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(115,170,15,0.03) 50%, transparent 100%);"></div>
+          </div>
         </div>
+      </div>
+      {% endfor %}
     </div>
+  </div>
 </section>
 
-<!-- CTA Section -->
-<section class="py-12 sm:py-16 bg-gradient-to-r from-[#155C1B] to-[#228B22]">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">Jadilah Bagian dari Sejarah</h2>
-        <div class="flex flex-wrap gap-3 sm:gap-4 justify-center">
-            <a href="{{ url_for('public.pengumuman') }}" class="px-5 py-2.5 sm:px-6 sm:py-3 bg-white text-[#155C1B] font-bold rounded-xl hover:bg-gray-100 text-sm sm:text-base">
-                Lihat Pengumuman
-            </a>
-            <a href="{{ url_for('public.berita') }}" class="px-5 py-2.5 sm:px-6 sm:py-3 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 border border-white/30 text-sm sm:text-base">
-                Baca Berita
-            </a>
-        </div>
+<!-- ════════════════════════════════════════════════ -->
+<!-- HORIZONTAL GALLERY — RETRO CARDS VIEW          -->
+<!-- ════════════════════════════════════════════════ -->
+<section class="relative py-16 md:py-20 overflow-hidden" style="background: var(--deep-forest);">
+  <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 mb-8 reveal">
+    <span class="text-xs tracking-[4px] uppercase text-[var(--neon-green)]/60" style="font-family: var(--retro-font);">Galeri Waktu</span>
+    <h2 class="text-2xl md:text-3xl font-bold text-white mt-2" style="font-family: var(--retro-font); letter-spacing: 2px;">
+      ⋮⋮ EKSPLORASI CEPAT
+    </h2>
+  </div>
+
+  <div class="h-scroll-container relative z-10 px-4 sm:px-6 pb-4 flex gap-5" style="padding-left: max(1.5rem, calc((100vw - 72rem) / 2)); padding-right: max(1.5rem, calc((100vw - 72rem) / 2));">
+    {% for item in sejarah_items %}
+    <div class="h-scroll-item rounded-xl border p-5 transition-all duration-300 hover:-translate-y-2" style="border-color: var(--card-border); background: rgba(10, 46, 14, 0.7); backdrop-filter: blur(10px);" onmouseover="this.style.borderColor='var(--neon-green)'; this.style.boxShadow='0 0 30px rgba(115,170,15,0.15)'" onmouseout="this.style.borderColor=''; this.style.boxShadow=''">
+      {% if item.gambar_url %}
+      <div class="w-full h-28 rounded-lg overflow-hidden mb-4 border border-[var(--card-border)]/30">
+        <img src="{{ item.gambar_url }}" alt="{{ item.gambar_alt or item.judul }}" class="w-full h-full object-cover" style="filter: brightness(0.85);" loading="lazy">
+      </div>
+      {% else %}
+      <div class="w-full h-28 rounded-lg mb-4 flex items-center justify-center border border-[var(--card-border)]/30" style="background: rgba(115,170,15,0.04);">
+        <span class="text-3xl opacity-30">⟐</span>
+      </div>
+      {% endif %}
+
+      <div class="text-xs tracking-widest mb-2" style="color: var(--neon-green); font-family: var(--retro-font);">
+        {{ item.tahun_dari }}{% if item.tahun_sampai %} → {{ item.tahun_sampai }}{% endif %}
+      </div>
+      <h3 class="text-sm font-bold text-white mb-1" style="font-family: var(--body-font);">{{ item.judul }}</h3>
+      {% if item.sub_judul %}
+      <p class="text-xs" style="color: var(--neon-glow);">{{ item.sub_judul }}</p>
+      {% endif %}
+      <p class="text-xs mt-2 line-clamp-3" style="color: var(--text-dim);">{{ item.konten }}</p>
     </div>
+    {% endfor %}
+  </div>
+
+  <div class="text-center mt-6 reveal">
+    <span class="text-xs tracking-[4px] uppercase" style="color: var(--text-dim); font-family: var(--retro-font); opacity: 0.5;">← Geser untuk eksplorasi →</span>
+  </div>
 </section>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- CTA — JADI BAGIAN SEJARAH                      -->
+<!-- ════════════════════════════════════════════════ -->
+<section class="relative py-16 md:py-20 overflow-hidden" style="background: var(--darker-bg);">
+  <!-- Decorative border top -->
+  <div class="absolute top-0 left-0 right-0 h-px" style="background: linear-gradient(90deg, transparent, var(--neon-green), var(--neon-glow), var(--neon-green), transparent);"></div>
+
+  <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center reveal">
+    <span class="inline-block text-4xl mb-4" style="color: var(--neon-green);">⟡</span>
+    <h2 class="text-2xl md:text-4xl font-bold text-white mb-3" style="font-family: var(--retro-font); letter-spacing: 2px;">
+      JADILAH BAGIAN <span class="text-[var(--neon-glow)]">DARI SEJARAH</span>
+    </h2>
+    <p class="text-[var(--text-dim)] mb-8 max-w-lg mx-auto" style="font-family: var(--body-font);">
+      Masa depan desa sedang ditulis hari ini. Bersama kita lanjutkan perjalanan ini.
+    </p>
+    <div class="flex flex-wrap gap-4 justify-center">
+      <a href="{{ url_for('public.pengumuman') }}" class="group inline-flex items-center gap-3 px-8 py-4 rounded-xl font-bold text-sm tracking-widest uppercase transition-all duration-300" style="font-family: var(--retro-font); background: linear-gradient(135deg, var(--neon-green), var(--neon-glow)); color: var(--darker-bg); box-shadow: 0 0 25px rgba(115,170,15,0.25);">
+        <span>Lihat Pengumuman</span>
+        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+        </svg>
+      </a>
+      <a href="{{ url_for('public.berita') }}" class="inline-flex items-center gap-3 px-8 py-4 rounded-xl font-bold text-sm tracking-widest uppercase border transition-all duration-300" style="font-family: var(--retro-font); border-color: var(--card-border); color: var(--neon-glow);">
+        <span>Baca Berita</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ─── INTERSECTION OBSERVER — REVEAL ON SCROLL ───
+document.addEventListener('DOMContentLoaded', function() {
+  // ─── SEJARAH NAVBAR — SCROLL TOGGLE ───
+  const navbar = document.getElementById('main-navbar');
+  if (navbar) {
+    const onScroll = () => {
+      navbar.classList.toggle('nav-scrolled', window.scrollY > 60);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  // Reveal animations
+  const reveals = document.querySelectorAll('.reveal');
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  reveals.forEach(el => revealObserver.observe(el));
+
+  // Timeline cards staggered reveal
+  const cards = document.querySelectorAll('.timeline-card');
+  const cardObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const delay = parseInt(entry.target.dataset.delay) || 0;
+        setTimeout(() => {
+          entry.target.classList.add('revealed');
+        }, delay);
+        cardObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  cards.forEach(card => cardObserver.observe(card));
+
+  // ─── PARTICLES CANVAS ───
+  const canvas = document.getElementById('particles-canvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let w, h, particles = [];
+
+    function resize() {
+      const hero = canvas.parentElement;
+      w = canvas.width = hero.offsetWidth;
+      h = canvas.height = hero.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const count = Math.min(60, Math.floor((w * h) / 15000));
+
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 1.5 + 0.5,
+        opacity: Math.random() * 0.5 + 0.1,
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+
+      // Draw connections
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(115, 170, 15, ${0.08 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw particles
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(154, 205, 50, ${p.opacity})`;
+        ctx.fill();
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = 'rgba(115,170,15,0.3)';
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+      });
+
+      ctx.shadowBlur = 0;
+      requestAnimationFrame(draw);
+    }
+    draw();
+  }
+
+  // ─── HORIZONTAL SCROLL DRAGGING ───
+  const hScroll = document.querySelector('.h-scroll-container');
+  if (hScroll) {
+    let isDown = false, startX, scrollLeft;
+    hScroll.addEventListener('mousedown', (e) => {
+      isDown = true;
+      hScroll.classList.add('active');
+      startX = e.pageX - hScroll.offsetLeft;
+      scrollLeft = hScroll.scrollLeft;
+    });
+    hScroll.addEventListener('mouseleave', () => {
+      isDown = false;
+      hScroll.classList.remove('active');
+    });
+    hScroll.addEventListener('mouseup', () => {
+      isDown = false;
+      hScroll.classList.remove('active');
+    });
+    hScroll.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - hScroll.offsetLeft;
+      const walk = (x - startX) * 2;
+      hScroll.scrollLeft = scrollLeft - walk;
+    });
+  }
+});
+</script>
 {% endblock %}

@@ -1,6 +1,6 @@
 {# NAVBAR COMPONENT #}
 
-<nav class="bg-[#155C1B] sticky top-0 z-50 shadow-lg" x-data="{ mobileOpen: false, dropdownOpen: false }">
+<nav class="bg-[#155C1B] sticky top-0 z-50 shadow-lg {{ navbar_extra_class or '' }}" id="main-navbar" x-data="{ mobileOpen: false, dropdownOpen: false }">
     {# ─── TOP ROW ─── #}
     <div class="max-w-7xl mx-auto px-4">
         <div class="flex items-center justify-between h-14 md:h-16">
