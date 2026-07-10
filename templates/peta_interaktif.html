@@ -685,6 +685,8 @@
                 { id: 'rw', label: 'Rumah RW', color: '#6366f1', shape: 'square', active: true },
                 { id: 'desa', label: 'Batas Desa', color: '#e76f51', shape: 'square', active: true },
                 { id: 'dusun', label: 'Batas Dusun/RW', color: '#a855f7', shape: 'square', active: true },
+                { id: 'blok', label: 'Blok', color: '#f97316', shape: 'square', active: true },
+                { id: 'pbt', label: 'PBT (Persil)', color: '#14b8a6', shape: 'square', active: true },
             ],
             init() { window.layerTogglerData = this; },
             toggle(id) {
@@ -823,6 +825,20 @@
                 if (window._dusunLayer) active ? map.addLayer(window._dusunLayer) : map.removeLayer(window._dusunLayer);
                 if (window._dusunLabels) active ? map.addLayer(window._dusunLabels) : map.removeLayer(window._dusunLabels);
             }
+            if (id === 'blok') {
+                if (window._blokLayer) {
+                    active ? map.addLayer(window._blokLayer) : map.removeLayer(window._blokLayer);
+                } else if (active) {
+                    loadBlokLayer(map);
+                }
+            }
+            if (id === 'pbt') {
+                if (window._pbtLayer) {
+                    active ? map.addLayer(window._pbtLayer) : map.removeLayer(window._pbtLayer);
+                } else if (active) {
+                    loadPbtLayer(map);
+                }
+            }
         };
 
         // ===== BOUNDARY LAYERS =====
@@ -881,6 +897,38 @@
                     });
                     window._dusunLabels.addTo(map);
                 });
+        }
+
+        // Blok layer (lazy - loaded when toggled)
+        function loadBlokLayer(map) {
+            fetch('/geojson/BlokKedungwinangun_wgs84.geojson')
+                .then(r => r.json())
+                .then(data => {
+                    window._blokLayer = L.geoJSON(data, {
+                        style: { color: '#f97316', weight: 2, fillColor: '#f97316', fillOpacity: 0.08 },
+                        onEachFeature: (feature, layer) => {
+                            const blok = feature.properties?.Blok;
+                            if (blok) {
+                                layer.bindTooltip('Blok ' + blok, { permanent: false, className: 'blok-tooltip' });
+                            }
+                        }
+                    });
+                    map.addLayer(window._blokLayer);
+                })
+                .catch(() => console.warn('Blok layer not available'));
+        }
+
+        // PBT layer (lazy - loaded when toggled)
+        function loadPbtLayer(map) {
+            fetch('/geojson/PBTKedungwinangun_wgs84.geojson')
+                .then(r => r.json())
+                .then(data => {
+                    window._pbtLayer = L.geoJSON(data, {
+                        style: { color: '#14b8a6', weight: 0.8, fillOpacity: 0 },
+                    });
+                    map.addLayer(window._pbtLayer);
+                })
+                .catch(() => console.warn('PBT layer not available'));
         }
 
         loadDesaBoundary();
