@@ -37,9 +37,9 @@
             padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
             gap: 12px;
         }
-        #top-bar h1 { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
-        #top-bar h1 span { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 400; }
-        .tb-actions { display: flex; gap: 4px; }
+        #top-bar h1 { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; display: flex; align-items: center; gap: 8px; flex-shrink: 1; min-width: 0; overflow: hidden; }
+        #top-bar h1 span { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 400; flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+        .tb-actions { display: flex; gap: 4px; flex-shrink: 0; }
         .tb-btn {
             width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12);
             background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); cursor: pointer;
@@ -202,7 +202,10 @@
             #detail-panel.visible { transform: translateY(0); }
             #detail-panel.hidden { transform: translateY(100%); opacity: 0; pointer-events: none; }
             #stats-bar { top: 60px; }
-            .tb-btn.sidebar-toggle { display: flex; }
+            .tb-actions { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+            .tb-actions::-webkit-scrollbar { display: none; }
+            .tb-btn.sidebar-toggle { display: flex; flex-shrink: 0; }
+            .tb-btn { flex-shrink: 0; }
             #top-bar h1 span { display: none; }
         }
         @media (min-width: 769px) {
@@ -220,13 +223,29 @@
             min-width: 210px; max-width: 230px;
             transition: all 0.3s;
         }
+        #layer-toggle.collapsed { padding: 8px 12px; min-width: auto; max-width: auto; cursor: pointer; }
+        #layer-toggle.collapsed .lt-body { display: none; }
         @media (max-width: 768px) {
             #layer-toggle { top: auto; bottom: 100px; right: 8px; padding: 12px 14px; min-width: 190px; max-width: 210px; }
+            #layer-toggle.collapsed { bottom: 80px; padding: 8px 12px; min-width: auto; }
+        }
+        .lt-header {
+            display: flex; align-items: center; gap: 6px; justify-content: space-between;
         }
         .lt-title {
             font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase;
-            letter-spacing: 0.08em; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+            letter-spacing: 0.08em; display: flex; align-items: center; gap: 6px;
         }
+        .lt-close {
+            background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer;
+            font-size: 16px; padding: 2px 6px; border-radius: 6px; transition: all 0.2s;
+            display: none;
+        }
+        .lt-close:hover { background: rgba(239,68,68,0.2); color: #fca5a5; }
+        @media (max-width: 768px) {
+            .lt-close { display: flex; align-items: center; justify-content: center; }
+        }
+        .lt-body { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; }
         .lt-row {
             display: flex; align-items: center; gap: 10px; padding: 6px 10px; cursor: pointer;
             font-size: 13px; color: rgba(255,255,255,0.85); transition: all 0.15s; user-select: none;
@@ -246,6 +265,21 @@
             background: #fff; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
         .lt-row:not(.off) .lt-check-knob { left: 18px; }
+        #layer-toggle-btn {
+            position: fixed; z-index: 996; display: none;
+            bottom: 80px; right: 8px;
+            width: 44px; height: 44px; border-radius: 12px;
+            background: rgba(15,23,20,0.88); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.8); cursor: pointer;
+            align-items: center; justify-content: center; font-size: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+        }
+        #layer-toggle-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); }
+        @media (max-width: 768px) {
+            #layer-toggle-btn { display: flex; }
+        }
 
         /* ===== MAP OVERRIDES ===== */
         .leaflet-control-zoom { border: none !important; box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important; }
@@ -398,18 +432,27 @@
 </div>
 
 <!-- ===== LAYER TOGGLE ===== -->
-<div id="layer-toggle" x-data="layerToggler()" x-init="init()">
-    <div class="lt-title">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-        Layer
-    </div>
-    <template x-for="l in layers" :key="l.id">
-        <div class="lt-row" :class="{ off: !l.active }" @click="toggle(l.id)">
-            <span class="lt-dot" :style="'background:' + l.color + (l.shape === 'square' ? ';border-radius:4px' : '')"></span>
-            <span x-text="l.label"></span>
-            <span class="lt-check"><span class="lt-check-knob"></span></span>
+<div x-data="layerToggler()" x-init="init()">
+    <div id="layer-toggle" :class="{ collapsed: !panelOpen }" @click="if(!panelOpen) panelOpen = true">
+        <div class="lt-header">
+            <div class="lt-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                <span x-show="!panelOpen" class="text-[13px] text-white/80 font-semibold uppercase tracking-wider">Layer</span>
+                <span x-show="panelOpen">Layer</span>
+            </div>
+            <button class="lt-close" @click.stop="panelOpen = false" x-show="panelOpen" title="Tutup">✕</button>
         </div>
-    </template>
+        <div class="lt-body" x-show="panelOpen">
+            <template x-for="l in layers" :key="l.id">
+                <div class="lt-row" :class="{ off: !l.active }" @click="toggle(l.id)">
+                    <span class="lt-dot" :style="'background:' + l.color + (l.shape === 'square' ? ';border-radius:4px' : '')"></span>
+                    <span x-text="l.label"></span>
+                    <span class="lt-check"><span class="lt-check-knob"></span></span>
+                </div>
+            </template>
+        </div>
+    </div>
+    <button id="layer-toggle-btn" x-show="!panelOpen" @click="panelOpen = true" title="Layer">🗺️</button>
 </div>
 
 <!-- ===== MAP ===== -->
@@ -675,6 +718,7 @@
     // ===================================================================
     function layerToggler() {
         return {
+            panelOpen: true,
             layers: [
                 { id: 'umkm', label: 'UMKM', color: '#e63946', shape: 'circle', active: true },
                 { id: 'perangkat', label: 'Perangkat Desa', color: '#059669', shape: 'circle', active: true },

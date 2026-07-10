@@ -97,12 +97,10 @@ LAINNYA_PAGES = [
 DUSUN_DATA = [
     {"nama": "Dusun Karangmiri", "delay": "0.05s"},
     {"nama": "Dusun Dungwaru", "delay": "0.12s"},
-    {"nama": "Dusun Perna", "delay": "0.19s"},
-    {"nama": "Dusun Sasak", "delay": "0.26s"},
-    {"nama": "Dusun Entak", "delay": "0.33s"},
-    {"nama": "Dusun Grewing", "delay": "0.40s"},
-    {"nama": "Dusun Pedana", "delay": "0.47s"},
-    {"nama": "Dusun Pagak", "delay": "0.54s"},
+    {"nama": "Dusun Perna & Sasak", "delay": "0.19s"},
+    {"nama": "Dusun Entak", "delay": "0.26s"},
+    {"nama": "Dusun Grewing", "delay": "0.33s"},
+    {"nama": "Dusun Pedana & Pagak", "delay": "0.40s"},
 ]
 
 MAPS_EMBED_URL = (

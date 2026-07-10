@@ -188,8 +188,8 @@
     </div>
 
     {# ─── MOBILE NAVIGATION ─── #}
-    <div x-show="mobileOpen" x-transition class="lg:hidden">
-        <div class="max-w-7xl mx-auto px-4 pb-4">
+    <div x-show="mobileOpen" x-transition class="lg:hidden overflow-y-auto" style="max-height: 50vh;">
+        <div class="max-w-7xl mx-auto px-4 pb-8">
             {# Nav Links - Mobile #}
             <div class="flex flex-wrap gap-1 pt-3">
                 {% for link in nav_links %}

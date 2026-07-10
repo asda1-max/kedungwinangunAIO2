@@ -572,7 +572,10 @@ def get_desa_info():
         "tagline": get_config("website_tagline", DEFAULT_CONFIG["website_tagline"]),
         "deskripsi": get_config("website_deskripsi", DEFAULT_CONFIG["website_deskripsi"]),
         "jumlah_dusun": 8,
+        "jumlah_kadus": 6,
         "jumlah_kasi": 3,
+        "jumlah_kaur": 3,
+        "jumlah_sekdes": 1,
         "jumlah_kepala_desa": 1,
     }
 

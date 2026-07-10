@@ -557,7 +557,7 @@
         {% endif %}
 
         <!-- Card -->
-        <div class="timeline-card {% if is_odd %}md:mr-[calc(50%+30px)]{% else %}md:ml-[calc(50%+30px)]{% endif %}" data-delay="{{ loop.index0 * 150 }}">
+        <div class="timeline-card {% if is_odd %}md:mr-[calc(50%+30px)]{% else %}md:ml-[calc(50%+30px)]{% endif %}" data-delay="{{ (loop.index0 % 4) * 50 }}">
           <!-- Corner brackets -->
           <div class="corner-bracket tl"></div>
           <div class="corner-bracket tr"></div>

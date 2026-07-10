@@ -488,18 +488,30 @@
                 </p>
 
                 <!-- Stats -->
-                <div class="grid grid-cols-3 gap-4">
-                    <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-                        <div class="text-3xl font-bold text-[#155C1B]">{{ desa.jumlah_dusun }}</div>
-                        <div class="text-xs text-gray-500 mt-1">Dusun</div>
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                    <div class="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
+                        <div class="text-3xl font-bold text-[#155C1B]">{{ desa.jumlah_kepala_desa }}</div>
+                        <div class="text-xs text-gray-500 mt-1">Kades</div>
                     </div>
-                    <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+                    <div class="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
+                        <div class="text-3xl font-bold text-[#155C1B]">{{ desa.jumlah_sekdes }}</div>
+                        <div class="text-xs text-gray-500 mt-1">Sekdes</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
+                        <div class="text-3xl font-bold text-[#155C1B]">{{ desa.jumlah_kaur }}</div>
+                        <div class="text-xs text-gray-500 mt-1">Kaur</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
                         <div class="text-3xl font-bold text-[#155C1B]">{{ desa.jumlah_kasi }}</div>
                         <div class="text-xs text-gray-500 mt-1">Kasi</div>
                     </div>
-                    <div class="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-                        <div class="text-3xl font-bold text-[#155C1B]">{{ desa.jumlah_kepala_desa }}</div>
-                        <div class="text-xs text-gray-500 mt-1">Kades</div>
+                    <div class="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
+                        <div class="text-3xl font-bold text-[#155C1B]">{{ desa.jumlah_kadus }}</div>
+                        <div class="text-xs text-gray-500 mt-1">Kadus</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-3 text-center shadow-sm border border-gray-100">
+                        <div class="text-3xl font-bold text-[#155C1B]">{{ desa.jumlah_dusun }}</div>
+                        <div class="text-xs text-gray-500 mt-1">Dusun</div>
                     </div>
                 </div>
 

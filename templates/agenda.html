@@ -101,6 +101,34 @@
                         </div>
                     </template>
                 </div>
+
+                {# ─── MOBILE: Upcoming Events List ─── #}
+                <div class="block lg:hidden mt-6">
+                    <h3 class="font-bold text-gray-800 mb-3">🗓️ Agenda Terdekat</h3>
+                    <div class="space-y-2">
+                        <template x-for="evt in upcomingEvents" :key="evt.id">
+                            <div @click="selectDate(evt.tanggal_mulai.substring(0, 10))"
+                                class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 bg-white hover:shadow-sm transition-shadow cursor-pointer">
+                                <div class="text-center shrink-0 w-10">
+                                    <div class="text-lg font-bold text-[#155C1B]" x-text="parseInt(evt.tanggal_mulai.substring(8, 10))"></div>
+                                    <div class="text-[10px] text-gray-400 uppercase" x-text="monthNames[parseInt(evt.tanggal_mulai.substring(5, 7)) - 1].substring(0, 3)"></div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-semibold text-gray-800 text-sm truncate" x-text="evt.judul"></h4>
+                                    <div class="flex items-center gap-2 mt-0.5">
+                                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-semibold"
+                                            :class="getStatusClass(evt.status)"
+                                            x-text="statusLabels[evt.status]"></span>
+                                        <span class="text-[10px] text-gray-400" x-text="evt.waktu ? evt.waktu : ''"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="upcomingEvents.length === 0">
+                            <div class="text-center py-6 text-gray-400 text-sm">Belum ada agenda terdekat</div>
+                        </template>
+                    </div>
+                </div>
             </div>
 
             {# ─── SIDEBAR: Selected Date Events ─── #}
@@ -315,6 +343,16 @@
                         });
                     }
                     return cells;
+                },
+
+                get upcomingEvents() {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const todayStr = today.toISOString().substring(0, 10);
+                    return this.allEvents
+                        .filter(evt => evt.tanggal_mulai && evt.tanggal_mulai.substring(0, 10) >= todayStr)
+                        .sort((a, b) => a.tanggal_mulai.localeCompare(b.tanggal_mulai))
+                        .slice(0, 10);
                 },
 
                 get selectedDateDay() {
