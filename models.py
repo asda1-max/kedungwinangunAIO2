@@ -9,8 +9,11 @@ Error Handling:
 
 import sqlite3
 import logging
+from os import makedirs
+from os.path import exists, join, dirname, abspath
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import url_for
 from config import Config, DEFAULT_CONFIG, DEFAULT_USERS
 from database import (
     DatabaseError,
@@ -2677,12 +2680,43 @@ def toggle_lokasi_rtrw_aktif(lokasi_id):
         logger.error(f"Error toggling lokasi_rtrw {lokasi_id}: {str(e)}")
         return False
 
+def _get_foto_url(jenis, rw, rt):
+    """Cari file foto untuk lokasi RT/RW berdasarkan naming convention"""
+    foto_dir = join(dirname(abspath(__file__)), 'foto')
+    rw_pad = str(rw).zfill(2) if rw else ''
+    rt_pad = str(rt).zfill(2) if rt else ''
+    
+    if jenis == 'RT':
+        candidates = [
+            f'PLANG_RT{rt_pad}_RW{rw_pad}.jpg',
+            f'RUMAH_RT{rt_pad}_RW{rw_pad}.jpg',
+            f'PLANG_RT{rt_pad}_RW{rw_pad}.png',
+            f'RUMAH_RT{rt_pad}_RW{rw_pad}.png',
+        ]
+    else:  # RW
+        candidates = [
+            f'PLANG_RW{rw_pad}.jpg',
+            f'RUMAH_RW{rw_pad}.jpg',
+            f'PLANG_RW{rw_pad}.png',
+            f'RUMAH_RW{rw_pad}.png',
+        ]
+    
+    for c in candidates:
+        if exists(join(foto_dir, c)):
+            try:
+                return url_for('serve_foto', filename=c)
+            except RuntimeError:
+                return f'/foto/{c}'
+    return ''
+
+
 def get_lokasi_rtrw_geojson():
     """Get semua lokasi RT/RW sebagai GeoJSON FeatureCollection"""
     locations = get_all_lokasi_rtrw(aktif=1)
     features = []
     for loc in locations:
         if loc.get('latitude') and loc.get('longitude'):
+            foto_url = _get_foto_url(loc.get('jenis', ''), loc.get('rw', ''), loc.get('rt', ''))
             features.append({
                 "type": "Feature",
                 "geometry": {
@@ -2699,7 +2733,8 @@ def get_lokasi_rtrw_geojson():
                     "wilayah": loc.get('wilayah', ''),
                     "alamat": loc.get('alamat', ''),
                     "no_hp": loc.get('no_hp', ''),
-                    "source": "rtrw"  # marker for filtering
+                    "foto_url": foto_url,
+                    "source": "rtrw"
                 }
             })
     return {"type": "FeatureCollection", "features": features}

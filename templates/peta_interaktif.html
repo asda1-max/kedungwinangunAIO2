@@ -823,7 +823,8 @@
             const id = 'loc_' + p.id;
             window.petaMarkers[id] = marker;
             const label = CAT_LABELS[cat] || p.jenis || '';
-            marker.bindPopup(`<b>${CAT_ICONS[cat] || '📍'} ${p.nama || p.nama_ketua || label}</b><br><small>${p.jabatan || ''}</small>`);
+            const fotoHtml = p.foto_url ? `<img src="${p.foto_url}" alt="${p.nama_ketua || label}" style="width:180px;height:120px;object-fit:cover;border-radius:8px;margin-bottom:6px;display:block" onerror="this.style.display='none'">` : '';
+            marker.bindPopup(`${fotoHtml}<b>${CAT_ICONS[cat] || '📍'} ${p.nama || p.nama_ketua || label}</b><br><small>${p.jabatan || ''}</small>`);
             marker.on('click', () => {
                 if (window.peta && window.peta.allItems) {
                     const item = window.peta.allItems.find(i => i._id === id);

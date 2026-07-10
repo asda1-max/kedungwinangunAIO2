@@ -21,9 +21,9 @@ Run:
     python app.py
 """
 
-from flask import Flask, jsonify, request, render_template, send_from_directory
+from flask import Flask, jsonify, request, render_template, send_from_directory, abort
 from os import environ, makedirs
-from os.path import exists
+from os.path import exists, join
 import json
 from dotenv import load_dotenv
 
@@ -336,6 +336,15 @@ def uploaded_file(filename):
     return send_from_directory(upload_folder, filename)
 
 
+@app.route("/foto/<path:filename>")
+def serve_foto(filename):
+    """Serve foto RT/RW and other location photos"""
+    foto_dir = join(app.root_path, 'foto')
+    if not exists(join(foto_dir, filename)):
+        abort(404)
+    return send_from_directory(foto_dir, filename)
+
+
 # ── GeoJSON Files ──────────────────────────────────────────────────────
 
 @app.route("/geojson/<path:filename>")
@@ -367,12 +376,38 @@ def serve_geojson(filename):
 
 # Fallback models in priority order
 _CHATBOT_MODELS = [
+    'deepseek/deepseek-v4-flash:free',
     'nvidia/nemotron-3-ultra-550b-a55b:free',
     'google/gemma-4-26b-a4b-it:free',
     'openrouter/free',
 ]
 
-_CHATBOT_SYSTEM_PROMPT = """Kamu adalah asisten AI untuk Website Desa Kedungwinangun, Kebumen, Jawa Tengah, Indonesia.
+def _build_chatbot_prompt():
+    """Build system prompt with dynamic RT/RW and Perangkat Desa data"""
+    from models import get_all_lokasi_rtrw, get_all_struktur
+
+    rtrw_list = get_all_lokasi_rtrw(aktif=1)
+    struktur_list = get_all_struktur(aktif=1)
+
+    rt_lines = []
+    rw_lines = []
+    for loc in rtrw_list:
+        j = loc.get('jenis', '')
+        if j == 'RT':
+            rt_lines.append(f"  - RT {loc.get('rt', '')} RW {loc.get('rw', '')}: {loc.get('nama_ketua', '-')} ({loc.get('jabatan', 'Ketua RT')})")
+        elif j == 'RW':
+            rw_lines.append(f"  - RW {loc.get('rw', '')}: {loc.get('nama_ketua', '-')} ({loc.get('jabatan', 'Ketua RW')})")
+
+    perangkat_lines = []
+    for s in struktur_list:
+        kat = s.get('kategori', '')
+        if kat in ('perangkat', 'bpd', 'pkk', 'karang_taruna'):
+            perangkat_lines.append(f"  - {s.get('jabatan', kat)}: {s.get('nama', '-')}")
+
+    rtrw_text = "\n".join(rt_lines + rw_lines) or "  (belum ada data)"
+    perangkat_text = "\n".join(perangkat_lines) or "  (belum ada data)"
+
+    return f"""Kamu adalah asisten AI untuk Website Desa Kedungwinangun, Kecamatan Klirong, Kebumen, Jawa Tengah, Indonesia.
 
 NAMA KADES : Moh Baequni
 
@@ -383,6 +418,12 @@ Konteks Website:
 - Layanan surat permohonan online
 - Galeri foto kegiatan desa
 - Kontak dan informasi pemerintahan desa
+
+DATA RT/RW:
+{rtrw_text}
+
+PERANGKAT DESA:
+{perangkat_text}
 
 Pedoman:
 - Jawab dengan ramah dalam Bahasa Indonesia informal (ngobrol)
@@ -413,8 +454,9 @@ def api_chat():
     messages = data.get('messages', [])
     model = data.get('model', _CHATBOT_MODELS[0])
 
-    # Build messages with system prompt
-    all_messages = [{"role": "system", "content": _CHATBOT_SYSTEM_PROMPT}]
+    # Build messages with dynamic system prompt
+    system_prompt = _build_chatbot_prompt()
+    all_messages = [{"role": "system", "content": system_prompt}]
     for msg in messages:
         if msg.get('role') in ('user', 'assistant'):
             all_messages.append({"role": msg['role'], "content": msg['content']})
