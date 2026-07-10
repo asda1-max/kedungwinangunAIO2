@@ -477,8 +477,8 @@
             }
         }
 
-        // Init theme
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // Init theme — default to light mode
+        if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark');
         }
         updateTheme();

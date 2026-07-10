@@ -724,7 +724,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
-  // Reveal animations
+  // Reveal animations — use rootMargin + threshold 0 to catch fast scroll
   const reveals = document.querySelectorAll('.reveal');
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -733,11 +733,11 @@ document.addEventListener('DOMContentLoaded', function() {
         revealObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1 });
+  }, { threshold: 0, rootMargin: '0px 0px -50px 0px' });
 
   reveals.forEach(el => revealObserver.observe(el));
 
-  // Timeline cards staggered reveal
+  // Timeline cards staggered reveal — same fix for fast scroll
   const cards = document.querySelectorAll('.timeline-card');
   const cardObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -749,7 +749,7 @@ document.addEventListener('DOMContentLoaded', function() {
         cardObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.15 });
+  }, { threshold: 0, rootMargin: '0px 0px -50px 0px' });
 
   cards.forEach(card => cardObserver.observe(card));
 

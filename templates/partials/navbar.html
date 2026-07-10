@@ -310,10 +310,8 @@
     var storedTheme = localStorage.getItem('theme');
     if (storedTheme === 'dark') {
         setDark(true);
-    } else if (storedTheme === 'light') {
+    } else {
         setDark(false);
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        setDark(true);
     }
 
     if (darkBtn) {
