@@ -451,6 +451,15 @@ def init_database():
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
+            -- Login Attempts (Brute Force Protection)
+            CREATE TABLE IF NOT EXISTS login_attempts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                identifier TEXT NOT NULL,
+                ip_address TEXT NOT NULL,
+                attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                success INTEGER DEFAULT 0
+            );
+
             -- Agenda Desa (Timeline)
             CREATE TABLE IF NOT EXISTS agenda (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -562,7 +571,7 @@ def get_desa_info():
         "nama": get_config("website_nama", DEFAULT_CONFIG["website_nama"]),
         "tagline": get_config("website_tagline", DEFAULT_CONFIG["website_tagline"]),
         "deskripsi": get_config("website_deskripsi", DEFAULT_CONFIG["website_deskripsi"]),
-        "jumlah_dusun": 6,
+        "jumlah_dusun": 8,
         "jumlah_kasi": 3,
         "jumlah_kepala_desa": 1,
     }
@@ -621,12 +630,81 @@ def get_user_by_id(user_id):
         logger.error(f"Error getting user by ID {user_id}: {str(e)}")
         return None
 
-def verify_user(nik, password):
-    """Verifikasi login user"""
-    user = get_user_by_nik(nik)
-    if user and user['status'] == 'approved' and check_password_hash(user['password_hash'], password):
-        return user
-    return None
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── LOGIN ATTEMPT HELPERS (Brute Force Protection) ─────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+def record_login_attempt(identifier, ip_address, success=False):
+    """Catat percobaan login ke database"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO login_attempts (identifier, ip_address, success, attempted_at)
+            VALUES (?, ?, ?, datetime('now', 'localtime'))
+        ''', (identifier, ip_address, 1 if success else 0))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error recording login attempt: {str(e)}")
+        return False
+
+def get_recent_login_attempts(identifier, ip_address, window_minutes=15):
+    """Hitung jumlah percobaan login gagal dalam window tertentu"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT COUNT(*) as count FROM login_attempts
+            WHERE success = 0
+            AND identifier = ?
+            AND ip_address = ?
+            AND attempted_at > datetime('now', 'localtime', ?)
+        ''', (identifier, ip_address, f'-{window_minutes} minutes'))
+        row = cursor.fetchone()
+        conn.close()
+        return row['count'] if row else 0
+    except Exception as e:
+        logger.error(f"Error counting login attempts: {str(e)}")
+        return 0
+
+def is_login_locked(identifier, ip_address, max_attempts=5, window_minutes=15):
+    """Cek apakah login terkunci karena terlalu banyak gagal"""
+    attempts = get_recent_login_attempts(identifier, ip_address, window_minutes)
+    return attempts >= max_attempts
+
+def clear_login_attempts(identifier):
+    """Hapus catatan percobaan login setelah berhasil"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM login_attempts WHERE identifier = ?', (identifier,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error clearing login attempts: {str(e)}")
+        return False
+
+def clean_old_login_attempts(days=7):
+    """Hapus percobaan login yang sudah lama (maintenance)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            DELETE FROM login_attempts
+            WHERE attempted_at < datetime('now', 'localtime', ?)
+        ''', (f'-{days} days',))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error cleaning old login attempts: {str(e)}")
+        return False
+
 
 def register_user(nik, nama_lengkap, email, no_telepon, alamat, password, ktp_path=None, kk_path=None):
     """Registrasi user baru"""
@@ -2432,7 +2510,7 @@ def get_agenda_by_id(agenda_id):
         logger.error(f"Error getting agenda {agenda_id}: {str(e)}")
         return None
 
-def add_agenda(judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu, lokasi,
+def add_agenda(judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi,
                icon, penanggung_jawab, peserta, status, aktif=1):
     """Tambah agenda baru"""
     try:
@@ -2443,10 +2521,10 @@ def add_agenda(judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu, lokasi
         max_order = (row['max_order'] or 0) + 1
 
         cursor.execute('''
-            INSERT INTO agenda (judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu,
+            INSERT INTO agenda (judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu,
                               lokasi, icon, penanggung_jawab, peserta, status, aktif, urutan)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu, lokasi,
+        ''', (judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi,
               icon, penanggung_jawab, peserta, status, aktif, max_order))
         conn.commit()
         conn.close()
@@ -2455,19 +2533,19 @@ def add_agenda(judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu, lokasi
         logger.error(f"Error adding agenda: {str(e)}")
         return False
 
-def update_agenda(agenda_id, judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu,
+def update_agenda(agenda_id, judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu,
                   lokasi, icon, penanggung_jawab, peserta, status, aktif, urutan):
     """Update agenda"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            UPDATE agenda SET judul = ?, deskripsi = ?, kategori = ?, tanggal = ?,
-                           tanggal_mulai = ?, waktu = ?, lokasi = ?, icon = ?,
+            UPDATE agenda SET judul = ?, deskripsi = ?, kategori = ?,
+                           tanggal_mulai = ?, tanggal_selesai = ?, waktu = ?, lokasi = ?, icon = ?,
                            penanggung_jawab = ?, peserta = ?, status = ?, aktif = ?,
                            urutan = ?
             WHERE id = ?
-        ''', (judul, deskripsi, kategori, tanggal, tanggal_mulai, waktu, lokasi,
+        ''', (judul, deskripsi, kategori, tanggal_mulai, tanggal_selesai, waktu, lokasi,
               icon, penanggung_jawab, peserta, status, aktif, urutan, agenda_id))
         conn.commit()
         conn.close()

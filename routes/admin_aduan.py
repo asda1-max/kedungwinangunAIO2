@@ -407,7 +407,7 @@ def add_agenda_route():
                 return redirect(request.url)
             
             logger.info(f"[AGENDA] add_agenda called: judul={judul}, tanggal={tanggal_mulai}")
-            result = add_agenda(judul=judul, deskripsi=deskripsi, kategori=kategori, tanggal=tanggal_mulai, tanggal_mulai=tanggal_mulai, waktu=waktu, lokasi=lokasi, icon=icon, penanggung_jawab=penanggung_jawab, peserta=peserta, status=status)
+            result = add_agenda(judul=judul, deskripsi=deskripsi, kategori=kategori, tanggal_mulai=tanggal_mulai, tanggal_selesai=tanggal_selesai or None, waktu=waktu, lokasi=lokasi, icon=icon, penanggung_jawab=penanggung_jawab, peserta=peserta, status=status)
             if result:
                 flash('Agenda berhasil ditambahkan!', 'success')
                 return redirect(url_for('admin.agenda'))
@@ -455,7 +455,7 @@ def edit_agenda_route(agenda_id):
                 return redirect(request.url)
             
             logger.info(f"[AGENDA] update_agenda called: id={agenda_id}, judul={judul}")
-            result = update_agenda(agenda_id, judul=judul, deskripsi=deskripsi, kategori=kategori, tanggal=tanggal_mulai, tanggal_mulai=tanggal_mulai, waktu=waktu, lokasi=lokasi, icon=icon, penanggung_jawab=penanggung_jawab, peserta=peserta, status=status, aktif=aktif, urutan=urutan)
+            result = update_agenda(agenda_id, judul=judul, deskripsi=deskripsi, kategori=kategori, tanggal_mulai=tanggal_mulai, tanggal_selesai=tanggal_selesai or None, waktu=waktu, lokasi=lokasi, icon=icon, penanggung_jawab=penanggung_jawab, peserta=peserta, status=status, aktif=aktif, urutan=urutan)
             if result:
                 flash('Agenda berhasil diperbarui!', 'success')
                 return redirect(url_for('admin.agenda'))

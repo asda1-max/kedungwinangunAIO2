@@ -19,6 +19,14 @@ class Config:
     # Session
     PERMANENT_SESSION_LIFETIME = 86400  # 24 hours
 
+    # Security
+    MAX_LOGIN_ATTEMPTS = 5           # Max failed attempts before lockout
+    LOGIN_LOCKOUT_MINUTES = 15       # Lockout duration in minutes
+    LOGIN_ATTEMPT_WINDOW = 15        # Rolling window in minutes for attempt counting
+    SESSION_COOKIE_SECURE = False     # Set True if using HTTPS
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+
 # ── Default Config (Database) ────────────────────────────────────────────
 DEFAULT_CONFIG = {
     # Website Info
@@ -86,12 +94,14 @@ LAINNYA_PAGES = [
 
 # ── Data Static ────────────────────────────────────────────────────────
 DUSUN_DATA = [
-    {"nama": "Dusun Kedungwaru", "delay": "0.05s"},
-    {"nama": "Dusun Perna", "delay": "0.12s"},
-    {"nama": "Dusun Sasak", "delay": "0.19s"},
-    {"nama": "Dusun Entak", "delay": "0.26s"},
-    {"nama": "Dusun Grewing", "delay": "0.33s"},
-    {"nama": "Dusun Pedana", "delay": "0.40s"},
+    {"nama": "Dusun Karangmiri", "delay": "0.05s"},
+    {"nama": "Dusun Dungwaru", "delay": "0.12s"},
+    {"nama": "Dusun Perna", "delay": "0.19s"},
+    {"nama": "Dusun Sasak", "delay": "0.26s"},
+    {"nama": "Dusun Entak", "delay": "0.33s"},
+    {"nama": "Dusun Grewing", "delay": "0.40s"},
+    {"nama": "Dusun Pedana", "delay": "0.47s"},
+    {"nama": "Dusun Pagak", "delay": "0.54s"},
 ]
 
 MAPS_EMBED_URL = (

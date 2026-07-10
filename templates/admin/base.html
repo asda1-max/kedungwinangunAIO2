@@ -6,7 +6,6 @@
     <title>{% block title %}{{ page_title or 'Admin Panel' }} - Desa Kedungwinangun{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -20,7 +19,7 @@
             }
         }
     </script>
-
+    <script src="{{ url_for('static', filename='tailwind.js') }}"></script>
     {% block extra_head %}{% endblock %}
 
     <style>

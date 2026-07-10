@@ -39,6 +39,13 @@ from models import init_database
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# Session cookie hardening
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=Config.SESSION_COOKIE_HTTPONLY,
+    SESSION_COOKIE_SAMESITE=Config.SESSION_COOKIE_SAMESITE,
+    SESSION_COOKIE_SECURE=Config.SESSION_COOKIE_SECURE,
+)
+
 # Create upload folder if not exists
 makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
 
@@ -212,6 +219,58 @@ def service_unavailable(e):
         ), 503
     except:
         return {"error": "Layanan tidak tersedia"}, 503
+
+
+# ── Security Headers Middleware ──────────────────────────────────────────
+
+@app.after_request
+def add_security_headers(response):
+    """Add security headers to every response"""
+    # Prevent MIME type sniffing
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    # Prevent clickjacking
+    response.headers['X-Frame-Options'] = 'DENY'
+    # Enable XSS filter in older browsers
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    # Referrer policy
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    # Cache control for sensitive pages
+    if request.path.startswith('/admin') or request.path.startswith('/login'):
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    # Permissions policy (limit feature access)
+    response.headers['Permissions-Policy'] = (
+        'camera=(), microphone=(), geolocation=(self "https://maps.google.com"), '
+        'payment=(), usb=(), fullscreen=(self)'
+    )
+    # Content Security Policy (relaxed for Google Maps, Fonts, etc.)
+    if request.path.startswith('/admin') or request.path.startswith('/login'):
+        csp = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://maps.google.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data: https: blob:; "
+            "frame-src https://maps.google.com; "
+            "connect-src 'self' https://openrouter.ai; "
+            "form-action 'self'"
+        )
+        response.headers['Content-Security-Policy'] = csp
+    return response
+
+
+# ── CSRF Token Injection ─────────────────────────────────────────────────
+
+import secrets
+
+@app.context_processor
+def inject_csrf_token():
+    """Inject CSRF token into all templates for optional use"""
+    from flask import session
+    if '_csrf_token' not in session:
+        session['_csrf_token'] = secrets.token_hex(32)
+    return {'csrf_token': session['_csrf_token']}
 
 
 @app.errorhandler(Exception)

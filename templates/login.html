@@ -433,6 +433,7 @@
         <!-- Admin Login Form -->
         <form method="POST" action="{{ url_for('public.login') }}" class="login-form active" id="form-admin">
             <input type="hidden" name="login_type" value="admin">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
             <div class="form-group">
                 <label for="admin_username">Username</label>
                 <input type="text" id="admin_username" name="username" placeholder="Ketik username admin..." required autocomplete="username">
@@ -453,6 +454,7 @@
         <!-- Dinas Login Form -->
         <form method="POST" action="{{ url_for('public.login') }}" class="login-form" id="form-dinas">
             <input type="hidden" name="login_type" value="dinas">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
             <div class="form-group">
                 <label for="dinas_nip">NIP (Nomor Induk Pegawai)</label>
                 <input type="text" id="dinas_nip" name="nip" placeholder="Ketik NIP..." required autocomplete="username">
