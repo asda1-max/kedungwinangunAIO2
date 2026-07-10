@@ -720,6 +720,7 @@
         return {
             panelOpen: true,
             layers: [
+                { id: 'satelit', label: 'Mode Satelit', color: '#0ea5e9', shape: 'square', active: false },
                 { id: 'umkm', label: 'UMKM', color: '#e63946', shape: 'circle', active: true },
                 { id: 'perangkat', label: 'Perangkat Desa', color: '#059669', shape: 'circle', active: true },
                 { id: 'bpd', label: 'BPD', color: '#7c3aed', shape: 'circle', active: true },
@@ -758,10 +759,15 @@
         L.control.zoom({ position: 'topright' }).addTo(map);
 
         // Tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        window._osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 20,
             attribution: '&copy; OSM | Desa Kedungwinangun',
         }).addTo(map);
+
+        window._satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 20,
+            attribution: '&copy; Esri | Desa Kedungwinangun',
+        });
 
         // Marker clusters: ONE PER CATEGORY for toggling
         const categoryClusters = {};
@@ -882,6 +888,15 @@
                     active ? map.addLayer(window._pbtLayer) : map.removeLayer(window._pbtLayer);
                 } else if (active) {
                     loadPbtLayer(map);
+                }
+            }
+            if (id === 'satelit') {
+                if (active) {
+                    map.removeLayer(window._osmLayer);
+                    map.addLayer(window._satLayer);
+                } else {
+                    map.removeLayer(window._satLayer);
+                    map.addLayer(window._osmLayer);
                 }
             }
         };
