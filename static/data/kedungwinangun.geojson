@@ -178,7 +178,7 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Sungai Bodri",
+                "name": "Sungai luk ulo",
                 "type": "sungai",
                 "kelas": "Sungai Kecil",
                 "panjang": "~3.5 km"
@@ -315,7 +315,7 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Wisata Mandi Bola Sungai Bodri",
+                "name": "Wisata Mandi Bola Sungai luk ulo",
                 "type": "fasilitas",
                 "kategori": "Wisata",
                 "keterangan": "Area wisata sungai"

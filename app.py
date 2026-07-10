@@ -378,7 +378,7 @@ NAMA KADES : Moh Baequni
 
 Konteks Website:
 - Website resmi desa untuk informasi dan layanan publik
-- Desa Kedungwinangun terletak di Kecamatan Kutowinangun, Kabupaten Kebumen, Jawa Tengah
+- Desa Kedungwinangun terletak di Kecamatan Klirong, Kabupaten Kebumen, Jawa Tengah
 - Menyediakan berita terkini tentang kegiatan desa
 - Layanan surat permohonan online
 - Galeri foto kegiatan desa

@@ -2288,7 +2288,7 @@ def add_aduan(nama, judul, deskripsi, kategori='infrastruktur', email=None, tele
         
         cursor.execute('''
             INSERT INTO aduan (nomor_aduan, nama, email, telepon, nik, alamat, dusun, judul,
-                             kategori, lokasi, isi, lampiran)
+                             kategori, lokasi, deskripsi, lampiran_url)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (nomor, nama, email, telepon, nik, alamat, dusun, judul, kategori, lokasi, deskripsi, lampiran_url))
         conn.commit()
@@ -2414,7 +2414,7 @@ def add_program_kerja(nama, deskripsi, kategori, tahun, target, realiasi, anggar
         max_order = (row['max_order'] or 0) + 1
 
         cursor.execute('''
-            INSERT INTO program_kerja (nama, deskripsi, kategori, tahun, target, realiasi,
+            INSERT INTO program_kerja (judul, deskripsi, kategori, tahun, target, realiasi,
                                       anggaran, icon, status, aktif, urutan)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (nama, deskripsi, kategori, tahun, target, realiasi, anggaran, icon, status, aktif, max_order))
@@ -2431,7 +2431,7 @@ def update_program_kerja(program_id, nama, deskripsi, kategori, tahun, target, r
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            UPDATE program_kerja SET nama = ?, deskripsi = ?, kategori = ?, tahun = ?,
+            UPDATE program_kerja SET judul = ?, deskripsi = ?, kategori = ?, tahun = ?,
                                    target = ?, realiasi = ?, anggaran = ?, icon = ?,
                                    status = ?, aktif = ?, urutan = ?, updated_at = ?
             WHERE id = ?

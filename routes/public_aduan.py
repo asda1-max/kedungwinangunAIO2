@@ -68,26 +68,23 @@ def aduan():
     from models import add_aduan
     
     if request.method == 'POST':
-        nama = request.form.get('nama', '').strip()
+        nama = request.form.get('nama', '').strip() or 'Anonim'
         email = request.form.get('email', '').strip()
         telepon = request.form.get('telepon', '').strip()
-        nik = request.form.get('nik', '').strip()
-        alamat = request.form.get('alamat', '').strip()
-        dusun = request.form.get('dusun', '').strip()
         judul = request.form.get('judul', '').strip()
         kategori = request.form.get('kategori', 'infrastruktur')
         lokasi = request.form.get('lokasi', '').strip()
         isi = request.form.get('deskripsi', '').strip()
 
-        if not nama or not judul or not isi:
-            flash('Nama, judul, dan deskripsi aduan wajib diisi!', 'error')
+        if not judul or not isi:
+            flash('Judul dan deskripsi aduan wajib diisi!', 'error')
             return redirect(url_for('public.aduan'))
 
         logger.info(f"[PUBLIC-ADUAN] Form submitted: nama={nama}, judul={judul}, kategori={kategori}")
         success, nomor = add_aduan(
             nama=nama, judul=judul, deskripsi=isi, kategori=kategori,
-            email=email or None, telepon=telepon or None, nik=nik or None,
-            alamat=alamat or None, dusun=dusun or None, lokasi=lokasi or None
+            email=email or None, telepon=telepon or None,
+            lokasi=lokasi or None
         )
         
         if success:

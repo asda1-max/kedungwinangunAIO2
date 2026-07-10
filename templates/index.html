@@ -757,7 +757,8 @@
     </section>
 
 
-    <!-- POTENSI SECTION -->
+    <!-- POTENSI DESA SECTION -->
+    {% if potensi_grouped %}
     <section id="potensi" class="bg-gradient-to-br from-[#f0fdf4] to-white py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
@@ -765,78 +766,44 @@
                 <p class="text-gray-500 mt-3 max-w-2xl mx-auto reveal stagger-1">Kenali berbagai potensi dan kegiatan menarik yang ada di {{ desa.nama }}</p>
             </div>
 
-            {% set potensi_list = [
-                {'nama': 'Pertanian Padi Organik', 'kategori': 'Pertanian', 'icon': '🌾', 'gambar_url': 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', 'deskripsi': 'Lahan pertanian padi organik seluas 150 hektar yang dikelola secara tradisional dengan pupuk alami.'},
-                {'nama': 'Kerajinan Bambu', 'kategori': 'Kerajinan', 'icon': '🎋', 'gambar_url': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', 'deskripsi': 'Pengrajin bamboo lokal menghasilkan berbagai kerajinan tangan seperti anyaman dan dekorasi rumah.'},
-                {'nama': 'Wisata Sungai Bodri', 'kategori': 'Pariwisata', 'icon': '🏞️', 'gambar_url': 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', 'deskripsi': 'Sungai Bodri menawarkan pemandangan alam yang asri dengan fasilitas mandi bola dan spot foto.'},
-                {'nama': 'Budidaya Ikan Lele', 'kategori': 'Perikanan', 'icon': '🐟', 'gambar_url': 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', 'deskripsi': 'Kolam ikan lele dengan sistem bioflok menghasilkan produksi tinggi dan ramah lingkungan.'}
-            ] %}
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {% for potensi in potensi_list %}
-                <div class="group bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-xl transition-all duration-500 reveal stagger-{{ loop.index }} card-glow shine-effect">
-                    <div class="relative h-40 overflow-hidden">
-                        <img src="{{ potensi.gambar_url }}" alt="{{ potensi.nama }}"
-                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div class="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-xl shadow-lg group-hover:scale-110 transition-transform duration-300 float">
-                            {{ potensi.icon }}
+            {% for kategori, potensi_items in potensi_grouped.items() %}
+            <div class="mb-12 last:mb-0">
+                <div class="flex items-center gap-3 mb-6 reveal">
+                    <div class="h-px flex-1 bg-gradient-to-r from-[#155C1B]/20 to-transparent"></div>
+                    <h3 class="text-sm font-bold text-[#155C1B] uppercase tracking-widest">{{ kategori }}</h3>
+                    <div class="h-px flex-1 bg-gradient-to-l from-[#155C1B]/20 to-transparent"></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {% for item in potensi_items %}
+                    <div class="group bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-xl transition-all duration-500 reveal stagger-{{ loop.index }} card-glow shine-effect">
+                        <div class="relative h-40 overflow-hidden">
+                            {% if item.gambar_url %}
+                            <img src="{{ item.gambar_url }}" alt="{{ item.nama }}"
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                 onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-[#155C1B]/20 to-[#73AA0F]/20 flex items-center justify-center\'><span class=\'text-4xl\'>{{ item.icon or '🏆' }}</span></div>'">
+                            {% else %}
+                            <div class="w-full h-full bg-gradient-to-br from-[#155C1B]/20 to-[#73AA0F]/20 flex items-center justify-center">
+                                <span class="text-4xl">{{ item.icon or '🏆' }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div class="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-xl shadow-lg group-hover:scale-110 transition-transform duration-300 float">
+                                {{ item.icon or '🏆' }}
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[#73AA0F] text-xs font-bold uppercase tracking-wider">{{ kategori }}</span>
+                            <h3 class="font-bold text-[#155C1B] mt-2 mb-2 group-hover:text-[#73AA0F] transition-colors duration-300">{{ item.nama }}</h3>
+                            {% if item.deskripsi %}
+                            <p class="text-gray-500 text-sm line-clamp-3">{{ item.deskripsi }}</p>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="p-5">
-                        <span class="text-[#73AA0F] text-xs font-bold uppercase tracking-wider">{{ potensi.kategori }}</span>
-                        <h3 class="font-bold text-[#155C1B] mt-2 mb-2 group-hover:text-[#73AA0F] transition-colors duration-300">{{ potensi.nama }}</h3>
-                        <p class="text-gray-500 text-sm line-clamp-3">{{ potensi.deskripsi }}</p>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
+            {% endfor %}
         </div>
-    </section>
-
-    <!-- POTENSI DESA SECTION -->
-    {% if potensi_grouped %}
-    <section id="potensi" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div class="flex items-center justify-between mb-10">
-            <div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-[#155C1B] animated-underline reveal">Potensi Desa</h2>
-                <p class="text-gray-500 mt-2 reveal stagger-1">Kekayaan dan potensi yang dimiliki desa</p>
-            </div>
-        </div>
-
-        {% for kategori, potensi_items in potensi_grouped.items() %}
-        <div class="mb-10">
-            <h3 class="text-xl font-bold text-[#155C1B] mb-4 flex items-center gap-2 reveal">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                </svg>
-                {{ kategori }}
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for item in potensi_items[:6] %}
-                <div class="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 reveal stagger-{{ loop.index }}">
-                    {% if item.gambar_url %}
-                    <div class="aspect-video overflow-hidden">
-                        <img src="{{ item.gambar_url }}" alt="{{ item.nama }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    </div>
-                    {% else %}
-                    <div class="aspect-video bg-gradient-to-br from-[#155C1B]/10 to-[#73AA0F]/10 flex items-center justify-center">
-                        <svg class="w-16 h-16 text-[#155C1B]/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    {% endif %}
-                    <div class="p-5">
-                        <h4 class="font-bold text-lg text-gray-800 mb-2 group-hover:text-[#155C1B] transition-colors">{{ item.nama }}</h4>
-                        {% if item.deskripsi %}
-                        <p class="text-gray-500 text-sm line-clamp-3">{{ item.deskripsi }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endfor %}
     </section>
     {% endif %}
 
