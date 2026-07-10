@@ -32,6 +32,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
         .share-btn { transition: all 0.2s; }
@@ -355,20 +356,8 @@
     <div
         class="w-full max-w-[480px] md:max-w-none mx-auto bg-white md:bg-transparent shadow-[0_0_30px_rgba(0,0,0,0.45)] md:shadow-none min-h-screen overflow-x-hidden">
 
-        <!-- NAVBAR -->
-        <nav
-            class="flex items-center gap-3 px-4 py-3 md:px-[5%] md:py-4 bg-[#0F5B21] text-white text-[11px] md:text-base font-semibold">
-            <img src="{{ url_for('static', filename='images/kebumen.png') }}" alt="Logo Desa"
-                class="w-8 h-10 md:w-10 md:h-[50px] object-contain">
-            <div class="flex gap-2 md:gap-6 ml-auto">
-                {% for link in nav_links %}
-                <a href="{{ link.href }}"
-                    class="nav-a {% if link.active %}nav-active{% endif %} text-gray-200 no-underline transition-colors duration-300">
-                    {{ link.label }}
-                </a>
-                {% endfor %}
-            </div>
-        </nav>
+        <!-- NAVBAR (using shared partial) -->
+        {% include 'partials/navbar.html' %}
 
         <!-- ARTICLE -->
         <div class="max-w-3xl mx-auto px-6 py-10 md:py-16">

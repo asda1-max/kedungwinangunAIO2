@@ -113,6 +113,7 @@ def index():
             'sosial_facebook': get_config("sosial_facebook", ""),
             'sosial_instagram': get_config("sosial_instagram", ""),
             'sosial_twitter': get_config("sosial_twitter", ""),
+            'sosial_tiktok': get_config("sosial_tiktok", ""),
         }
 
         return render_template(

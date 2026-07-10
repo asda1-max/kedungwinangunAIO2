@@ -69,6 +69,7 @@ def config():
             update_config("sosial_facebook", request.form.get('sosial_facebook', ''))
             update_config("sosial_instagram", request.form.get('sosial_instagram', ''))
             update_config("sosial_twitter", request.form.get('sosial_twitter', ''))
+            update_config("sosial_tiktok", request.form.get('sosial_tiktok', ''))
 
             # Footer
             update_config("footer_copyright", request.form.get('footer_copyright', ''))

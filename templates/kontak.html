@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kontak Kami — {{ site_name or desa.nama }}</title>
+    <meta name="description" content="Hubungi {{ desa.nama }} melalui WhatsApp, Telepon, Email, atau media sosial">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -25,119 +27,389 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #f4f7f2; }
+        .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .reveal.is-visible { opacity: 1; transform: translateY(0); }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+
+        .contact-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .contact-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 40px -12px rgba(21, 92, 27, 0.25); }
+
+        .socmed-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .socmed-card:hover { transform: translateY(-4px) scale(1.03); }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        body.dark .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .hero-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+        }
+
+        .map-container { transition: all 0.4s ease; }
+        .map-container:hover { box-shadow: 0 25px 50px -12px rgba(21, 92, 27, 0.3); }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        .float-anim { animation: float 4s ease-in-out infinite; }
     </style>
 </head>
 <body>
-    <!-- NAVBAR (using shared partial) -->
     {% include 'partials/navbar.html' %}
 
-    <!-- PAGE HEADER - Minimalist -->
-    <div class="bg-[#0F5B21] px-6 py-10 md:px-[5%] md:py-14 text-white">
-        <p class="text-xs md:text-sm text-green-300 mb-2">
-            <a href="{{ url_for('public.index') }}" class="hover:underline">Beranda</a> / Kontak
-        </p>
-        <h1 class="text-2xl md:text-4xl font-extrabold">Hubungi Kami</h1>
-        <p class="text-sm md:text-base text-green-200 mt-1">Jangan ragu untuk menghubungi kami</p>
-    </div>
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!-- HERO SECTION                                                  -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <section class="relative bg-gradient-to-br from-[#0c4a1a] via-[#155C1B] to-[#1a6b22] text-white overflow-hidden">
+        <div class="hero-blob top-[-10%] right-[-5%] w-[400px] h-[400px] bg-[#73AA0F]"></div>
+        <div class="hero-blob bottom-[-15%] left-[-5%] w-[500px] h-[500px] bg-emerald-300"></div>
 
-    <!-- CONTENT - Minimalist -->
-    <div class="px-6 py-10 md:px-[5%] md:py-14">
-        <!-- Contact Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-            <!-- WhatsApp -->
-            <a href="{% if kontak.whatsapp %}https://wa.me/{{ kontak.whatsapp }}{% else %}#{% endif %}"
-               class="flex items-center gap-4 p-5 bg-white rounded-xl border border-neutral-200 shadow-sm hover:shadow-md transition-shadow">
-                <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                    </svg>
+        <div class="relative max-w-7xl mx-auto px-6 py-16 md:py-28 lg:py-32">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
+                <!-- LHS: Text -->
+                <div class="max-w-2xl reveal">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-green-200 text-xs font-medium mb-5">
+                        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                        Siap melayani Anda
+                    </div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight">
+                        Hubungi <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-emerald-200">Kami</span>
+                    </h1>
+                    <p class="mt-4 text-base md:text-lg text-green-200/80 max-w-xl leading-relaxed">
+                        Punya pertanyaan, saran, atau butuh bantuan? Kami siap mendengar dan membantu Anda.
+                    </p>
+                    <div class="flex flex-wrap gap-3 mt-8">
+                        <a href="#kontak-info"
+                           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-[#155C1B] font-semibold text-sm hover:bg-green-50 transition-all shadow-lg">
+                            📞 Kontak
+                        </a>
+                        <a href="{% if kontak.whatsapp %}https://wa.me/{{ kontak.whatsapp }}{% else %}#{% endif %}"
+                           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-500/20 border border-green-400/30 text-green-100 font-semibold text-sm hover:bg-green-500/30 transition-all">
+                            💬 WhatsApp
+                        </a>
+                    </div>
                 </div>
-                <div class="flex-1">
-                    <h3 class="text-[#155C1B] font-semibold">WhatsApp</h3>
-                    <p class="text-green-600">{% if kontak.whatsapp %}+{{ kontak.whatsapp }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
-                </div>
-            </a>
 
-            <!-- Telepon -->
-            <a href="{% if kontak.telepon %}tel:{{ kontak.telepon }}{% else %}#{% endif %}"
-               class="flex items-center gap-4 p-5 bg-white rounded-xl border border-neutral-200 shadow-sm hover:shadow-md transition-shadow">
-                <div class="w-12 h-12 rounded-lg bg-[#155C1B]/10 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 text-[#155C1B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"/>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-[#155C1B] font-semibold">Telepon</h3>
-                    <p class="text-gray-600">{% if kontak.telepon %}{{ kontak.telepon }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
-                </div>
-            </a>
-
-            <!-- Email -->
-            <a href="{% if kontak.email %}mailto:{{ kontak.email }}{% else %}#{% endif %}"
-               class="flex items-center gap-4 p-5 bg-white rounded-xl border border-neutral-200 shadow-sm hover:shadow-md transition-shadow">
-                <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                        <polyline points="22,6 12,13 2,6"/>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-[#155C1B] font-semibold">Email</h3>
-                    <p class="text-blue-600 text-sm break-all">{% if kontak.email %}{{ kontak.email }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
-                </div>
-            </a>
-
-            <!-- Alamat -->
-            <div class="flex items-start gap-4 p-5 bg-white rounded-xl border border-neutral-200 shadow-sm">
-                <div class="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                        <circle cx="12" cy="10" r="3"/>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-[#155C1B] font-semibold">Alamat</h3>
-                    <p class="text-gray-600 text-sm">{% if kontak.alamat %}{{ kontak.alamat }}{% else %}<span class="text-gray-400 italic">Belum tersedia</span>{% endif %}</p>
+                <!-- RHS: Visual -->
+                <div class="hidden lg:flex items-center justify-center reveal reveal-delay-2">
+                    <div class="relative w-72 h-72">
+                        <div class="absolute inset-0 bg-gradient-to-br from-green-400/20 to-emerald-300/20 rounded-full blur-2xl"></div>
+                        <div class="relative w-full h-full flex items-center justify-center">
+                            <div class="glass-card rounded-3xl p-8 text-center shadow-2xl">
+                                <div class="text-6xl mb-4 float-anim">🏘️</div>
+                                <p class="text-white/90 font-semibold text-lg">{{ site_name or 'Desa' }}</p>
+                                <p class="text-green-300 text-sm">{{ site_tagline or '' }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Social Media -->
-        <h3 class="text-[#155C1B] text-lg font-bold mb-4">Media Sosial</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-            {% if kontak.instagram %}
-            <a href="https://instagram.com/{{ kontak.instagram }}" target="_blank"
-               class="flex items-center gap-3 p-4 bg-white rounded-xl border border-neutral-200 shadow-sm hover:shadow-md transition-shadow">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/>
-                    </svg>
-                </div>
-                <span class="text-gray-700 font-medium">@{{ kontak.instagram }}</span>
-            </a>
-            {% endif %}
-
-            {% if kontak.facebook %}
-            <a href="https://facebook.com/{{ kontak.facebook }}" target="_blank"
-               class="flex items-center gap-3 p-4 bg-white rounded-xl border border-neutral-200 shadow-sm hover:shadow-md transition-shadow">
-                <div class="w-10 h-10 rounded-lg bg-[#1877F2] flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                    </svg>
-                </div>
-                <span class="text-gray-700 font-medium">{{ kontak.facebook }}</span>
-            </a>
-            {% endif %}
+        <!-- Wave divider -->
+        <div class="absolute bottom-0 left-0 right-0">
+            <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+                <path d="M0 60V30C240 0 480 0 720 30C960 60 1200 60 1440 30V60H0Z" fill="#f4f7f2"/>
+            </svg>
         </div>
+    </section>
 
-        <!-- Map -->
-        <h3 class="text-[#155C1B] text-lg font-bold mb-4">Lokasi Kantor</h3>
-        <div class="rounded-xl overflow-hidden h-[350px] border border-neutral-200 shadow-sm">
-            <iframe src="{{ desa.maps_embed_url }}" class="w-full h-full" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!-- QUICK CONTACT CARDS                                            -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <div class="max-w-7xl mx-auto px-6 -mt-10 relative z-10" id="kontak-info">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal">
+            <!-- WhatsApp -->
+            <a href="{% if kontak.whatsapp %}https://wa.me/{{ kontak.whatsapp }}{% else %}#{% endif %}"
+               class="contact-card flex flex-col items-center text-center p-7 bg-white rounded-2xl shadow-lg shadow-green-900/5 border border-green-100 {% if not kontak.whatsapp %}opacity-60 pointer-events-none{% endif %}">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center mb-5 shadow-lg shadow-green-200/50">
+                    <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    </svg>
+                </div>
+                <h3 class="text-[#155C1B] font-bold text-base">WhatsApp</h3>
+                <p class="text-green-600 text-sm mt-1.5 font-medium">
+                    {% if kontak.whatsapp %}+{{ kontak.whatsapp }}{% else %}<span class="text-gray-400 italic font-normal">Belum tersedia</span>{% endif %}
+                </p>
+                {% if kontak.whatsapp %}
+                <span class="mt-3 text-[10px] font-semibold text-green-500 bg-green-50 px-3 py-1 rounded-full">Klik untuk chat</span>
+                {% endif %}
+            </a>
+
+            <!-- Telepon -->
+            <a href="{% if kontak.telepon %}tel:{{ kontak.telepon }}{% else %}#{% endif %}"
+               class="contact-card flex flex-col items-center text-center p-7 bg-white rounded-2xl shadow-lg shadow-green-900/5 border border-green-100 {% if not kontak.telepon %}opacity-60 pointer-events-none{% endif %}">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#155C1B] to-emerald-700 flex items-center justify-center mb-5 shadow-lg shadow-green-200/50">
+                    <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                </div>
+                <h3 class="text-[#155C1B] font-bold text-base">Telepon</h3>
+                <p class="text-gray-600 text-sm mt-1.5 font-medium">
+                    {% if kontak.telepon %}{{ kontak.telepon }}{% else %}<span class="text-gray-400 italic font-normal">Belum tersedia</span>{% endif %}
+                </p>
+                {% if kontak.telepon %}
+                <span class="mt-3 text-[10px] font-semibold text-gray-500 bg-gray-50 px-3 py-1 rounded-full">Klik untuk telepon</span>
+                {% endif %}
+            </a>
+
+            <!-- Email -->
+            <a href="{% if kontak.email %}mailto:{{ kontak.email }}{% else %}#{% endif %}"
+               class="contact-card flex flex-col items-center text-center p-7 bg-white rounded-2xl shadow-lg shadow-green-900/5 border border-green-100 {% if not kontak.email %}opacity-60 pointer-events-none{% endif %}">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-5 shadow-lg shadow-blue-200/50">
+                    <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                </div>
+                <h3 class="text-[#155C1B] font-bold text-base">Email</h3>
+                <p class="text-blue-600 text-sm mt-1.5 font-medium break-all">
+                    {% if kontak.email %}{{ kontak.email }}{% else %}<span class="text-gray-400 italic font-normal">Belum tersedia</span>{% endif %}
+                </p>
+                {% if kontak.email %}
+                <span class="mt-3 text-[10px] font-semibold text-blue-500 bg-blue-50 px-3 py-1 rounded-full">Klik untuk kirim email</span>
+                {% endif %}
+            </a>
+
+            <!-- Alamat -->
+            <div class="contact-card flex flex-col items-center text-center p-7 bg-white rounded-2xl shadow-lg shadow-green-900/5 border border-green-100 {% if not kontak.alamat %}opacity-60{% endif %}">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center mb-5 shadow-lg shadow-orange-200/50">
+                    <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                </div>
+                <h3 class="text-[#155C1B] font-bold text-base">Alamat</h3>
+                <p class="text-gray-600 text-sm mt-1.5 font-medium">
+                    {% if kontak.alamat %}{{ kontak.alamat }}{% else %}<span class="text-gray-400 italic font-normal">Belum tersedia</span>{% endif %}
+                </p>
+            </div>
         </div>
     </div>
 
-    <!-- FOOTER (using shared partial) -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!-- SOCIAL MEDIA + INFO                                            -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <div class="max-w-7xl mx-auto px-6 py-16 md:py-24">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-10">
+            <!-- LHS: Social Media — 3 cols -->
+            <div class="lg:col-span-3 reveal">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-1 h-7 bg-gradient-to-b from-[#73AA0F] to-green-400 rounded-full"></div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-[#155C1B]">Media Sosial</h2>
+                </div>
+                <p class="text-gray-500 text-sm mt-1 mb-7">Ikuti kami untuk informasi dan kegiatan terbaru</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {% if kontak.instagram %}
+                    <a href="https://instagram.com/{{ kontak.instagram }}" target="_blank" rel="noopener"
+                       class="socmed-card flex items-center gap-4 p-5 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg group">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-gray-400 font-medium">Instagram</p>
+                            <p class="text-gray-700 font-semibold truncate group-hover:text-[#155C1B] transition-colors">@{{ kontak.instagram }}</p>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-[#155C1B] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                    {% endif %}
+
+                    {% if kontak.facebook %}
+                    <a href="https://facebook.com/{{ kontak.facebook }}" target="_blank" rel="noopener"
+                       class="socmed-card flex items-center gap-4 p-5 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg group">
+                        <div class="w-12 h-12 rounded-xl bg-[#1877F2] flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-gray-400 font-medium">Facebook</p>
+                            <p class="text-gray-700 font-semibold truncate group-hover:text-[#155C1B] transition-colors">{{ kontak.facebook }}</p>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-[#155C1B] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                    {% endif %}
+
+                    {% if kontak.twitter %}
+                    <a href="https://x.com/{{ kontak.twitter }}" target="_blank" rel="noopener"
+                       class="socmed-card flex items-center gap-4 p-5 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg group">
+                        <div class="w-12 h-12 rounded-xl bg-black flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-gray-400 font-medium">X / Twitter</p>
+                            <p class="text-gray-700 font-semibold truncate group-hover:text-[#155C1B] transition-colors">@{{ kontak.twitter }}</p>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-[#155C1B] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                    {% endif %}
+
+                    {% if kontak.tiktok %}
+                    <a href="https://tiktok.com/@{{ kontak.tiktok }}" target="_blank" rel="noopener"
+                       class="socmed-card flex items-center gap-4 p-5 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg group">
+                        <div class="w-12 h-12 rounded-xl bg-black flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-gray-400 font-medium">TikTok</p>
+                            <p class="text-gray-700 font-semibold truncate group-hover:text-[#155C1B] transition-colors">@{{ kontak.tiktok }}</p>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-[#155C1B] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                    {% endif %}
+                </div>
+
+                {% if not kontak.instagram and not kontak.facebook and not kontak.twitter and not kontak.tiktok %}
+                <div class="text-center py-10 px-6 bg-white rounded-2xl border border-dashed border-gray-200">
+                    <div class="text-4xl mb-3">📱</div>
+                    <p class="text-gray-400 font-medium">Belum ada media sosial yang dikonfigurasi</p>
+                    <p class="text-xs text-gray-300 mt-1">Admin dapat menambahkan di pengaturan website</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- RHS: Quick Info — 2 cols -->
+            <div class="lg:col-span-2 reveal reveal-delay-1">
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-green-100/50 h-full">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-2xl">ℹ️</span>
+                        <h3 class="text-xl font-extrabold text-[#155C1B]">Informasi Cepat</h3>
+                    </div>
+                    <div class="w-12 h-1 bg-gradient-to-r from-[#73AA0F] to-green-400 rounded-full mb-6"></div>
+
+                    <div class="space-y-5">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center shrink-0 text-lg">🕐</div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-700">Jam Pelayanan</p>
+                                <p class="text-sm text-gray-500">Senin - Jumat: 08:00 - 15:00</p>
+                                <p class="text-sm text-gray-500">Sabtu: 08:00 - 12:00</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center shrink-0 text-lg">📍</div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-700">Lokasi</p>
+                                <p class="text-sm text-gray-500">
+                                    {% if kontak.alamat %}{{ kontak.alamat }}{% else %}<span class="text-gray-400 italic">Belum diatur</span>{% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center shrink-0 text-lg">📧</div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-700">Email</p>
+                                <p class="text-sm text-gray-500">
+                                    {% if kontak.email %}{{ kontak.email }}{% else %}<span class="text-gray-400 italic">Belum diatur</span>{% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center shrink-0 text-lg">💬</div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-700">WhatsApp</p>
+                                <p class="text-sm text-gray-500">
+                                    {% if kontak.whatsapp %}+{{ kontak.whatsapp }}{% else %}<span class="text-gray-400 italic">Belum diatur</span>{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-gray-100">
+                        <a href="{% if kontak.whatsapp %}https://wa.me/{{ kontak.whatsapp }}?text=Halo%20saya%20ingin%20bertanya{% else %}#{% endif %}"
+                           class="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl bg-gradient-to-r from-[#155C1B] to-[#1a6b22] text-white font-semibold text-sm hover:shadow-lg hover:shadow-green-900/30 transition-all">
+                            <span>💬</span>
+                            Chat via WhatsApp
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!-- MAP SECTION                                                    -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <section class="bg-white py-16 md:py-20 reveal">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-1 h-7 bg-gradient-to-b from-[#73AA0F] to-green-400 rounded-full"></div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-[#155C1B]">Lokasi Kantor</h2>
+                    </div>
+                    <p class="text-gray-500 text-sm">Temukan kami di peta</p>
+                </div>
+                <a href="https://maps.google.com/maps?q=Kedungwinangun,+Klirong,+Kebumen" target="_blank"
+                   class="inline-flex items-center gap-2 text-sm font-semibold text-[#155C1B] hover:text-green-700 transition-colors">
+                    Buka di Google Maps
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
+            </div>
+
+            <div class="map-container rounded-2xl overflow-hidden h-[350px] md:h-[450px] shadow-lg border border-gray-100">
+                <iframe
+                    src="{{ desa.maps_embed_url }}&output=embed"
+                    class="w-full h-full"
+                    style="border:0;"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    title="Peta {{ site_name }}">
+                </iframe>
+            </div>
+
+            <div class="flex flex-wrap gap-4 mt-6 text-sm text-gray-500">
+                <span class="inline-flex items-center gap-1.5">📍 <span class="font-medium text-gray-600">Alamat:</span> {{ kontak.alamat or 'Kedungwinangun, Klirong, Kebumen' }}</span>
+            </div>
+        </div>
+    </section>
+
     {% include 'partials/footer.html' %}
+
+    <script>
+        (function() {
+            var targets = document.querySelectorAll('.reveal');
+            if (!('IntersectionObserver' in window)) {
+                targets.forEach(function(el) { el.classList.add('is-visible'); });
+                return;
+            }
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.08 });
+            targets.forEach(function(el) { observer.observe(el); });
+        })();
+    </script>
 </body>
 </html>

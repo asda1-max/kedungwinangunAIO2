@@ -359,6 +359,7 @@ def kontak():
             'facebook': get_config("sosial_facebook", ""),
             'instagram': get_config("sosial_instagram", ""),
             'twitter': get_config("sosial_twitter", ""),
+            'tiktok': get_config("sosial_tiktok", ""),
         }
 
         return render_template(

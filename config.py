@@ -59,6 +59,7 @@ DEFAULT_CONFIG = {
     "sosial_facebook": "",
     "sosial_instagram": "",
     "sosial_twitter": "",
+    "sosial_tiktok": "",
 
     # Footer
     "footer_copyright": f"© {datetime.now().year} Desa Kedungwinangun. Hak Cipta Dilindungi.",
