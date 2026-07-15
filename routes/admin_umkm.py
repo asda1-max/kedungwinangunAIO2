@@ -7,8 +7,9 @@ import logging
 import os
 import uuid
 import re
-from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify, current_app
 from functools import wraps
+from config import Config, compress_and_save_image
 
 logger = logging.getLogger(__name__)
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -155,6 +156,20 @@ def add_umkm_route():
             lat = request.form.get('latitude', '').strip()
             lng = request.form.get('longitude', '').strip()
             foto_url = request.form.get('foto_url', '').strip()
+            foto_file = request.files.get('foto_file')
+            if foto_file and foto_file.filename:
+                upload_dir = os.path.join(Config.UPLOAD_FOLDER, 'umkm')
+                os.makedirs(upload_dir, exist_ok=True)
+                foto_file.seek(0)
+                file_bytes = foto_file.read()
+                try:
+                    filename, _ = compress_and_save_image(file_bytes, upload_dir)
+                except Exception:
+                    ext = foto_file.filename.rsplit('.', 1)[1].lower() if '.' in foto_file.filename else 'jpg'
+                    filename = f"{uuid.uuid4().hex}.{ext}"
+                    with open(os.path.join(upload_dir, filename), 'wb') as f:
+                        f.write(file_bytes)
+                foto_url = f'/uploads/umkm/{filename}'
             produk_jasa = request.form.get('produk_jasa', '').strip()
             harga_range = request.form.get('harga_range', '').strip()
             jam_operasional = request.form.get('jam_operasional', '').strip()
@@ -210,6 +225,20 @@ def edit_umkm_route(umkm_id):
             lat = request.form.get('latitude', '').strip()
             lng = request.form.get('longitude', '').strip()
             foto_url = request.form.get('foto_url', '').strip()
+            foto_file = request.files.get('foto_file')
+            if foto_file and foto_file.filename:
+                upload_dir = os.path.join(Config.UPLOAD_FOLDER, 'umkm')
+                os.makedirs(upload_dir, exist_ok=True)
+                foto_file.seek(0)
+                file_bytes = foto_file.read()
+                try:
+                    filename, _ = compress_and_save_image(file_bytes, upload_dir)
+                except Exception:
+                    ext = foto_file.filename.rsplit('.', 1)[1].lower() if '.' in foto_file.filename else 'jpg'
+                    filename = f"{uuid.uuid4().hex}.{ext}"
+                    with open(os.path.join(upload_dir, filename), 'wb') as f:
+                        f.write(file_bytes)
+                foto_url = f'/uploads/umkm/{filename}'
             produk_jasa = request.form.get('produk_jasa', '').strip()
             harga_range = request.form.get('harga_range', '').strip()
             jam_operasional = request.form.get('jam_operasional', '').strip()

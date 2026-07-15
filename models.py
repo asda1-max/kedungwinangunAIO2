@@ -482,6 +482,23 @@ def init_database():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- Lokasi RT/RW
+            CREATE TABLE IF NOT EXISTS lokasi_rtrw (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                jenis TEXT NOT NULL,
+                rw TEXT,
+                rt TEXT,
+                nama_ketua TEXT,
+                jabatan TEXT,
+                wilayah TEXT,
+                alamat TEXT,
+                no_hp TEXT,
+                latitude REAL,
+                longitude REAL,
+                aktif INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         ''')
 
         # Insert default config

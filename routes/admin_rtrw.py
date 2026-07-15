@@ -33,16 +33,18 @@ def index():
 def add():
     """Add new RT/RW location"""
     if request.method == 'POST':
-        jenis = request.form.get('jenis')
-        rw = request.form.get('rw')
-        rt = request.form.get('rt')
-        nama_ketua = request.form.get('nama_ketua')
-        jabatan = request.form.get('jabatan')
-        wilayah = request.form.get('wilayah')
-        alamat = request.form.get('alamat')
-        no_hp = request.form.get('no_hp')
-        latitude = request.form.get('latitude')
-        longitude = request.form.get('longitude')
+        jenis = request.form.get('jenis', '').strip()
+        rw = request.form.get('rw', '').strip()
+        rt = request.form.get('rt', '').strip()
+        nama_ketua = request.form.get('nama_ketua', '').strip()
+        jabatan = request.form.get('jabatan', '').strip()
+        wilayah = request.form.get('wilayah', '').strip()
+        alamat = request.form.get('alamat', '').strip()
+        no_hp = request.form.get('no_hp', '').strip()
+        lat = request.form.get('latitude', '').strip()
+        lng = request.form.get('longitude', '').strip()
+        latitude = float(lat) if lat else None
+        longitude = float(lng) if lng else None
         
         if not jenis:
             flash('Jenis (RT/RW) wajib diisi', 'error')
@@ -71,16 +73,18 @@ def edit(id):
         return redirect(url_for('admin_rtrw.index'))
     
     if request.method == 'POST':
-        jenis = request.form.get('jenis')
-        rw = request.form.get('rw')
-        rt = request.form.get('rt')
-        nama_ketua = request.form.get('nama_ketua')
-        jabatan = request.form.get('jabatan')
-        wilayah = request.form.get('wilayah')
-        alamat = request.form.get('alamat')
-        no_hp = request.form.get('no_hp')
-        latitude = request.form.get('latitude')
-        longitude = request.form.get('longitude')
+        jenis = request.form.get('jenis', '').strip()
+        rw = request.form.get('rw', '').strip()
+        rt = request.form.get('rt', '').strip()
+        nama_ketua = request.form.get('nama_ketua', '').strip()
+        jabatan = request.form.get('jabatan', '').strip()
+        wilayah = request.form.get('wilayah', '').strip()
+        alamat = request.form.get('alamat', '').strip()
+        no_hp = request.form.get('no_hp', '').strip()
+        lat = request.form.get('latitude', '').strip()
+        lng = request.form.get('longitude', '').strip()
+        latitude = float(lat) if lat else None
+        longitude = float(lng) if lng else None
         aktif = 1 if request.form.get('aktif') else 0
         
         if not jenis:

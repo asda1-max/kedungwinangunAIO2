@@ -1,3 +1,4 @@
 .env
 testai.py
 foto/*
+database.db
