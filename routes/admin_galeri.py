@@ -8,6 +8,7 @@ import os
 import uuid
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 from functools import wraps
+from config import Config, compress_and_save_image
 
 logger = logging.getLogger(__name__)
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -28,23 +29,34 @@ def flash_error(msg):
 
 
 def allowed_image(filename):
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    ALLOWED_EXTENSIONS = Config.ALLOWED_IMAGE_EXT
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def save_uploaded_file(file, subfolder=''):
-    from config import Config
-    if file and file.filename and allowed_image(file.filename):
+    """Save uploaded image with WebP compression.
+    If image > 2MB, apply extreme compression by reducing resolution."""
+    if not file or not file.filename or not allowed_image(file.filename):
+        return None
+
+    upload_dir = os.path.join(Config.UPLOAD_FOLDER, subfolder) if subfolder else Config.UPLOAD_FOLDER
+    os.makedirs(upload_dir, exist_ok=True)
+
+    file.seek(0)
+    file_bytes = file.read()
+
+    try:
+        filename, _ = compress_and_save_image(file_bytes, upload_dir)
+    except Exception:
         ext = file.filename.rsplit('.', 1)[1].lower()
         filename = f"{uuid.uuid4().hex}.{ext}"
-        upload_dir = os.path.join(Config.UPLOAD_FOLDER, subfolder) if subfolder else Config.UPLOAD_FOLDER
-        os.makedirs(upload_dir, exist_ok=True)
         filepath = os.path.join(upload_dir, filename)
-        file.save(filepath)
-        if subfolder:
-            return f"/uploads/{subfolder}/{filename}"
-        return f"/uploads/{filename}"
-    return None
+        with open(filepath, 'wb') as f:
+            f.write(file_bytes)
+
+    if subfolder:
+        return f"/uploads/{subfolder}/{filename}"
+    return f"/uploads/{filename}"
 
 
 # ── Galeri Management ────────────────────────────────────────────────────

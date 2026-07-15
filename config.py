@@ -5,6 +5,7 @@ Berisi konstanta, konfigurasi default, dan settings aplikasi
 
 from datetime import datetime
 import os
+import uuid as _uuid
 
 # ── Flask Configuration ──────────────────────────────────────────────────
 class Config:
@@ -19,6 +20,13 @@ class Config:
     # Session
     PERMANENT_SESSION_LIFETIME = 86400  # 24 hours
 
+    # Image Upload Settings
+    MAX_IMAGE_SIZE = 2 * 1024 * 1024        # 2MB threshold for extreme compression
+    EXTREME_COMPRESS_MAX_DIM = 1200         # Max dimension when > 2MB
+    NORMAL_WEBP_QUALITY = 80
+    EXTREME_WEBP_QUALITY = 60
+    ALLOWED_IMAGE_EXT = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff'}
+
     # Security
     MAX_LOGIN_ATTEMPTS = 5           # Max failed attempts before lockout
     LOGIN_LOCKOUT_MINUTES = 15       # Lockout duration in minutes
@@ -26,6 +34,41 @@ class Config:
     SESSION_COOKIE_SECURE = False     # Set True if using HTTPS
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
+
+# ── Image Processing ────────────────────────────────────────────────────
+
+def compress_and_save_image(file_bytes, upload_dir, filename_prefix=''):
+    """
+    Compress image to WebP format.
+    If original file > 2MB, apply extreme compression by reducing resolution.
+    Returns (webp_filename, filepath) on success, raises on failure.
+    """
+    from PIL import Image
+    import io
+
+    file_size = len(file_bytes)
+    img = Image.open(io.BytesIO(file_bytes))
+
+    if img.mode in ('RGBA', 'LA', 'P'):
+        img = img.convert('RGBA')
+    else:
+        img = img.convert('RGB')
+
+    quality = Config.NORMAL_WEBP_QUALITY
+    if file_size > Config.MAX_IMAGE_SIZE:
+        quality = Config.EXTREME_WEBP_QUALITY
+        max_dim = Config.EXTREME_COMPRESS_MAX_DIM
+        ratio = max_dim / max(img.width, img.height)
+        if ratio < 1:
+            new_w = int(img.width * ratio)
+            new_h = int(img.height * ratio)
+            img = img.resize((new_w, new_h), Image.LANCZOS)
+
+    filename = f"{filename_prefix or _uuid.uuid4().hex}.webp"
+    filepath = os.path.join(upload_dir, filename)
+    img.save(filepath, 'WEBP', quality=quality, optimize=True)
+    return filename, filepath
+
 
 # ── Default Config (Database) ────────────────────────────────────────────
 DEFAULT_CONFIG = {

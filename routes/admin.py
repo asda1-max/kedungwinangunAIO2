@@ -17,6 +17,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from config import Config, compress_and_save_image
 from models import (
     get_all_berita,
     get_berita_by_id,
@@ -107,7 +108,6 @@ from models import (
     toggle_agenda_aktif,
 )
 from errors import admin_required, flash_error
-from config import Config
 
 # File upload helpers
 ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
@@ -117,25 +117,29 @@ def allowed_image(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
 def save_uploaded_file(file, subfolder=''):
-    """Save uploaded file and return the URL/path"""
-    if file and file.filename and allowed_image(file.filename):
-        # Create unique filename
+    """Save uploaded image with WebP compression.
+    If image > 2MB, apply extreme compression by reducing resolution."""
+    if not file or not file.filename or not allowed_image(file.filename):
+        return None
+
+    upload_dir = os.path.join(Config.UPLOAD_FOLDER, subfolder) if subfolder else Config.UPLOAD_FOLDER
+    os.makedirs(upload_dir, exist_ok=True)
+
+    file.seek(0)
+    file_bytes = file.read()
+
+    try:
+        filename, _ = compress_and_save_image(file_bytes, upload_dir)
+    except Exception:
         ext = file.filename.rsplit('.', 1)[1].lower()
         filename = f"{uuid.uuid4().hex}.{ext}"
-
-        # Create upload directory
-        upload_dir = os.path.join(Config.UPLOAD_FOLDER, subfolder) if subfolder else Config.UPLOAD_FOLDER
-        os.makedirs(upload_dir, exist_ok=True)
-
-        # Save file
         filepath = os.path.join(upload_dir, filename)
-        file.save(filepath)
+        with open(filepath, 'wb') as f:
+            f.write(file_bytes)
 
-        # Return relative URL path
-        if subfolder:
-            return f"/uploads/{subfolder}/{filename}"
-        return f"/uploads/{filename}"
-    return None
+    if subfolder:
+        return f"/uploads/{subfolder}/{filename}"
+    return f"/uploads/{filename}"
 import logging
 
 # Setup logging
@@ -1039,16 +1043,17 @@ def add_struktur_route():
             foto_url = request.form.get('foto_url', '').strip()
             foto_file = request.files.get('foto_file')
             if foto_file and foto_file.filename:
-                from werkzeug.utils import secure_filename
-                import os
-                import uuid
-                
-                ext = foto_file.filename.rsplit('.', 1)[1].lower() if '.' in foto_file.filename else 'jpg'
-                filename = f"struktur_{uuid.uuid4().hex}.{ext}"
                 upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'struktur')
                 os.makedirs(upload_dir, exist_ok=True)
-                foto_path = os.path.join(upload_dir, filename)
-                foto_file.save(foto_path)
+                foto_file.seek(0)
+                file_bytes = foto_file.read()
+                try:
+                    filename, _ = compress_and_save_image(file_bytes, upload_dir, 'struktur_')
+                except Exception:
+                    ext = foto_file.filename.rsplit('.', 1)[1].lower() if '.' in foto_file.filename else 'jpg'
+                    filename = f"struktur_{uuid.uuid4().hex}.{ext}"
+                    with open(os.path.join(upload_dir, filename), 'wb') as f:
+                        f.write(file_bytes)
                 foto_url = f'/static/uploads/struktur/{filename}'
 
             if not kategori or not nama:
@@ -1110,16 +1115,17 @@ def edit_struktur_route(struktur_id):
             foto_url = request.form.get('foto_url', '').strip()
             foto_file = request.files.get('foto_file')
             if foto_file and foto_file.filename:
-                from werkzeug.utils import secure_filename
-                import os
-                import uuid
-                
-                ext = foto_file.filename.rsplit('.', 1)[1].lower() if '.' in foto_file.filename else 'jpg'
-                filename = f"struktur_{uuid.uuid4().hex}.{ext}"
                 upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'struktur')
                 os.makedirs(upload_dir, exist_ok=True)
-                foto_path = os.path.join(upload_dir, filename)
-                foto_file.save(foto_path)
+                foto_file.seek(0)
+                file_bytes = foto_file.read()
+                try:
+                    filename, _ = compress_and_save_image(file_bytes, upload_dir, 'struktur_')
+                except Exception:
+                    ext = foto_file.filename.rsplit('.', 1)[1].lower() if '.' in foto_file.filename else 'jpg'
+                    filename = f"struktur_{uuid.uuid4().hex}.{ext}"
+                    with open(os.path.join(upload_dir, filename), 'wb') as f:
+                        f.write(file_bytes)
                 foto_url = f'/static/uploads/struktur/{filename}'
 
             if not kategori or not nama:
