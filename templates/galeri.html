@@ -59,13 +59,14 @@
             {% for foto in foto_list %}
             <div class="reveal group relative overflow-hidden rounded-xl cursor-pointer aspect-square"
                  style="transition-delay: {{ loop.index * 0.03 }}s"
-                 onclick="openLightbox('{{ foto.gambar_url }}', '{{ foto.judul }}')">
+                   onclick="openLightbox('{{ foto.gambar_url }}', '{{ foto.judul }}', '{{ foto.deskripsi|replace("'", "\\'")|default('') }}')">
                 <img src="{{ foto.gambar_url }}"
                      alt="{{ foto.gambar_alt or foto.judul }}"
                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div class="absolute bottom-3 left-3 right-3">
                         <p class="text-white text-sm font-semibold leading-tight">{{ foto.judul }}</p>
+                        <p class="text-white/80 text-xs mt-1 line-clamp-2">{{ foto.deskripsi or '' }}</p>
                         <span class="inline-block mt-1 text-white/80 text-xs bg-white/20 px-2 py-0.5 rounded-full">{{ foto.kategori }}</span>
                     </div>
                     <div class="absolute top-3 right-3">
@@ -104,20 +105,23 @@
     <div id="lightbox" class="fixed inset-0 bg-black/95 z-[200] hidden items-center justify-center p-4" onclick="closeLightbox()">
         <button class="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 transition-colors z-10" onclick="event.stopPropagation(); closeLightbox();">×</button>
         <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[85vh] object-contain rounded-lg" onclick="event.stopPropagation()">
-        <div class="absolute bottom-6 left-0 right-0 text-center">
+        <div class="absolute bottom-6 left-0 right-0 text-center px-4">
             <p id="lightbox-caption" class="text-white text-lg font-semibold"></p>
+            <p id="lightbox-desc" class="text-white/70 text-sm mt-1"></p>
         </div>
     </div>
 
     <script>
         // Lightbox
-        function openLightbox(imgSrc, caption) {
+        function openLightbox(imgSrc, caption, desc) {
             var lightbox = document.getElementById('lightbox');
             var img = document.getElementById('lightbox-img');
             var cap = document.getElementById('lightbox-caption');
+            var descEl = document.getElementById('lightbox-desc');
             if (lightbox && img && cap) {
                 img.src = imgSrc;
                 cap.textContent = caption;
+                if (descEl) descEl.textContent = desc || '';
                 lightbox.classList.remove('hidden');
                 lightbox.classList.add('flex');
                 document.body.style.overflow = 'hidden';
