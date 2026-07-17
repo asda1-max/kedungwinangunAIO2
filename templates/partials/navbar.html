@@ -80,6 +80,10 @@
                                 <span class="text-lg">🗺️</span>
                                 <span class="font-medium">Peta Interaktif</span>
                             </a>
+                            <a href="{{ url_for('public.e_library') }}" class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors">
+                                <span class="text-lg">📚</span>
+                                <span class="font-medium">E-Library</span>
+                            </a>
                             {% if custom_pages %}
                             <div class="border-t border-gray-100 mt-2 pt-2">
                                 {% for p in custom_pages %}
@@ -276,6 +280,10 @@
                     <a href="{{ url_for('public.peta_interaktif') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
                         <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">🗺️</span>
                         Peta Interaktif
+                    </a>
+                    <a href="{{ url_for('public.e_library') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-green-100 hover:bg-white/10 transition-colors">
+                        <span class="w-7 h-7 rounded-lg bg-yellow-500/20 flex items-center justify-center">📚</span>
+                        E-Library
                     </a>
                     {% if custom_pages %}
                     {% for p in custom_pages %}

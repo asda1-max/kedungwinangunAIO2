@@ -1,0 +1,209 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Tambah Buku - E-Library{% endblock %}
+{% block page_title %}Tambah Buku Digital{% endblock %}
+{% block page_subtitle %}Tambahkan buku PDF baru ke e-library desa{% endblock %}
+
+{% block header_actions %}
+<div class="user-menu">
+    <div class="user-avatar">{{ session.get('user_nama', 'A')[0]|upper }}</div>
+    <div class="user-info">
+        <h4>{{ session.get('user_nama', 'Admin') }}</h4>
+        <span>Administrator</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card animate-in">
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="judul">Judul Buku</label>
+                <input type="text" id="judul" name="judul" placeholder="Contoh: Profil Desa Kedungwinangun" required>
+            </div>
+
+            <div class="form-group">
+                <label for="penulis">Penulis <span class="hint">(opsional)</span></label>
+                <input type="text" id="penulis" name="penulis" placeholder="Nama penulis atau penerbit">
+            </div>
+
+            <div class="form-group">
+                <label for="deskripsi">Deskripsi <span class="hint">(opsional)</span></label>
+                <textarea id="deskripsi" name="deskripsi" placeholder="Jelaskan tentang buku ini..."></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="kategori">Kategori</label>
+                    <select id="kategori" name="kategori">
+                        <option value="umum">Umum</option>
+                        <option value="profil">Profil Desa</option>
+                        <option value="peraturan">Peraturan Desa</option>
+                        <option value="laporan">Laporan Desa</option>
+                        <option value="pendidikan">Pendidikan</option>
+                        <option value="pertanian">Pertanian</option>
+                        <option value="kesehatan">Kesehatan</option>
+                        <option value="budaya">Budaya</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tahun">Tahun <span class="hint">(opsional)</span></label>
+                    <input type="text" id="tahun" name="tahun" placeholder="2024">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="halaman">Jumlah Halaman <span class="hint">(opsional)</span></label>
+                    <input type="number" id="halaman" name="halaman" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="bahasa">Bahasa</label>
+                    <select id="bahasa" name="bahasa">
+                        <option value="Indonesia">Indonesia</option>
+                        <option value="Inggris">Inggris</option>
+                        <option value="Jawa">Jawa</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- PDF Upload: File or URL -->
+            <div class="form-group">
+                <label>File PDF</label>
+                <div class="upload-tabs">
+                    <button type="button" class="upload-tab active" onclick="switchUploadTab('file')">Upload File</button>
+                    <button type="button" class="upload-tab" onclick="switchUploadTab('url')">Dari URL</button>
+                </div>
+                <div id="upload-file" class="upload-panel active">
+                    <div class="file-upload-box" onclick="document.getElementById('file_path').click()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                        <p><strong>Klik untuk upload</strong> atau drag & drop</p>
+                        <span>PDF (Max 16MB)</span>
+                        <input type="file" id="file_path" name="file_path" accept=".pdf" onchange="showFileName(this)" hidden>
+                        <p id="file-name-display" style="margin-top: 8px; font-size: 13px; color: #6b7280;"></p>
+                    </div>
+                </div>
+                <div id="upload-url" class="upload-panel">
+                    <input type="url" id="file_url" name="file_url" placeholder="https://example.com/buku.pdf">
+                </div>
+            </div>
+
+            <!-- Cover Image: File or URL -->
+            <div class="form-group">
+                <label>Cover Buku <span class="hint">(opsional)</span></label>
+                <div class="upload-tabs">
+                    <button type="button" class="upload-tab active" onclick="switchUploadTab2('file')">Upload File</button>
+                    <button type="button" class="upload-tab" onclick="switchUploadTab2('url')">Dari URL</button>
+                </div>
+                <div id="cover-file" class="upload-panel2 active">
+                    <div class="file-upload-box" onclick="document.getElementById('cover_file').click()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <p><strong>Klik untuk upload</strong> cover buku</p>
+                        <span>PNG, JPG, JPEG, WEBP (Max 16MB)</span>
+                        <input type="file" id="cover_file" name="cover_file" accept=".png,.jpg,.jpeg,.webp" onchange="previewUpload(this)" hidden>
+                    </div>
+                    <div class="preview-box" id="upload-preview" style="display: none;"></div>
+                </div>
+                <div id="cover-url" class="upload-panel2">
+                    <input type="url" id="cover_url" name="cover_url" placeholder="https://example.com/cover.jpg" oninput="previewUrl(this.value)">
+                    <div class="preview-box" id="url-preview">
+                        <p class="preview-placeholder">Masukkan URL cover untuk melihat preview</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    Simpan
+                </button>
+                <a href="{{ url_for('ebook.ebook_index') }}" class="btn btn-outline">Batal</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.upload-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+.upload-tab { padding: 8px 16px; border: 1px solid #e5e7eb; background: white; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.upload-tab.active { background: #166534; color: white; border-color: #166534; }
+.upload-panel, .upload-panel2 { display: none; }
+.upload-panel.active, .upload-panel2.active { display: block; }
+.file-upload-box { border: 2px dashed #d1d5db; border-radius: 10px; padding: 32px; text-align: center; cursor: pointer; transition: all 0.15s; background: #fafafa; }
+.file-upload-box:hover { border-color: #166534; background: #f0fdf4; }
+.file-upload-box svg { width: 40px; height: 40px; margin-bottom: 12px; color: #9ca3af; }
+.file-upload-box p { margin: 0 0 4px; color: #374151; }
+.file-upload-box span { font-size: 12px; color: #9ca3af; }
+.preview-box { margin-top: 12px; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; min-height: 120px; max-height: 250px; background: #f9fafb; }
+.preview-box img { width: 100%; height: auto; object-fit: contain; max-height: 250px; }
+.preview-placeholder { padding: 40px; text-align: center; color: #9ca3af; font-size: 14px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+function switchUploadTab(tab) {
+    document.querySelectorAll('#upload-file, #upload-url').forEach(p => p.classList.remove('active'));
+    var tabs = document.querySelectorAll('.upload-tabs .upload-tab');
+    tabs.forEach(function(t, i) {
+        t.classList.toggle('active', (i===0 && tab==='file') || (i===1 && tab==='url'));
+    });
+    document.getElementById('upload-' + tab).classList.add('active');
+}
+
+function switchUploadTab2(tab) {
+    document.querySelectorAll('#cover-file, #cover-url').forEach(p => p.classList.remove('active'));
+    var tabs = document.querySelectorAll('.upload-tabs .upload-tab');
+    tabs.forEach(function(t) { t.classList.remove('active'); });
+    tabs[tab === 'file' ? 2 : 3].classList.add('active');
+    document.getElementById('cover-' + tab).classList.add('active');
+}
+
+function showFileName(input) {
+    var display = document.getElementById('file-name-display');
+    if (input.files && input.files[0]) {
+        display.innerHTML = '&#10003; File terpilih: <strong>' + input.files[0].name + '</strong> (' + (input.files[0].size / 1024 / 1024).toFixed(1) + ' MB)';
+        display.style.color = '#166534';
+    } else {
+        display.innerHTML = '';
+    }
+}
+
+function previewUpload(input) {
+    const preview = document.getElementById('upload-preview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function previewUrl(url) {
+    const preview = document.getElementById('url-preview');
+    if (url) {
+        preview.innerHTML = '<img src="' + url + '" alt="Preview" onerror="this.parentElement.innerHTML=\'<p class=preview-placeholder>Gagal memuat gambar</p>\'">';
+    } else {
+        preview.innerHTML = '<p class="preview-placeholder">Masukkan URL cover untuk melihat preview</p>';
+    }
+}
+</script>
+{% endblock %}

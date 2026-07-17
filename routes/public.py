@@ -1235,3 +1235,93 @@ def agenda():
         logger.error(f"Error loading agenda page: {str(e)}")
         flash('Terjadi kesalahan saat memuat halaman', 'error')
         return redirect(url_for('public.index'))
+
+
+# ════════════════════════════════════════════════════════════════════════
+# ── E-LIBRARY ─────────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════
+
+@public_bp.route("/e-library")
+def e_library():
+    """Halaman e-library / perpustakaan digital"""
+    try:
+        from models import get_all_pages, get_all_ebook
+        desa_info = get_desa_info_with_maps()
+        custom_pages = get_all_pages()
+        ebook_list = get_all_ebook(aktif=1)
+        kategori_labels = {
+            'umum': 'Umum', 'profil': 'Profil Desa',
+            'peraturan': 'Peraturan Desa', 'laporan': 'Laporan Desa',
+            'pendidikan': 'Pendidikan', 'pertanian': 'Pertanian',
+            'kesehatan': 'Kesehatan', 'budaya': 'Budaya',
+            'lainnya': 'Lainnya',
+        }
+        return render_template(
+            "e_library.html",
+            page={"title": "E-Library"},
+            desa=desa_info,
+            nav_links=set_nav_active("Lainnya", request.path),
+            site_name=desa_info['nama'],
+            site_tagline=desa_info['tagline'],
+            site_description=desa_info['deskripsi'],
+            custom_pages=custom_pages,
+            ebook_list=ebook_list,
+            kategori_labels=kategori_labels,
+        )
+    except Exception as e:
+        logger.error(f"Error loading e-library page: {str(e)}")
+        flash('Terjadi kesalahan saat memuat halaman', 'error')
+        return redirect(url_for('public.index'))
+
+
+@public_bp.route("/e-library/<int:ebook_id>")
+def e_library_detail(ebook_id):
+    """Halaman detail buku digital"""
+    try:
+        from models import get_all_pages, get_ebook_by_id
+        desa_info = get_desa_info_with_maps()
+        custom_pages = get_all_pages()
+        buku = get_ebook_by_id(ebook_id)
+        if not buku or buku.get('aktif') != 1:
+            flash('Buku tidak ditemukan', 'error')
+            return redirect(url_for('public.e_library'))
+        kategori_labels = {
+            'umum': 'Umum', 'profil': 'Profil Desa',
+            'peraturan': 'Peraturan Desa', 'laporan': 'Laporan Desa',
+            'pendidikan': 'Pendidikan', 'pertanian': 'Pertanian',
+            'kesehatan': 'Kesehatan', 'budaya': 'Budaya',
+            'lainnya': 'Lainnya',
+        }
+        return render_template(
+            "e_library_detail.html",
+            page={"title": buku['judul']},
+            desa=desa_info,
+            nav_links=set_nav_active("Lainnya", request.path),
+            site_name=desa_info['nama'],
+            site_tagline=desa_info['tagline'],
+            site_description=desa_info['deskripsi'],
+            custom_pages=custom_pages,
+            buku=buku,
+            kategori_labels=kategori_labels,
+        )
+    except Exception as e:
+        logger.error(f"Error loading e-library detail: {str(e)}")
+        flash('Terjadi kesalahan saat memuat halaman', 'error')
+        return redirect(url_for('public.e_library'))
+
+
+@public_bp.route("/e-library/<int:ebook_id>/download")
+def e_library_download(ebook_id):
+    """Download buku digital (increment count, then redirect to file)"""
+    try:
+        from models import get_ebook_by_id, increment_ebook_download
+        buku = get_ebook_by_id(ebook_id)
+        if not buku or buku.get('aktif') != 1:
+            flash('Buku tidak ditemukan', 'error')
+            return redirect(url_for('public.e_library'))
+        increment_ebook_download(ebook_id)
+        return redirect(buku['file_path'])
+    except Exception as e:
+        logger.error(f"Error downloading ebook {ebook_id}: {str(e)}")
+        flash('Terjadi kesalahan saat mengunduh', 'error')
+        return redirect(url_for('public.e_library'))

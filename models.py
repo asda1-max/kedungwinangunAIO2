@@ -499,6 +499,24 @@ def init_database():
                 aktif INTEGER DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- E-Library (Ebook)
+            CREATE TABLE IF NOT EXISTS ebook (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                judul TEXT NOT NULL,
+                penulis TEXT,
+                deskripsi TEXT,
+                kategori TEXT DEFAULT 'umum',
+                file_path TEXT NOT NULL,
+                cover_url TEXT,
+                tahun TEXT,
+                halaman INTEGER DEFAULT 0,
+                bahasa TEXT DEFAULT 'Indonesia',
+                aktif INTEGER DEFAULT 1,
+                download_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         ''')
 
         # Insert default config
@@ -2794,6 +2812,117 @@ def get_all_locations_geojson(aktif=1):
         })
     
     return {"type": "FeatureCollection", "features": features}
+
+
+# ── E-Library (Ebook) CRUD ──────────────────────────────────────────────
+
+def get_all_ebook(aktif=None):
+    """Get all ebooks, optionally filtered by active status"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        if aktif is not None:
+            cursor.execute('SELECT * FROM ebook WHERE aktif = ? ORDER BY created_at DESC', (aktif,))
+        else:
+            cursor.execute('SELECT * FROM ebook ORDER BY created_at DESC')
+        result = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return result
+    except Exception as e:
+        logger.error(f"Error getting all ebook: {str(e)}")
+        return []
+
+def get_ebook_by_id(ebook_id):
+    """Get ebook by ID"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM ebook WHERE id = ?', (ebook_id,))
+        row = cursor.fetchone()
+        conn.close()
+        return dict(row) if row else None
+    except Exception as e:
+        logger.error(f"Error getting ebook {ebook_id}: {str(e)}")
+        return None
+
+def add_ebook(judul, file_path, penulis=None, deskripsi=None, kategori='umum',
+              cover_url=None, tahun=None, halaman=0, bahasa='Indonesia'):
+    """Add new ebook"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO ebook (judul, penulis, deskripsi, kategori, file_path,
+                              cover_url, tahun, halaman, bahasa)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (judul, penulis, deskripsi, kategori, file_path,
+              cover_url, tahun, halaman, bahasa))
+        conn.commit()
+        result = cursor.lastrowid
+        conn.close()
+        return result
+    except Exception as e:
+        logger.error(f"Error adding ebook: {str(e)}")
+        return None
+
+def update_ebook(ebook_id, judul, file_path, penulis=None, deskripsi=None,
+                 kategori='umum', cover_url=None, tahun=None, halaman=0, bahasa='Indonesia'):
+    """Update existing ebook"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE ebook SET judul=?, penulis=?, deskripsi=?, kategori=?,
+                           file_path=?, cover_url=?, tahun=?, halaman=?,
+                           bahasa=?, updated_at=CURRENT_TIMESTAMP
+            WHERE id=?
+        ''', (judul, penulis, deskripsi, kategori, file_path,
+              cover_url, tahun, halaman, bahasa, ebook_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error updating ebook {ebook_id}: {str(e)}")
+        return False
+
+def delete_ebook(ebook_id):
+    """Delete ebook"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM ebook WHERE id = ?', (ebook_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error deleting ebook {ebook_id}: {str(e)}")
+        return False
+
+def toggle_ebook_aktif(ebook_id):
+    """Toggle ebook active status"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE ebook SET aktif = NOT aktif WHERE id = ?', (ebook_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error toggling ebook {ebook_id}: {str(e)}")
+        return False
+
+def increment_ebook_download(ebook_id):
+    """Increment download count"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE ebook SET download_count = download_count + 1 WHERE id = ?', (ebook_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error incrementing download count for ebook {ebook_id}: {str(e)}")
+        return False
 
 
 # Kategori mapping untuk peta

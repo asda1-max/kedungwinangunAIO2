@@ -64,11 +64,12 @@ def inject_custom_pages():
     return {'custom_pages_nav': get_all_pages()}
 
 # ── Register Blueprints ───────────────────────────────────────────────
-from routes import public_bp, admin_bp, admin_rtrw_bp
+from routes import public_bp, admin_bp, admin_rtrw_bp, ebook_bp
 
 app.register_blueprint(public_bp)    # Public routes: /, /berita, /berita/<id>
 app.register_blueprint(admin_bp)      # Admin routes: /admin/*
 app.register_blueprint(admin_rtrw_bp) # Admin RT/RW routes: /admin/rtrw/*
+app.register_blueprint(ebook_bp)      # Admin E-Library routes: /admin/ebook/*
 
 
 # ── Error Handlers ────────────────────────────────────────────────────
@@ -197,6 +198,22 @@ def bad_request(e):
         return {"error": "Permintaan tidak valid"}, 400
 
 
+@app.errorhandler(413)
+def request_entity_too_large(e):
+    """Handle 413 - File too large"""
+    if request.is_json:
+        return jsonify({
+            "success": False,
+            "error": "Ukuran file terlalu besar. Maksimal 16MB.",
+            "status_code": 413
+        }), 413
+    try:
+        flash("Ukuran file terlalu besar. Maksimal 16MB.", "error")
+        return redirect(request.referrer or "/admin/dashboard")
+    except:
+        return {"error": "Ukuran file terlalu besar"}, 413
+
+
 @app.errorhandler(503)
 def service_unavailable(e):
     """Handle 503 - Service Unavailable"""
@@ -229,7 +246,7 @@ def add_security_headers(response):
     # Prevent MIME type sniffing
     response.headers['X-Content-Type-Options'] = 'nosniff'
     # Prevent clickjacking
-    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     # Enable XSS filter in older browsers
     response.headers['X-XSS-Protection'] = '1; mode=block'
     # Referrer policy
